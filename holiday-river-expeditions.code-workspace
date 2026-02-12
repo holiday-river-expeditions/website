@@ -2,12 +2,12 @@
   "folders": [
     {
       "name": "website",
-      "path": "."
+      "path": ".",
     },
     {
       "name": "docs",
-      "path": "../docs"
-    }
+      "path": "../docs",
+    },
   ],
-  "settings": {}
+  "settings": {},
 }
