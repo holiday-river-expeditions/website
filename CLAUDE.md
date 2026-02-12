@@ -43,12 +43,14 @@
 ## Branching & Environments
 
 ### Branches
+
 - `main` — Production-ready code. Deploys to production (holidayriverexpeditions.com)
 - `beta` — Staging/QA. Deploys to beta environment (beta.holidayriverexpeditions.com)
 - `develop` — Active development integration branch
 
 ### Flow
-feature/* → develop → beta → main
+
+feature/\* → develop → beta → main
 
 - Feature branches branch off `develop`
 - PRs merge feature branches into `develop`
@@ -56,11 +58,13 @@ feature/* → develop → beta → main
 - When approved for release, PR from `beta` → `main`
 
 ### Vercel Environments
+
 - Production: auto-deploys from `main` branch
 - Beta: auto-deploys from `beta` branch (custom domain: beta.holidayriverexpeditions.com)
 - Preview: ephemeral deploys for all other branches/PRs
 
 ### Branch Protection (GitHub)
+
 - `main`: require PR reviews, require status checks, no force push
 - `beta`: require PR from develop only, require status checks
 - `develop`: require PR, require status checks
