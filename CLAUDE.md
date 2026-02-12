@@ -63,12 +63,6 @@ feature/\* → develop → beta → main
 - Beta: auto-deploys from `beta` branch (custom domain: beta.holidayriverexpeditions.com)
 - Preview: ephemeral deploys for all other branches/PRs
 
-### Branch Protection (GitHub)
-
-- `main`: require PR reviews, require status checks, no force push
-- `beta`: require PR from develop only, require status checks
-- `develop`: require PR, require status checks
-
 ## Documentation
 
 - Project docs live in the sibling `docs/` repo (Obsidian vault)
