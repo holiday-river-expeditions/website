@@ -1,0 +1,51 @@
+name: Feature Request
+description: Suggest a new feature or improvement for the website
+labels: ['enhancement']
+body:
+  - type: textarea
+    id: problem
+    attributes:
+      label: Problem statement
+      description: What problem are you trying to solve?
+      placeholder: |
+        Describe the root problem rather than jumping to a solution.
+        - Who is affected? (guests, guides, office staff, etc.)
+        - What's frustrating, missing, or broken about the current experience?
+        - Why does this matter?
+    validations:
+      required: true
+
+  - type: textarea
+    id: solution
+    attributes:
+      label: Proposed solution
+      description: If you have an idea for how to fix this, describe it here.
+      placeholder: How do you think this could be solved?
+    validations:
+      required: false
+
+  - type: dropdown
+    id: area
+    attributes:
+      label: Area of the site
+      description: Which part of the site does this relate to?
+      options:
+        - Homepage
+        - Trip listings
+        - Trip detail pages
+        - Booking/reservations
+        - Navigation/header/footer
+        - Blog/news
+        - About/company pages
+        - Contact
+        - Other
+    validations:
+      required: true
+
+  - type: textarea
+    id: context
+    attributes:
+      label: Additional context
+      description: Add any screenshots, examples, links, or other context that would help.
+    validations:
+      required: false
