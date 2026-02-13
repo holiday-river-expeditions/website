@@ -45,7 +45,7 @@
 ### Branches
 
 - `main` — Production-ready code. Deploys to production (website-holiday-river-expeditions.vercel.app)
-- `beta` — Staging/QA. Deploys to beta environment (not yet configured)
+- `beta` — Staging/QA. Deploys to beta environment (website-git-beta-holiday-river-expeditions.vercel.app)
 - `develop` — Active development integration branch
 
 ### Flow
@@ -60,7 +60,7 @@ feature/\* → develop → beta → main
 ### Vercel Environments
 
 - Production: auto-deploys from `main` branch → https://website-holiday-river-expeditions.vercel.app
-- Beta: auto-deploys from `beta` branch (not yet configured)
+- Beta: auto-deploys from `beta` branch → https://website-git-beta-holiday-river-expeditions.vercel.app
 - Preview: ephemeral deploys for all other branches/PRs
 
 ## Documentation
