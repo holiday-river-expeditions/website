@@ -44,24 +44,13 @@
 
 ### Branches
 
-- `main` — Production-ready code. Deploys to production (website-holiday-river-expeditions.vercel.app)
-- `beta` — Staging/QA. Deploys to beta environment (website-env-beta-holiday-river-expeditions.vercel.app)
-- `develop` — Active development integration branch
+- `main` — Production branch. Auto-deploys to Vercel.
+- `feature/*` — Short-lived feature branches, merged to `main` via PR.
 
-### Flow
+### Vercel (Hobby plan, temporary)
 
-feature/\* → develop → beta → main
-
-- Feature branches branch off `develop`
-- PRs merge feature branches into `develop`
-- When ready for QA/stakeholder review, PR from `develop` → `beta`
-- When approved for release, PR from `beta` → `main`
-
-### Vercel Environments
-
-- Production: auto-deploys from `main` branch → https://website-holiday-river-expeditions.vercel.app
-- Beta: auto-deploys from `beta` branch → https://website-env-beta-holiday-river-expeditions.vercel.app
-- Preview: ephemeral deploys for all other branches/PRs
+- Production: auto-deploys from `main` → https://website-phi-six-25.vercel.app
+- Preview: ephemeral deploys for PRs
 
 ## Documentation
 
