@@ -37,7 +37,7 @@
     "@types/react": "^19",
     "@types/react-dom": "^19",
     "@vitejs/plugin-react": "^5.1.4",
-    "eslint": "^9",
+    "eslint": "^9.39.3",
     "eslint-config-next": "16.1.6",
     "eslint-config-prettier": "^10.1.8",
     "husky": "^9.1.7",
@@ -47,6 +47,11 @@
     "tailwindcss": "^4",
     "typescript": "^5",
     "vitest": "^4.0.18"
+  },
+  "pnpm": {
+    "overrides": {
+      "rollup": ">=4.59.0"
+    }
   },
   "lint-staged": {
     "*.{ts,tsx,js,jsx}": [
