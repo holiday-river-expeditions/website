@@ -1,14 +1,17 @@
 import type { Metadata } from 'next';
-import { Geist, Geist_Mono } from 'next/font/google';
+import { Open_Sans, Stardos_Stencil } from 'next/font/google';
 import './globals.css';
 
-const geistSans = Geist({
-  variable: '--font-geist-sans',
+const stardos = Stardos_Stencil({
+  weight: '700',
+  variable: '--font-stardos',
+  display: 'swap',
   subsets: ['latin'],
 });
 
-const geistMono = Geist_Mono({
-  variable: '--font-geist-mono',
+const openSans = Open_Sans({
+  variable: '--font-open-sans',
+  display: 'swap',
   subsets: ['latin'],
 });
 
@@ -41,9 +44,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased`}
-      >
+      <body className={`${stardos.variable} ${openSans.variable} antialiased`}>
         {children}
       </body>
     </html>
