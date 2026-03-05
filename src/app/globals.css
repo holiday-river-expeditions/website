@@ -1,39 +1,48 @@
 @import 'tailwindcss';
 
 @theme inline {
-  /* Colors */
-  --color-brand-red: #a30d11;
-  --color-taupe: #4e4d48;
-  --color-charcoal: #212121;
-  --color-off-white: #f4f4f4;
-  --color-light-gray: #a6adb4;
-  --color-blue: #1863dc;
-  --color-teal: #5c9ca1;
+    /* Colors — core palette */
+    --color-brand-red: #a30d11;
+    --color-taupe: #4e4d48;
+    --color-charcoal: #212121;
+    --color-off-white: #f4f4f4;
+    --color-light-gray: #a6adb4;
+    --color-blue: #1863dc;
+    --color-teal: #5c9ca1;
 
-  /* Fonts */
-  --font-stardos: var(--font-stardos), 'Open Sans', Arial, sans-serif;
-  --font-sans: var(--font-open-sans), Arial, sans-serif;
+    /* Colors — atmospheric extensions */
+    --color-canyon: #1a1612;
+    --color-sand: #e8e0d4;
+    --color-river: #2d7a7f;
 
-  /* Typography scale — font sizes */
-  --text-h1: 50px;
-  --text-h3: 26px;
-  --text-paragraph: 18px;
-  --text-body: 16px;
-  --text-link: 12px;
+    /* Fonts */
+    --font-stardos: var(--font-stardos), 'Open Sans', Arial, sans-serif;
+    --font-sans: var(--font-open-sans), Arial, sans-serif;
 
-  /* Typography scale — line heights */
-  --text-h1--line-height: 46px;
-  --text-h3--line-height: 28px;
-  --text-paragraph--line-height: 24px;
-  --text-body--line-height: 22.4px;
-  --text-link--line-height: 1.5;
+    /* Typography scale — font sizes */
+    --text-h1: 50px;
+    --text-h2: 36px;
+    --text-h3: 26px;
+    --text-subheading: 22px;
+    --text-paragraph: 18px;
+    --text-body: 16px;
+    --text-link: 12px;
 
-  /* Letter spacing */
-  --tracking-tight: -1.5px;
+    /* Typography scale — line heights */
+    --text-h1--line-height: 46px;
+    --text-h2--line-height: 38px;
+    --text-h3--line-height: 28px;
+    --text-subheading--line-height: 30px;
+    --text-paragraph--line-height: 24px;
+    --text-body--line-height: 22.4px;
+    --text-link--line-height: 1.5;
+
+    /* Letter spacing */
+    --tracking-tight: -1.5px;
 }
 
 body {
-  background: white;
-  color: var(--color-taupe);
-  font-family: var(--font-sans);
+    background: white;
+    color: var(--color-taupe);
+    font-family: var(--font-sans);
 }

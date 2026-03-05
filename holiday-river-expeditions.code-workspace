@@ -1,13 +1,13 @@
 {
-  "folders": [
-    {
-      "name": "website",
-      "path": ".",
-    },
-    {
-      "name": "docs",
-      "path": "../docs",
-    },
-  ],
-  "settings": {},
+    "folders": [
+        {
+            "name": "website",
+            "path": ".",
+        },
+        {
+            "name": "docs",
+            "path": "../docs",
+        },
+    ],
+    "settings": {},
 }

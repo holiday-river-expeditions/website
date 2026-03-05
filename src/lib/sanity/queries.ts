@@ -90,3 +90,34 @@ export const pageBySlugQuery = defineQuery(`
     content
   }
 `);
+
+export const homepageQuery = defineQuery(`
+  *[_type == "homepage"][0] {
+    heroHeading,
+    heroSubheading,
+    heroImage,
+    heroCtaText,
+    heroCtaLink,
+    holidayWayTagline,
+    holidayWayHeading,
+    holidayWayBody,
+    ctaHeading,
+    ctaSubheading,
+    ctaImage,
+    ctaButtonText,
+    ctaButtonLink
+  }
+`);
+
+export const featuredTripsQuery = defineQuery(`
+  *[_type == "trip" && featured == true] | order(name asc) {
+    _id,
+    name,
+    slug,
+    difficulty,
+    duration,
+    pricingNotes,
+    "river": river->{ name, slug },
+    "mainImage": photos[0]
+  }
+`);

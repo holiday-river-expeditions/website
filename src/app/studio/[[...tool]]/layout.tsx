@@ -1,11 +1,11 @@
 export const metadata = {
-  title: 'Sanity Studio | Holiday River Expeditions',
+    title: 'Sanity Studio | Holiday River Expeditions',
 };
 
 export default function StudioLayout({
-  children,
+    children,
 }: {
-  children: React.ReactNode;
+    children: React.ReactNode;
 }) {
-  return <>{children}</>;
+    return <>{children}</>;
 }

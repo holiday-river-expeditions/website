@@ -1,21 +1,21 @@
 {
-  "$schema": "https://openapi.vercel.sh/vercel.json",
-  "framework": "nextjs",
-  "headers": [
-    {
-      "source": "/(.*)",
-      "has": [
+    "$schema": "https://openapi.vercel.sh/vercel.json",
+    "framework": "nextjs",
+    "headers": [
         {
-          "type": "host",
-          "value": "beta.holidayriverexpeditions.com"
+            "source": "/(.*)",
+            "has": [
+                {
+                    "type": "host",
+                    "value": "beta.holidayriverexpeditions.com"
+                }
+            ],
+            "headers": [
+                {
+                    "key": "X-Robots-Tag",
+                    "value": "noindex, nofollow"
+                }
+            ]
         }
-      ],
-      "headers": [
-        {
-          "key": "X-Robots-Tag",
-          "value": "noindex, nofollow"
-        }
-      ]
-    }
-  ]
+    ]
 }

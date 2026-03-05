@@ -1,65 +1,65 @@
 {
-  "name": "website",
-  "version": "0.1.0",
-  "private": true,
-  "packageManager": "pnpm@10.29.3",
-  "scripts": {
-    "dev": "next dev",
-    "build": "next build",
-    "start": "next start",
-    "lint": "eslint",
-    "format": "prettier --write .",
-    "format:check": "prettier --check .",
-    "test": "vitest run",
-    "test:e2e": "playwright test",
-    "typecheck": "tsc --noEmit",
-    "typegen": "sanity schema extract && sanity typegen generate",
-    "prepare": "husky"
-  },
-  "dependencies": {
-    "@portabletext/react": "^6.0.2",
-    "@sanity/client": "^7.16.0",
-    "@sanity/image-url": "^2.0.3",
-    "@sanity/vision": "^5.12.0",
-    "next": "16.1.6",
-    "next-sanity": "^12.1.0",
-    "react": "19.2.3",
-    "react-dom": "19.2.3",
-    "sanity": "^5.12.0"
-  },
-  "devDependencies": {
-    "@playwright/test": "^1.58.2",
-    "@tailwindcss/postcss": "^4",
-    "@testing-library/dom": "^10.4.1",
-    "@testing-library/jest-dom": "^6.9.1",
-    "@testing-library/react": "^16.3.2",
-    "@types/node": "^20",
-    "@types/react": "^19",
-    "@types/react-dom": "^19",
-    "@vitejs/plugin-react": "^5.1.4",
-    "eslint": "^9.39.3",
-    "eslint-config-next": "16.1.6",
-    "eslint-config-prettier": "^10.1.8",
-    "husky": "^9.1.7",
-    "jsdom": "^28.0.0",
-    "lint-staged": "^16.2.7",
-    "prettier": "^3.8.1",
-    "tailwindcss": "^4",
-    "typescript": "^5",
-    "vitest": "^4.0.18"
-  },
-  "pnpm": {
-    "overrides": {
-      "rollup": ">=4.59.0"
+    "name": "website",
+    "version": "0.1.0",
+    "private": true,
+    "packageManager": "pnpm@10.29.3",
+    "scripts": {
+        "dev": "next dev",
+        "build": "next build",
+        "start": "next start",
+        "lint": "eslint",
+        "format": "prettier --write .",
+        "format:check": "prettier --check .",
+        "test": "vitest run",
+        "test:e2e": "playwright test",
+        "typecheck": "tsc --noEmit",
+        "typegen": "sanity schema extract && sanity typegen generate",
+        "prepare": "husky"
+    },
+    "dependencies": {
+        "@portabletext/react": "^6.0.2",
+        "@sanity/client": "^7.16.0",
+        "@sanity/image-url": "^2.0.3",
+        "@sanity/vision": "^5.12.0",
+        "next": "16.1.6",
+        "next-sanity": "^12.1.0",
+        "react": "19.2.3",
+        "react-dom": "19.2.3",
+        "sanity": "^5.12.0"
+    },
+    "devDependencies": {
+        "@playwright/test": "^1.58.2",
+        "@tailwindcss/postcss": "^4",
+        "@testing-library/dom": "^10.4.1",
+        "@testing-library/jest-dom": "^6.9.1",
+        "@testing-library/react": "^16.3.2",
+        "@types/node": "^20",
+        "@types/react": "^19",
+        "@types/react-dom": "^19",
+        "@vitejs/plugin-react": "^5.1.4",
+        "eslint": "^9.39.3",
+        "eslint-config-next": "16.1.6",
+        "eslint-config-prettier": "^10.1.8",
+        "husky": "^9.1.7",
+        "jsdom": "^28.0.0",
+        "lint-staged": "^16.2.7",
+        "prettier": "^3.8.1",
+        "tailwindcss": "^4",
+        "typescript": "^5",
+        "vitest": "^4.0.18"
+    },
+    "pnpm": {
+        "overrides": {
+            "rollup": ">=4.59.0"
+        }
+    },
+    "lint-staged": {
+        "*.{ts,tsx,js,jsx}": [
+            "eslint --fix",
+            "prettier --write"
+        ],
+        "*.{json,md,mdx,css,html,yml,yaml,graphql}": [
+            "prettier --write"
+        ]
     }
-  },
-  "lint-staged": {
-    "*.{ts,tsx,js,jsx}": [
-      "eslint --fix",
-      "prettier --write"
-    ],
-    "*.{json,md,mdx,css,html,yml,yaml,graphql}": [
-      "prettier --write"
-    ]
-  }
 }

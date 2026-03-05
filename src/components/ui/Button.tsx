@@ -1,6 +1,6 @@
 import Link from 'next/link';
 
-type ButtonVariant = 'primary' | 'secondary' | 'outline';
+type ButtonVariant = 'primary' | 'secondary' | 'outline' | 'teal';
 type ButtonSize = 'default' | 'lg';
 
 interface ButtonBaseProps {
@@ -31,6 +31,7 @@ const variantStyles: Record<ButtonVariant, string> = {
     secondary: 'bg-blue text-white hover:bg-blue/90',
     outline:
         'border-2 border-brand-red text-brand-red hover:bg-brand-red hover:text-white',
+    teal: 'bg-teal text-white hover:bg-river',
 };
 
 const sizeStyles: Record<ButtonSize, string> = {
@@ -59,7 +60,7 @@ export function Button({
 
     return (
         <button
-            type="button"
+            type='button'
             className={classes}
             {...(rest as React.ButtonHTMLAttributes<HTMLButtonElement>)}
         >
