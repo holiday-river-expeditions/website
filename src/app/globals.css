@@ -1,48 +1,47 @@
 @import 'tailwindcss';
 
 @theme inline {
-    /* Colors — core palette */
-    --color-brand-red: #a30d11;
-    --color-taupe: #4e4d48;
-    --color-charcoal: #212121;
-    --color-off-white: #f4f4f4;
-    --color-light-gray: #a6adb4;
-    --color-blue: #1863dc;
-    --color-teal: #5c9ca1;
+    /* Colors — primary brand palette */
+    --color-holiday-red: #d00a0b;
+    --color-holiday-white: #fcfcfc;
+    --color-holiday-grey: #b6b6b6;
 
-    /* Colors — atmospheric extensions */
-    --color-canyon: #1a1612;
-    --color-sand: #e8e0d4;
-    --color-river: #2d7a7f;
+    /* Colors — secondary palette (accents only, never at scale) */
+    --color-teal: #3f786b;
+    --color-evergreen: #0a332d;
+    --color-opal: #9dbdb8;
+    --color-sand: #d6b588;
+    --color-onyx: #2c2b29;
 
     /* Fonts */
-    --font-stardos: var(--font-stardos), 'Open Sans', Arial, sans-serif;
+    --font-alt-gothic:
+        var(--font-alt-gothic), var(--font-oswald), Arial, sans-serif;
     --font-sans: var(--font-open-sans), Arial, sans-serif;
 
     /* Typography scale — font sizes */
-    --text-h1: 50px;
-    --text-h2: 36px;
-    --text-h3: 26px;
+    --text-h1: 64px;
+    --text-h2: 44px;
+    --text-h3: 28px;
     --text-subheading: 22px;
     --text-paragraph: 18px;
     --text-body: 16px;
     --text-link: 12px;
 
     /* Typography scale — line heights */
-    --text-h1--line-height: 46px;
-    --text-h2--line-height: 38px;
-    --text-h3--line-height: 28px;
+    --text-h1--line-height: 0.92;
+    --text-h2--line-height: 0.95;
+    --text-h3--line-height: 1;
     --text-subheading--line-height: 30px;
     --text-paragraph--line-height: 24px;
     --text-body--line-height: 22.4px;
     --text-link--line-height: 1.5;
 
     /* Letter spacing */
-    --tracking-tight: -1.5px;
+    --tracking-tight: -0.5px;
 }
 
 body {
-    background: white;
-    color: var(--color-taupe);
+    background: var(--color-holiday-white);
+    color: var(--color-onyx);
     font-family: var(--font-sans);
 }

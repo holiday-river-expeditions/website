@@ -1,20 +1,37 @@
 import { render, screen } from '@testing-library/react';
-import { expect, test, vi } from 'vitest';
-
-vi.mock('@/lib/sanity', () => ({
-    getHomepage: vi.fn().mockResolvedValue(null),
-    getAllRivers: vi.fn().mockResolvedValue([]),
-    getFeaturedTrips: vi.fn().mockResolvedValue([]),
-}));
-
-vi.mock('@/lib/sanity/image', () => ({
-    urlFor: vi.fn(),
-}));
+import { expect, test } from 'vitest';
 
 import Home from './page';
 
-test('renders the home page', async () => {
-    const html = await Home();
-    render(html);
-    expect(screen.getByText('Holiday River Expeditions')).toBeInTheDocument();
+test('renders the home page with the hero headline and key sections', () => {
+    render(Home());
+
+    // Hero headline
+    expect(
+        screen.getByRole('heading', {
+            level: 1,
+            name: /multi-day raft and bike expeditions/i,
+        }),
+    ).toBeInTheDocument();
+
+    // Trip grid — a featured trip name
+    expect(
+        screen.getByRole('heading', { level: 3, name: /cataract canyon/i }),
+    ).toBeInTheDocument();
+
+    // Motor-Free Since 1966 section
+    expect(
+        screen.getByRole('heading', {
+            level: 2,
+            name: /motor-free rafting/i,
+        }),
+    ).toBeInTheDocument();
+
+    // Learn & Get Inspired section
+    expect(
+        screen.getByRole('heading', {
+            level: 2,
+            name: /learn & get inspired/i,
+        }),
+    ).toBeInTheDocument();
 });

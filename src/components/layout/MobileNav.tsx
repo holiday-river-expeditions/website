@@ -8,13 +8,13 @@ export function MobileNav() {
     const [isOpen, setIsOpen] = useState(false);
 
     return (
-        <div className='lg:hidden'>
+        <>
             <button
                 type='button'
                 onClick={() => setIsOpen(!isOpen)}
                 aria-expanded={isOpen}
                 aria-label={isOpen ? 'Close menu' : 'Open menu'}
-                className='flex h-10 w-10 items-center justify-center text-white'
+                className='flex h-10 w-10 items-center justify-center text-holiday-red'
             >
                 {isOpen ? (
                     <svg
@@ -49,28 +49,21 @@ export function MobileNav() {
             </button>
 
             {isOpen && (
-                <div className='absolute left-0 right-0 top-full z-50 border-t border-white/10 bg-charcoal'>
+                <div className='absolute left-0 right-0 top-full z-50 border-t border-holiday-grey/30 bg-holiday-white lg:hidden'>
                     <nav className='flex flex-col px-6 py-4'>
                         {navItems.map((item) => (
                             <Link
                                 key={item.href}
                                 href={item.href}
                                 onClick={() => setIsOpen(false)}
-                                className='border-b border-white/10 py-3 text-body font-semibold text-white transition-colors hover:text-brand-red'
+                                className='border-b border-holiday-grey/30 py-3 font-alt-gothic text-body font-medium uppercase tracking-widest text-holiday-red'
                             >
                                 {item.label}
                             </Link>
                         ))}
-                        <Link
-                            href='/open-seats'
-                            onClick={() => setIsOpen(false)}
-                            className='mt-4 rounded-lg bg-brand-red px-5 py-3 text-center text-body font-semibold text-white transition-colors hover:bg-brand-red/90'
-                        >
-                            Open Seats
-                        </Link>
                     </nav>
                 </div>
             )}
-        </div>
+        </>
     );
 }

@@ -1,4 +1,4 @@
-type SectionBackground = 'white' | 'off-white' | 'charcoal' | 'canyon' | 'sand';
+type SectionBackground = 'white' | 'sand' | 'opal' | 'evergreen' | 'onyx';
 
 interface SectionProps {
     background?: SectionBackground;
@@ -8,11 +8,11 @@ interface SectionProps {
 }
 
 const bgStyles: Record<SectionBackground, string> = {
-    white: 'bg-white',
-    'off-white': 'bg-off-white',
-    charcoal: 'bg-charcoal text-white',
-    canyon: 'bg-canyon text-white',
-    sand: 'bg-sand',
+    white: 'bg-holiday-white text-onyx',
+    sand: 'bg-sand text-onyx',
+    opal: 'bg-opal text-onyx',
+    evergreen: 'bg-evergreen text-holiday-white',
+    onyx: 'bg-onyx text-holiday-white',
 };
 
 export function Section({

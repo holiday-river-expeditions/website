@@ -1,6 +1,6 @@
 import Link from 'next/link';
 
-type ButtonVariant = 'primary' | 'secondary' | 'outline' | 'teal';
+type ButtonVariant = 'primary' | 'outline' | 'onyx';
 type ButtonSize = 'default' | 'lg';
 
 interface ButtonBaseProps {
@@ -27,16 +27,15 @@ interface ButtonAsLink extends ButtonBaseProps {
 type ButtonProps = ButtonAsButton | ButtonAsLink;
 
 const variantStyles: Record<ButtonVariant, string> = {
-    primary: 'bg-brand-red text-white hover:bg-brand-red/90',
-    secondary: 'bg-blue text-white hover:bg-blue/90',
+    primary: 'bg-holiday-red text-holiday-white hover:bg-holiday-red/90',
     outline:
-        'border-2 border-brand-red text-brand-red hover:bg-brand-red hover:text-white',
-    teal: 'bg-teal text-white hover:bg-river',
+        'border-2 border-holiday-red text-holiday-red hover:bg-holiday-red hover:text-holiday-white',
+    onyx: 'bg-onyx text-holiday-white hover:bg-onyx/90',
 };
 
 const sizeStyles: Record<ButtonSize, string> = {
-    default: 'px-5 py-2 text-body',
-    lg: 'px-8 py-3 text-paragraph',
+    default: 'px-6 py-2 text-link tracking-widest',
+    lg: 'px-8 py-3 text-body tracking-widest',
 };
 
 export function Button({
@@ -48,7 +47,7 @@ export function Button({
     ...rest
 }: ButtonProps) {
     const classes =
-        `inline-block rounded-lg font-semibold transition-colors ${variantStyles[variant]} ${sizeStyles[size]} ${className}`.trim();
+        `inline-block rounded-full font-alt-gothic font-medium uppercase transition-colors ${variantStyles[variant]} ${sizeStyles[size]} ${className}`.trim();
 
     if (href) {
         return (

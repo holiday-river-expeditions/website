@@ -1,299 +1,240 @@
+import Image from 'next/image';
 import { Button } from '@/components/ui/Button';
+import { ContentCard } from '@/components/ui/ContentCard';
 import { Hero } from '@/components/ui/Hero';
-import { RiverCard } from '@/components/ui/RiverCard';
+import { RiverSelector } from '@/components/ui/RiverSelector';
 import { Section } from '@/components/ui/Section';
-import { TestimonialBlock } from '@/components/ui/TestimonialBlock';
-import { TrustBar } from '@/components/ui/TrustBar';
-import { getAllRivers, getFeaturedTrips, getHomepage } from '@/lib/sanity';
-import { urlFor } from '@/lib/sanity/image';
+import { TripCard, type TripCardProps } from '@/components/ui/TripCard';
 
-const trustItems = [
-    { label: '60 Years on the River' },
-    { label: '5.0 on Google' },
-    { label: "Travelers' Choice 2025" },
-    { label: 'Motor-Free Since 1966' },
-];
+const HERO_IMAGE =
+    'https://www.bikeraft.com/wp-content/uploads/2025/12/SRO_0237-scaled.jpg';
 
-const fallbackRivers = [
+const HERO_HEADING =
+    'Multi-Day Raft and Bike Expeditions in the Heart of Canyon Country';
+
+const featuredTrips: TripCardProps[] = [
     {
-        name: 'Colorado River',
-        description: 'Grand Canyon to Cataract — legendary whitewater',
-        slug: 'colorado',
-        imageUrl:
-            'https://www.bikeraft.com/wp-content/uploads/2025/11/Cataract-Canyon-whitewater-rafting.png',
+        name: 'Cataract Canyon',
+        category: 'Whitewater Rafting',
+        image: 'https://www.bikeraft.com/wp-content/uploads/2025/11/Cataract-Canyon-Rafting-Trips-4.jpg',
+        startingPrice: '$1,830',
+        duration: '5/6 Days',
+        description:
+            'Legendary whitewater through the heart of Canyonlands National Park.',
+        href: '/trips/cataract-canyon',
     },
     {
-        name: 'Green River',
-        description: 'Desolation Canyon and the Gates of Lodore',
-        slug: 'green',
-        imageUrl:
-            'https://www.bikeraft.com/wp-content/uploads/2025/11/Green-River-rafting-banner.png',
+        name: 'Westwater Canyon',
+        category: 'Whitewater Rafting',
+        image: 'https://www.bikeraft.com/wp-content/uploads/2025/11/Westwater-Canyon-Rafting-Trips.jpg',
+        startingPrice: '$595',
+        duration: '2/3 Days',
+        description: 'World-class whitewater within a weekend.',
+        href: '/trips/westwater-canyon',
     },
     {
-        name: 'San Juan River',
-        description: 'Ancient ruins and desert solitude',
-        slug: 'san-juan',
-        imageUrl:
-            'https://www.bikeraft.com/wp-content/uploads/2025/11/San-Juan-River-Banner-1.png',
+        name: 'The Maze',
+        category: 'Mountain Biking',
+        image: 'https://www.bikeraft.com/wp-content/uploads/2025/11/The-Maze-Canyonlands.jpg',
+        startingPrice: '$1,415',
+        duration: '4/5 Days',
+        description:
+            'Bike in solitude in the least-visited district of Canyonlands.',
+        href: '/trips/the-maze',
+    },
+    {
+        name: 'Gates of Lodore',
+        category: 'Whitewater Rafting',
+        image: 'https://www.bikeraft.com/wp-content/uploads/2025/11/Gates-of-Lodore-Rafting.jpg',
+        startingPrice: '$1,385',
+        duration: '3/4 Days',
+        description:
+            'Experience Dinosaur National Monument from a scenic river.',
+        href: '/trips/gates-of-lodore',
+    },
+    {
+        name: 'The White Rim',
+        category: 'Mountain Biking',
+        image: 'https://www.bikeraft.com/wp-content/uploads/2025/11/White-Rim-Mountain-Biking.jpg',
+        startingPrice: '$1,415',
+        duration: '3/4 Days',
+        description: 'An iconic desert mountain biking expedition.',
+        href: '/trips/white-rim',
     },
     {
         name: 'Yampa River',
-        description: "Colorado's last free-flowing river",
-        slug: 'yampa',
-        imageUrl:
-            'https://www.bikeraft.com/wp-content/uploads/2025/10/Yampa-River-Rafting-Tiger-Wall.jpg',
+        category: 'Whitewater Rafting',
+        image: 'https://www.bikeraft.com/wp-content/uploads/2025/10/Yampa-River-Rafting-Tiger-Wall.jpg',
+        startingPrice: '$1,385',
+        duration: '4/5 Days',
+        description: 'Stunning beauty on a free-flowing river.',
+        href: '/trips/yampa',
     },
 ];
 
-const fallbackTrips = [
+const rivers = [
     {
-        name: 'Cataract Canyon',
-        duration: 4,
-        river: 'Colorado River',
-        slug: 'cataract-canyon',
-        imageUrl:
-            'https://www.bikeraft.com/wp-content/uploads/2025/11/Cataract-Canyon-Rafting-Trips-4.jpg',
+        name: 'Desolation',
+        href: '/rivers/desolation',
+        image: 'https://www.bikeraft.com/wp-content/uploads/2025/11/Desolation-Canyon-Rafting-Trip-3-1.jpg',
     },
     {
-        name: 'Desolation Canyon',
-        duration: 5,
-        river: 'Green River',
-        slug: 'desolation-canyon',
-        imageUrl:
-            'https://www.bikeraft.com/wp-content/uploads/2025/11/Desolation-Canyon-Rafting-Trip-3-1.jpg',
+        name: 'Yampa',
+        href: '/rivers/yampa',
+        image: 'https://www.bikeraft.com/wp-content/uploads/2025/10/Yampa-River-Rafting-Tiger-Wall.jpg',
     },
     {
-        name: 'San Juan River Journey',
-        duration: 4,
-        river: 'San Juan River',
-        slug: 'san-juan-river-journey',
-        imageUrl:
-            'https://www.bikeraft.com/wp-content/uploads/2025/11/San-Juan-river-rafting-trips-banner.png',
+        name: 'Gates of Lodore',
+        href: '/rivers/gates-of-lodore',
+        image: 'https://www.bikeraft.com/wp-content/uploads/2025/11/Gates-of-Lodore-Rafting.jpg',
+    },
+    {
+        name: 'Westwater',
+        href: '/rivers/westwater',
+        image: 'https://www.bikeraft.com/wp-content/uploads/2025/11/Westwater-Canyon-Rafting-Trips.jpg',
+    },
+    {
+        name: 'Cataract',
+        href: '/rivers/cataract',
+        image: 'https://www.bikeraft.com/wp-content/uploads/2025/11/Cataract-Canyon-whitewater-rafting.png',
+    },
+    {
+        name: 'San Juan',
+        href: '/rivers/san-juan',
+        image: 'https://www.bikeraft.com/wp-content/uploads/2025/11/San-Juan-River-Banner-1.png',
+    },
+    {
+        name: 'White Rim',
+        href: '/rivers/white-rim',
+        image: 'https://www.bikeraft.com/wp-content/uploads/2025/11/White-Rim-Mountain-Biking.jpg',
+    },
+    {
+        name: 'Maze',
+        href: '/rivers/maze',
+        image: 'https://www.bikeraft.com/wp-content/uploads/2025/11/The-Maze-Canyonlands.jpg',
+    },
+    {
+        name: 'San Rafael',
+        href: '/rivers/san-rafael',
+        image: 'https://www.bikeraft.com/wp-content/uploads/2025/11/San-Rafael-Swell.jpg',
     },
 ];
 
-const testimonials = [
+const learnContent = [
     {
-        quote: 'This was the most transformative week of our lives. The guides, the canyons, the stars — everything was beyond what we imagined.',
-        author: 'Sarah M.',
-        trip: 'Cataract Canyon, 4 Days',
-        rating: 5,
+        title: 'River Cooking 101',
+        image: 'https://www.bikeraft.com/wp-content/uploads/2025/11/river-cooking.jpg',
+        href: '/blog/river-cooking-101',
     },
     {
-        quote: "We've done three trips with Holiday now. Each one feels like coming home to a place you've never been. That's the magic of it.",
-        author: 'James & Linda K.',
-        trip: 'Desolation Canyon, 5 Days',
-        rating: 5,
+        title: 'Triple Rig History',
+        image: 'https://www.bikeraft.com/wp-content/uploads/2025/11/triple-rig-history.jpg',
+        href: '/blog/triple-rig-history',
+    },
+    {
+        title: 'Packing For Your Trip',
+        image: 'https://www.bikeraft.com/wp-content/uploads/2025/11/packing-for-trip.jpg',
+        href: '/blog/packing-for-your-trip',
+        isVideo: true,
+    },
+    {
+        title: 'Stargazing On The River',
+        image: 'https://www.bikeraft.com/wp-content/uploads/2025/11/stargazing-on-river.jpg',
+        href: '/blog/stargazing-on-the-river',
     },
 ];
 
-const HERO_FALLBACK_IMAGE =
-    'https://www.bikeraft.com/wp-content/uploads/2025/12/SRO_0237-scaled.jpg';
-const CTA_FALLBACK_IMAGE =
-    'https://www.bikeraft.com/wp-content/uploads/2021/11/Dee-Holladay-Kim-Crumbo-Awards-Hero.jpg';
+const motorFreeImages = {
+    left: 'https://www.bikeraft.com/wp-content/uploads/2021/11/Holiday-River-Rafting-vintage.jpg',
+    right: 'https://www.bikeraft.com/wp-content/uploads/2021/11/Dee-Holladay-portrait.jpg',
+};
 
-export default async function Home() {
-    const [hp, sanityRivers, featuredTrips] = await Promise.all([
-        getHomepage(),
-        getAllRivers(),
-        getFeaturedTrips(),
-    ]);
-
-    // Hero
-    const heroImage = hp?.heroImage
-        ? urlFor(hp.heroImage).width(1920).quality(80).url()
-        : HERO_FALLBACK_IMAGE;
-    const heroHeading = hp?.heroHeading ?? 'Holiday River Expeditions';
-    const heroSubheading =
-        hp?.heroSubheading ?? 'Motor-Free Rafting Since 1966';
-    const heroCtaText = hp?.heroCtaText ?? 'Plan Your Trip';
-    const heroCtaLink = hp?.heroCtaLink ?? '/trips';
-
-    // The Holiday Way
-    const hwTagline = hp?.holidayWayTagline ?? 'The Holiday Way';
-    const hwHeading = hp?.holidayWayHeading ?? 'Go with the flow.';
-    const hwBody =
-        hp?.holidayWayBody ??
-        "For six decades, we've believed the river knows the way. No motors. No rush. Just you, your crew, and the wild canyon country of the American West. We guide people into landscapes that change them \u2014 and we take care of every detail so you can be fully present for the experience.";
-
-    // Final CTA
-    const ctaHeading = hp?.ctaHeading ?? 'Ready for Your Adventure?';
-    const ctaSubheading =
-        hp?.ctaSubheading ??
-        'Browse our trips, find the right river, and reserve your spot.';
-    const ctaImage = hp?.ctaImage
-        ? urlFor(hp.ctaImage).width(1920).quality(80).url()
-        : CTA_FALLBACK_IMAGE;
-    const ctaButtonText = hp?.ctaButtonText ?? 'Browse All Trips';
-    const ctaButtonLink = hp?.ctaButtonLink ?? '/trips';
-
-    // Rivers — use Sanity data if available, otherwise fallbacks
-    const rivers =
-        sanityRivers && sanityRivers.length > 0
-            ? sanityRivers.map((r) => ({
-                  name: r.name ?? '',
-                  tagline: r.description ?? '',
-                  href: `/trips?river=${r.slug?.current ?? ''}`,
-                  backgroundImage: r.image
-                      ? urlFor(r.image).width(600).quality(80).url()
-                      : '',
-              }))
-            : fallbackRivers.map((r) => ({
-                  name: r.name,
-                  tagline: r.description,
-                  href: `/trips?river=${r.slug}`,
-                  backgroundImage: r.imageUrl,
-              }));
-
-    // Featured trips — use Sanity data if available, otherwise fallbacks
-    const trips =
-        featuredTrips && featuredTrips.length > 0
-            ? featuredTrips.map((t) => ({
-                  name: t.name ?? '',
-                  duration: t.duration ?? 0,
-                  river: t.river?.name ?? '',
-                  slug: t.slug?.current ?? '',
-                  imageUrl: t.mainImage
-                      ? urlFor(t.mainImage).width(600).quality(80).url()
-                      : '',
-              }))
-            : fallbackTrips;
-
+export default function Home() {
     return (
         <>
             {/* Hero */}
-            <Hero
-                heading={heroHeading}
-                subheading={heroSubheading}
-                ctaText={heroCtaText}
-                ctaHref={heroCtaLink}
-                backgroundImage={heroImage}
-            />
+            <Hero heading={HERO_HEADING} backgroundImage={HERO_IMAGE} />
 
-            {/* Trust bar */}
-            <TrustBar items={trustItems} />
-
-            {/* The Holiday Way */}
-            <Section background='canyon' className='py-20 md:py-28'>
-                <div className='mx-auto max-w-3xl text-center'>
-                    <p className='text-link font-semibold uppercase tracking-widest text-teal'>
-                        {hwTagline}
-                    </p>
-                    <h2 className='mt-4 text-h2 font-extrabold leading-h2 text-white'>
-                        {hwHeading}
-                    </h2>
-                    <p className='mt-6 text-subheading leading-subheading text-white/80'>
-                        {hwBody}
-                    </p>
-                    <div className='mx-auto mt-8 h-px w-24 bg-teal/40' />
-                </div>
-            </Section>
-
-            {/* Explore by River */}
-            <Section background='sand' className='py-20'>
-                <div className='mb-10 text-center'>
-                    <h2 className='text-h2 font-extrabold leading-h2 text-charcoal'>
-                        Explore by River
-                    </h2>
-                    <p className='mt-3 text-paragraph leading-paragraph text-taupe'>
-                        Four legendary rivers. Hundreds of miles of canyon
-                        country. Your adventure starts here.
-                    </p>
-                </div>
-                <div className='grid gap-6 sm:grid-cols-2 lg:grid-cols-4'>
-                    {rivers.map((river) => (
-                        <RiverCard key={river.name} {...river} />
+            {/* Trip Grid */}
+            <Section background='white' className='py-20 md:py-24'>
+                <div className='grid gap-10 sm:grid-cols-2 lg:grid-cols-3'>
+                    {featuredTrips.map((trip) => (
+                        <TripCard key={trip.name} {...trip} />
                     ))}
                 </div>
-            </Section>
-
-            {/* Signature Trips */}
-            <Section className='py-20'>
-                <div className='mb-10 text-center'>
-                    <h2 className='text-h2 font-extrabold leading-h2 text-charcoal'>
-                        Signature Trips
-                    </h2>
-                    <p className='mt-3 text-paragraph leading-paragraph text-taupe'>
-                        Our most popular adventures, hand-picked by the Holiday
-                        team.
-                    </p>
-                </div>
-                <div className='grid gap-8 md:grid-cols-3'>
-                    {trips.map((trip) => (
-                        <div
-                            key={trip.name}
-                            className='group overflow-hidden rounded-lg border-t-4 border-teal bg-white shadow-md transition-shadow hover:shadow-lg'
-                        >
-                            <div
-                                className='aspect-4/3 bg-cover bg-center transition-transform duration-300 group-hover:scale-105'
-                                style={{
-                                    backgroundImage: `url(${trip.imageUrl})`,
-                                }}
-                            />
-                            <div className='p-5'>
-                                <p className='text-link font-semibold uppercase text-teal'>
-                                    {trip.river} &middot; {trip.duration}{' '}
-                                    {trip.duration === 1 ? 'Day' : 'Days'}
-                                </p>
-                                <h3 className='mt-1 text-paragraph font-bold leading-paragraph text-charcoal'>
-                                    {trip.name}
-                                </h3>
-                                <p className='mt-3'>
-                                    <Button
-                                        href={`/trips/${trip.slug}`}
-                                        variant='outline'
-                                        size='default'
-                                    >
-                                        Learn More
-                                    </Button>
-                                </p>
-                            </div>
-                        </div>
-                    ))}
-                </div>
-                <div className='mt-10 text-center'>
-                    <Button href='/trips' variant='teal' size='lg'>
+                <div className='mt-14 text-center'>
+                    <Button href='/trips' variant='outline' size='lg'>
                         View All Trips
                     </Button>
                 </div>
             </Section>
 
-            {/* Testimonials */}
-            <Section background='canyon' className='py-20 md:py-28'>
-                <div className='mb-10 text-center'>
-                    <p className='text-link font-semibold uppercase tracking-widest text-teal'>
-                        What Our Guests Say
-                    </p>
-                    <h2 className='mt-4 text-h2 font-extrabold leading-h2 text-white'>
-                        Stories from the River
-                    </h2>
-                </div>
-                <TestimonialBlock testimonials={testimonials} />
-            </Section>
+            {/* Motor-Free Since 1966 */}
+            <Section background='white' className='py-20 md:py-24'>
+                <div className='grid items-center gap-10 md:grid-cols-[1.3fr_1fr]'>
+                    {/* Left: two-image collage */}
+                    <div className='grid grid-cols-2 gap-4'>
+                        <div className='relative aspect-[3/4] overflow-hidden'>
+                            <Image
+                                src={motorFreeImages.left}
+                                alt='Vintage Holiday River Expeditions rafting trip'
+                                fill
+                                className='object-cover'
+                                sizes='(max-width: 768px) 50vw, 30vw'
+                            />
+                        </div>
+                        <div className='relative aspect-[3/4] translate-y-8 overflow-hidden'>
+                            <Image
+                                src={motorFreeImages.right}
+                                alt='Holiday River Expeditions guide portrait'
+                                fill
+                                className='object-cover grayscale'
+                                sizes='(max-width: 768px) 50vw, 30vw'
+                            />
+                        </div>
+                    </div>
 
-            {/* Final CTA */}
-            <section className='relative flex min-h-[50vh] items-center overflow-hidden'>
-                <div
-                    className='absolute inset-0 bg-cover bg-center'
-                    style={{
-                        backgroundImage: `url(${ctaImage})`,
-                    }}
-                />
-                <div className='absolute inset-0 bg-canyon/70' />
-                <div className='relative z-10 w-full px-6 py-20 text-center'>
-                    <h2 className='text-h2 font-extrabold leading-h2 text-white md:text-h1 md:leading-h1'>
-                        {ctaHeading}
-                    </h2>
-                    <p className='mt-4 text-paragraph leading-paragraph text-white/80'>
-                        {ctaSubheading}
-                    </p>
-                    <div className='mt-8'>
-                        <Button href={ctaButtonLink} variant='teal' size='lg'>
-                            {ctaButtonText}
-                        </Button>
+                    {/* Right: copy */}
+                    <div>
+                        <h2 className='font-alt-gothic text-h2 font-medium uppercase leading-h2 text-holiday-red'>
+                            Motor-Free Rafting
+                            <br />
+                            Since 1966
+                        </h2>
+                        <p className='mt-6 text-body leading-body text-onyx'>
+                            From the Holiday family to all of our guests over
+                            the decades: Thank you for making us the company we
+                            are today. Here&apos;s to many more years of joyful
+                            moments shared in wild places.
+                        </p>
+                        <div className='mt-8'>
+                            <Button href='/about' variant='outline'>
+                                Learn More
+                            </Button>
+                        </div>
                     </div>
                 </div>
-            </section>
+            </Section>
+
+            {/* Rivers Selector */}
+            <RiverSelector rivers={rivers} />
+
+            {/* Learn & Get Inspired */}
+            <Section background='white' className='py-20 md:py-24'>
+                <h2 className='font-alt-gothic text-h2 font-medium uppercase leading-h2 text-holiday-red'>
+                    Learn &amp; Get Inspired
+                </h2>
+                <div className='mt-10 grid gap-6 sm:grid-cols-2 lg:grid-cols-4'>
+                    {learnContent.map((item) => (
+                        <ContentCard key={item.title} {...item} />
+                    ))}
+                </div>
+                <div className='mt-14 text-center'>
+                    <Button href='/blog' variant='outline' size='lg'>
+                        Learn More
+                    </Button>
+                </div>
+            </Section>
         </>
     );
 }

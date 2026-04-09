@@ -1,12 +1,16 @@
 import type { Metadata } from 'next';
-import { Open_Sans, Stardos_Stencil } from 'next/font/google';
+import { Open_Sans, Oswald } from 'next/font/google';
 import { Header } from '@/components/layout/Header';
 import { Footer } from '@/components/layout/Footer';
 import './globals.css';
 
-const stardos = Stardos_Stencil({
-    weight: '700',
-    variable: '--font-stardos',
+// TODO: Replace Oswald fallback with Adobe Fonts ATF Alternate Gothic Medium
+// once the kit ID is available. The official brand typeface is
+// "ATF Alternate Gothic Medium" (Adobe Fonts). Add a <link> to the kit in
+// <head> below and the CSS variable --font-alt-gothic will be used.
+const oswald = Oswald({
+    weight: ['500', '700'],
+    variable: '--font-oswald',
     display: 'swap',
     subsets: ['latin'],
 });
@@ -27,6 +31,7 @@ export const metadata: Metadata = {
     icons: {
         icon: [
             { url: '/favicon-32x32.png', sizes: '32x32', type: 'image/png' },
+            { url: '/favicon-48x48.png', sizes: '48x48', type: 'image/png' },
         ],
         apple: [
             {
@@ -39,7 +44,7 @@ export const metadata: Metadata = {
             {
                 rel: 'mask-icon',
                 url: '/safari-pinned-tab.svg',
-                color: '#A30D11',
+                color: '#D00A0B',
             },
         ],
     },
@@ -52,8 +57,15 @@ export default function RootLayout({
 }>) {
     return (
         <html lang='en'>
+            <head>
+                {/*
+                    TODO: Replace with Adobe Fonts kit link for
+                    ATF Alternate Gothic Medium once kit ID is available:
+                    <link rel="stylesheet" href="https://use.typekit.net/XXXXXXX.css" />
+                */}
+            </head>
             <body
-                className={`${stardos.variable} ${openSans.variable} antialiased`}
+                className={`${oswald.variable} ${openSans.variable} antialiased`}
             >
                 <Header />
                 <main className='min-h-screen'>{children}</main>

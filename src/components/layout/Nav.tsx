@@ -1,29 +1,26 @@
 import Link from 'next/link';
-import { Button } from '@/components/ui/Button';
 
 const navItems = [
-    { label: 'Trips', href: '/trips' },
-    { label: 'Destinations', href: '/destinations' },
-    { label: 'About', href: '/about' },
+    { label: 'Rafting', href: '/rafting' },
+    { label: 'Biking', href: '/biking' },
+    { label: 'About Us', href: '/about' },
     { label: 'Blog', href: '/blog' },
-    { label: 'Contact', href: '/contact' },
 ] as const;
 
 export { navItems };
 
 export function DesktopNav() {
     return (
-        <nav className='hidden items-center gap-6 lg:flex'>
+        <nav className='hidden items-center gap-8 lg:flex'>
             {navItems.map((item) => (
                 <Link
                     key={item.href}
                     href={item.href}
-                    className='text-body font-semibold text-white transition-colors hover:text-brand-red'
+                    className='font-alt-gothic text-link font-medium uppercase tracking-widest text-holiday-red transition-opacity hover:opacity-70'
                 >
                     {item.label}
                 </Link>
             ))}
-            <Button href='/open-seats'>Open Seats</Button>
         </nav>
     );
 }
