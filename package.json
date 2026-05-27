@@ -17,40 +17,43 @@
         "prepare": "husky"
     },
     "dependencies": {
-        "@portabletext/react": "^6.0.2",
-        "@sanity/client": "^7.16.0",
-        "@sanity/image-url": "^2.0.3",
-        "@sanity/vision": "^5.12.0",
-        "next": "16.1.6",
-        "next-sanity": "^12.1.0",
+        "@portabletext/react": "^6.2.0",
+        "@sanity/client": "^7.22.0",
+        "@sanity/image-url": "^2.1.1",
+        "@sanity/vision": "^5.27.0",
+        "next": "16.2.6",
+        "next-sanity": "^12.4.5",
         "react": "19.2.3",
         "react-dom": "19.2.3",
-        "sanity": "^5.12.0"
+        "sanity": "^5.27.0"
     },
     "devDependencies": {
-        "@playwright/test": "^1.58.2",
-        "@tailwindcss/postcss": "^4",
+        "@playwright/test": "^1.60.0",
+        "@tailwindcss/postcss": "^4.3.0",
         "@testing-library/dom": "^10.4.1",
         "@testing-library/jest-dom": "^6.9.1",
         "@testing-library/react": "^16.3.2",
-        "@types/node": "^20",
-        "@types/react": "^19",
-        "@types/react-dom": "^19",
-        "@vitejs/plugin-react": "^5.1.4",
-        "eslint": "^9.39.3",
-        "eslint-config-next": "16.1.6",
+        "@types/node": "^20.19.41",
+        "@types/react": "^19.2.15",
+        "@types/react-dom": "^19.2.3",
+        "@vitejs/plugin-react": "^5.2.0",
+        "eslint": "^9.39.4",
+        "eslint-config-next": "16.2.6",
         "eslint-config-prettier": "^10.1.8",
         "husky": "^9.1.7",
-        "jsdom": "^28.0.0",
-        "lint-staged": "^16.2.7",
-        "prettier": "^3.8.1",
-        "tailwindcss": "^4",
-        "typescript": "^5",
-        "vitest": "^4.0.18"
+        "jsdom": "^28.1.0",
+        "lint-staged": "^16.4.0",
+        "prettier": "^3.8.3",
+        "tailwindcss": "^4.3.0",
+        "typescript": "^5.9.3",
+        "vitest": "^4.1.7"
     },
     "pnpm": {
         "overrides": {
-            "rollup": ">=4.59.0"
+            "rollup": ">=4.59.0",
+            "postcss": ">=8.5.10",
+            "uuid": ">=11.1.1",
+            "@vercel/frameworks>js-yaml": ">=3.14.2"
         }
     },
     "lint-staged": {
