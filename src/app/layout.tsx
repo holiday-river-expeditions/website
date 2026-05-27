@@ -4,10 +4,8 @@ import { Header } from '@/components/layout/Header';
 import { Footer } from '@/components/layout/Footer';
 import './globals.css';
 
-// TODO: Replace Oswald fallback with Adobe Fonts ATF Alternate Gothic Medium
-// once the kit ID is available. The official brand typeface is
-// "ATF Alternate Gothic Medium" (Adobe Fonts). Add a <link> to the kit in
-// <head> below and the CSS variable --font-alt-gothic will be used.
+// Oswald serves as the fallback for the brand typeface, ATF Alternate Gothic,
+// which is loaded via the Adobe Fonts (Typekit) kit linked in <head> below.
 const oswald = Oswald({
     weight: ['500', '700'],
     variable: '--font-oswald',
@@ -58,11 +56,10 @@ export default function RootLayout({
     return (
         <html lang='en'>
             <head>
-                {/*
-                    TODO: Replace with Adobe Fonts kit link for
-                    ATF Alternate Gothic Medium once kit ID is available:
-                    <link rel="stylesheet" href="https://use.typekit.net/XXXXXXX.css" />
-                */}
+                <link
+                    rel='stylesheet'
+                    href='https://use.typekit.net/guz5fen.css'
+                />
             </head>
             <body
                 className={`${oswald.variable} ${openSans.variable} antialiased`}

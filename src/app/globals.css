@@ -15,7 +15,7 @@
 
     /* Fonts */
     --font-alt-gothic:
-        var(--font-alt-gothic), var(--font-oswald), Arial, sans-serif;
+        alternate-gothic-atf, var(--font-oswald), Arial, sans-serif;
     --font-sans: var(--font-open-sans), Arial, sans-serif;
 
     /* Typography scale — font sizes */
