@@ -32,17 +32,8 @@ vi.mock('@/lib/sanity', () => ({
         rivers: [],
         learnContent: [],
     })),
-    // Not exercised when images are null, but the import must resolve.
-    urlFor: () => ({
-        width: () => ({
-            fit: () => ({
-                auto: () => ({
-                    height: () => ({ url: () => '' }),
-                    url: () => '',
-                }),
-            }),
-        }),
-    }),
+    // Returns '' (no image uploaded) — components render their placeholders.
+    imageUrl: () => '',
 }));
 
 import Home from './page';

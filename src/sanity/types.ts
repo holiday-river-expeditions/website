@@ -538,7 +538,7 @@ export type AllTripsQueryResult = Array<{
 
 // Source: src/lib/sanity/queries.ts
 // Variable: tripBySlugQuery
-// Query: *[_type == "trip" && slug.current == $slug][0] {    _id,    name,    slug,    difficulty,    duration,    description,    highlights,    photos,    pricingNotes,    arcticTripId,    "river": river->{ _id, name, slug, description, image },    "activities": activities[]->{ _id, name, slug },    "categories": categories[]->{ _id, name, slug }  }
+// Query: *[_type == "trip" && slug.current == $slug][0] {    _id,    name,    slug,    difficulty,    duration,    description,    highlights,    photos,    pricingNotes,    arcticTripId,    tagline,    subtitle,    ribbon,    startingPrice,    durationLabel,    "river": river->{ _id, name, slug, description, image },    "activities": activities[]->{ _id, name, slug },    "categories": categories[]->{ _id, name, slug }  }
 export type TripBySlugQueryResult = {
     _id: string;
     name: string | null;
@@ -584,6 +584,11 @@ export type TripBySlugQueryResult = {
     }> | null;
     pricingNotes: string | null;
     arcticTripId: string | null;
+    tagline: string | null;
+    subtitle: string | null;
+    ribbon: string | null;
+    startingPrice: string | null;
+    durationLabel: string | null;
     river: {
         _id: string;
         name: string | null;
@@ -815,7 +820,7 @@ import '@sanity/client';
 declare module '@sanity/client' {
     interface SanityQueries {
         '\n  *[_type == "trip"] | order(name asc) {\n    _id,\n    name,\n    slug,\n    difficulty,\n    duration,\n    pricingNotes,\n    arcticTripId,\n    "river": river->{ name, slug },\n    "activities": activities[]->{ name, slug },\n    "categories": categories[]->{ name, slug },\n    "mainImage": photos[0]\n  }\n': AllTripsQueryResult;
-        '\n  *[_type == "trip" && slug.current == $slug][0] {\n    _id,\n    name,\n    slug,\n    difficulty,\n    duration,\n    description,\n    highlights,\n    photos,\n    pricingNotes,\n    arcticTripId,\n    "river": river->{ _id, name, slug, description, image },\n    "activities": activities[]->{ _id, name, slug },\n    "categories": categories[]->{ _id, name, slug }\n  }\n': TripBySlugQueryResult;
+        '\n  *[_type == "trip" && slug.current == $slug][0] {\n    _id,\n    name,\n    slug,\n    difficulty,\n    duration,\n    description,\n    highlights,\n    photos,\n    pricingNotes,\n    arcticTripId,\n    tagline,\n    subtitle,\n    ribbon,\n    startingPrice,\n    durationLabel,\n    "river": river->{ _id, name, slug, description, image },\n    "activities": activities[]->{ _id, name, slug },\n    "categories": categories[]->{ _id, name, slug }\n  }\n': TripBySlugQueryResult;
         '\n  *[_type == "river"] | order(name asc) {\n    _id,\n    name,\n    slug,\n    description,\n    image\n  }\n': AllRiversQueryResult;
         '\n  *[_type == "river" && slug.current == $slug][0] {\n    _id,\n    name,\n    slug,\n    description,\n    image\n  }\n': RiverBySlugQueryResult;
         '\n  *[_type == "activity"] | order(name asc) {\n    _id,\n    name,\n    slug,\n    description,\n    image\n  }\n': AllActivitiesQueryResult;

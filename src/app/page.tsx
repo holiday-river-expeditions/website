@@ -1,4 +1,3 @@
-import type { SanityImageSource } from '@sanity/image-url';
 import Image from 'next/image';
 import Link from 'next/link';
 import { Button } from '@/components/ui/Button';
@@ -7,31 +6,12 @@ import { Hero } from '@/components/ui/Hero';
 import { RiverSelector } from '@/components/ui/RiverSelector';
 import { Section } from '@/components/ui/Section';
 import { TripCard, type TripCardProps } from '@/components/ui/TripCard';
-import { getHomepage, urlFor } from '@/lib/sanity';
+import { getHomepage, imageUrl } from '@/lib/sanity';
 
 // Re-fetch from Sanity at most once a minute so content edits in /studio appear
 // on the live site without a redeploy. (Swap for webhook-based on-demand
 // revalidation later if the team wants near-instant updates.)
 export const revalidate = 60;
-
-/**
- * Build a CDN URL for a Sanity image, cropped to the requested box (honoring the
- * editor's hotspot). Returns '' when the image hasn't been uploaded yet so the
- * components can show a neutral placeholder instead of a broken image.
- */
-function imageUrl(
-    source: { asset?: { _ref?: string } } | null | undefined,
-    width: number,
-    height?: number,
-): string {
-    if (!source?.asset?._ref) return '';
-    let builder = urlFor(source as SanityImageSource)
-        .width(width)
-        .fit('crop')
-        .auto('format');
-    if (height) builder = builder.height(height);
-    return builder.url();
-}
 
 export default async function Home() {
     const homepage = await getHomepage();

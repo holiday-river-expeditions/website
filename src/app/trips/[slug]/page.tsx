@@ -1,0 +1,189 @@
+import { PortableText } from '@portabletext/react';
+import type { Metadata } from 'next';
+import Image from 'next/image';
+import Link from 'next/link';
+import { notFound } from 'next/navigation';
+import { Button } from '@/components/ui/Button';
+import { Section } from '@/components/ui/Section';
+import { getTripBySlug, imageUrl } from '@/lib/sanity';
+
+// Same ISR window as the homepage: Studio edits go live within a minute.
+export const revalidate = 60;
+
+interface TripPageProps {
+    params: Promise<{ slug: string }>;
+}
+
+const difficultyLabels: Record<string, string> = {
+    easy: 'Easy',
+    moderate: 'Moderate',
+    challenging: 'Challenging',
+    expert: 'Expert',
+};
+
+export async function generateMetadata({
+    params,
+}: TripPageProps): Promise<Metadata> {
+    const { slug } = await params;
+    const trip = await getTripBySlug(slug);
+    if (!trip) return {};
+    return {
+        title: trip.name ?? undefined,
+        description: trip.tagline ?? undefined,
+    };
+}
+
+export default async function TripPage({ params }: TripPageProps) {
+    const { slug } = await params;
+    const trip = await getTripBySlug(slug);
+    if (!trip) notFound();
+
+    const category = trip.categories?.[0]?.name ?? null;
+    const heroPhoto = imageUrl(trip.photos?.[0], 2000, 900);
+    const galleryPhotos = (trip.photos ?? []).slice(1, 7);
+    const difficulty = trip.difficulty
+        ? difficultyLabels[trip.difficulty]
+        : null;
+
+    const facts: Array<{ label: string; value: string; href?: string }> = [];
+    if (trip.startingPrice)
+        facts.push({ label: 'Starts at', value: trip.startingPrice });
+    if (trip.durationLabel)
+        facts.push({ label: 'Duration', value: trip.durationLabel });
+    if (difficulty) facts.push({ label: 'Difficulty', value: difficulty });
+    if (trip.river?.name)
+        facts.push({
+            label: 'River',
+            value: trip.river.name,
+            href: trip.river.slug?.current
+                ? `/rivers/${trip.river.slug.current}`
+                : undefined,
+        });
+
+    return (
+        <>
+            {/* Banner — inset like the homepage hero */}
+            <section className='px-4 pt-3 md:px-10 md:pt-4'>
+                <div className='relative flex h-[320px] items-end overflow-hidden bg-evergreen md:h-[440px]'>
+                    {heroPhoto && (
+                        <Image
+                            src={heroPhoto}
+                            alt={trip.photos?.[0]?.alt ?? trip.name ?? ''}
+                            fill
+                            priority
+                            className='object-cover'
+                            sizes='100vw'
+                        />
+                    )}
+                    <div className='absolute inset-0 bg-gradient-to-t from-onyx/70 via-onyx/10 to-transparent' />
+                    <div className='relative z-10 w-full px-6 pb-10 md:px-12'>
+                        {category && (
+                            <span className='inline-block bg-teal px-3 py-1 font-alt-gothic text-[12px] font-medium uppercase tracking-[0.05em] text-holiday-white'>
+                                {category}
+                            </span>
+                        )}
+                        <h1 className='mt-3 font-alt-gothic text-h2 font-black uppercase leading-h2 text-holiday-white md:text-h1 md:leading-h1'>
+                            {trip.name}
+                        </h1>
+                        {trip.subtitle && (
+                            <p className='mt-2 font-alt-gothic text-subheading font-black uppercase leading-[0.95] text-holiday-white'>
+                                {trip.subtitle}
+                            </p>
+                        )}
+                    </div>
+                </div>
+            </section>
+
+            {/* Fact bar */}
+            <Section background='white' className='py-8 md:py-10'>
+                <div className='flex flex-wrap items-center justify-between gap-6 border-b border-holiday-grey/40 pb-8'>
+                    <dl className='flex flex-wrap gap-x-12 gap-y-4'>
+                        {facts.map((fact) => (
+                            <div key={fact.label}>
+                                <dt className='font-alt-gothic text-[12px] font-medium uppercase tracking-[0.05em] text-holiday-grey'>
+                                    {fact.label}
+                                </dt>
+                                <dd className='mt-1 font-alt-gothic text-h3 font-semibold uppercase leading-h3 text-holiday-red'>
+                                    {fact.href ? (
+                                        <Link
+                                            href={fact.href}
+                                            className='transition-opacity hover:opacity-70'
+                                        >
+                                            {fact.value}
+                                        </Link>
+                                    ) : (
+                                        fact.value
+                                    )}
+                                </dd>
+                            </div>
+                        ))}
+                    </dl>
+                    <Button href='/book' size='lg'>
+                        Book Now
+                    </Button>
+                </div>
+
+                {/* Description + highlights */}
+                <div className='mt-12 grid gap-12 md:grid-cols-[1.6fr_1fr]'>
+                    <div>
+                        {trip.tagline && (
+                            <p className='text-paragraph font-bold leading-paragraph text-onyx'>
+                                {trip.tagline}
+                            </p>
+                        )}
+                        {trip.description ? (
+                            <div className='mt-6 space-y-4 text-body leading-body text-onyx [&_a]:text-holiday-red [&_a]:underline'>
+                                <PortableText value={trip.description} />
+                            </div>
+                        ) : (
+                            <p className='mt-6 text-body leading-body text-onyx/60'>
+                                Trip description coming soon — add it in the
+                                Studio.
+                            </p>
+                        )}
+                    </div>
+
+                    {trip.highlights && trip.highlights.length > 0 && (
+                        <aside>
+                            <h2 className='font-alt-gothic text-h3 font-black uppercase leading-h3 text-holiday-red'>
+                                Highlights
+                            </h2>
+                            <ul className='mt-4 space-y-3'>
+                                {trip.highlights.map((highlight) => (
+                                    <li
+                                        key={highlight}
+                                        className='border-l-2 border-holiday-red pl-4 text-body leading-body text-onyx'
+                                    >
+                                        {highlight}
+                                    </li>
+                                ))}
+                            </ul>
+                        </aside>
+                    )}
+                </div>
+            </Section>
+
+            {/* Photo gallery */}
+            {galleryPhotos.length > 0 && (
+                <Section background='white' className='pb-20 pt-0 md:pb-24'>
+                    <div className='grid gap-4 sm:grid-cols-2 lg:grid-cols-3'>
+                        {galleryPhotos.map((photo) => (
+                            <div
+                                key={photo._key}
+                                className='relative aspect-[4/3] overflow-hidden bg-holiday-grey/15'
+                            >
+                                <Image
+                                    src={imageUrl(photo, 800, 600)}
+                                    alt={photo.alt ?? trip.name ?? ''}
+                                    fill
+                                    className='object-cover'
+                                    sizes='(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw'
+                                />
+                            </div>
+                        ))}
+                    </div>
+                </Section>
+            )}
+        </>
+    );
+}

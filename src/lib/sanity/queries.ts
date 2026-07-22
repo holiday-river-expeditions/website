@@ -28,6 +28,11 @@ export const tripBySlugQuery = defineQuery(`
     photos,
     pricingNotes,
     arcticTripId,
+    tagline,
+    subtitle,
+    ribbon,
+    startingPrice,
+    durationLabel,
     "river": river->{ _id, name, slug, description, image },
     "activities": activities[]->{ _id, name, slug },
     "categories": categories[]->{ _id, name, slug }
