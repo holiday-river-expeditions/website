@@ -34,8 +34,8 @@ const variantStyles: Record<ButtonVariant, string> = {
 };
 
 const sizeStyles: Record<ButtonSize, string> = {
-    default: 'px-6 py-2 text-link tracking-widest',
-    lg: 'px-8 py-3 text-body tracking-widest',
+    default: 'px-6 py-2 text-[19px] leading-none',
+    lg: 'px-8 py-2.5 text-[20px] leading-none tracking-[0.05em]',
 };
 
 export function Button({

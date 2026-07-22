@@ -12,6 +12,8 @@
  * ---------------------------------------------------------------------------------
  */
 
+export declare const internalGroqTypeReferenceTo: unique symbol;
+
 // Source: schema.json
 export type SanityImageAssetReference = {
     _ref: string;
@@ -93,6 +95,20 @@ export type SiteSettings = {
     };
 };
 
+export type TripReference = {
+    _ref: string;
+    _type: 'reference';
+    _weak?: boolean;
+    [internalGroqTypeReferenceTo]?: 'trip';
+};
+
+export type RiverReference = {
+    _ref: string;
+    _type: 'reference';
+    _weak?: boolean;
+    [internalGroqTypeReferenceTo]?: 'river';
+};
+
 export type Homepage = {
     _id: string;
     _type: 'homepage';
@@ -100,7 +116,6 @@ export type Homepage = {
     _updatedAt: string;
     _rev: string;
     heroHeading?: string;
-    heroSubheading?: string;
     heroImage?: {
         asset?: SanityImageAssetReference;
         media?: unknown;
@@ -108,22 +123,47 @@ export type Homepage = {
         crop?: SanityImageCrop;
         _type: 'image';
     };
-    heroCtaText?: string;
-    heroCtaLink?: string;
-    holidayWayTagline?: string;
-    holidayWayHeading?: string;
-    holidayWayBody?: string;
-    ctaHeading?: string;
-    ctaSubheading?: string;
-    ctaImage?: {
+    featuredTrips?: Array<
+        {
+            _key: string;
+        } & TripReference
+    >;
+    storyBody?: string;
+    storyImageLeft?: {
         asset?: SanityImageAssetReference;
         media?: unknown;
         hotspot?: SanityImageHotspot;
         crop?: SanityImageCrop;
         _type: 'image';
     };
-    ctaButtonText?: string;
-    ctaButtonLink?: string;
+    storyImagePortrait?: {
+        asset?: SanityImageAssetReference;
+        media?: unknown;
+        hotspot?: SanityImageHotspot;
+        crop?: SanityImageCrop;
+        _type: 'image';
+    };
+    storyCtaText?: string;
+    storyCtaLink?: string;
+    rivers?: Array<
+        {
+            _key: string;
+        } & RiverReference
+    >;
+    learnContent?: Array<{
+        title?: string;
+        image?: {
+            asset?: SanityImageAssetReference;
+            media?: unknown;
+            hotspot?: SanityImageHotspot;
+            crop?: SanityImageCrop;
+            _type: 'image';
+        };
+        link?: string;
+        isVideo?: boolean;
+        _type: 'learnCard';
+        _key: string;
+    }>;
 };
 
 export type SanityImageCrop = {
@@ -208,13 +248,6 @@ export type Faq = {
     order?: number;
 };
 
-export type RiverReference = {
-    _ref: string;
-    _type: 'reference';
-    _weak?: boolean;
-    [internalGroqTypeReferenceTo]?: 'river';
-};
-
 export type ActivityReference = {
     _ref: string;
     _type: 'reference';
@@ -289,7 +322,11 @@ export type Trip = {
     }>;
     pricingNotes?: string;
     arcticTripId?: string;
-    featured?: boolean;
+    tagline?: string;
+    startingPrice?: string;
+    durationLabel?: string;
+    subtitle?: string;
+    ribbon?: string;
 };
 
 export type TripCategory = {
@@ -441,13 +478,14 @@ export type AllSanitySchemaTypes =
     | ContentBlock
     | HeroBlock
     | SiteSettings
+    | TripReference
+    | RiverReference
     | Homepage
     | SanityImageCrop
     | SanityImageHotspot
     | Page
     | Slug
     | Faq
-    | RiverReference
     | ActivityReference
     | TripCategoryReference
     | Trip
@@ -462,8 +500,6 @@ export type AllSanitySchemaTypes =
     | SanityAssetSourceData
     | SanityImageAsset
     | Geopoint;
-
-export declare const internalGroqTypeReferenceTo: unique symbol;
 
 // Source: src/lib/sanity/queries.ts
 // Variable: allTripsQuery
@@ -699,10 +735,9 @@ export type PageBySlugQueryResult = {
 
 // Source: src/lib/sanity/queries.ts
 // Variable: homepageQuery
-// Query: *[_type == "homepage"][0] {    heroHeading,    heroSubheading,    heroImage,    heroCtaText,    heroCtaLink,    holidayWayTagline,    holidayWayHeading,    holidayWayBody,    ctaHeading,    ctaSubheading,    ctaImage,    ctaButtonText,    ctaButtonLink  }
+// Query: *[_type == "homepage"][0] {    heroHeading,    heroImage,    "featuredTrips": featuredTrips[]->{      _id,      name,      slug,      tagline,      subtitle,      ribbon,      startingPrice,      durationLabel,      "category": categories[0]->name,      "image": photos[0]    },    storyBody,    storyImageLeft,    storyImagePortrait,    storyCtaText,    storyCtaLink,    "rivers": rivers[]->{      _id,      name,      slug,      image    },    learnContent[]{      _key,      title,      image,      link,      isVideo    }  }
 export type HomepageQueryResult = {
     heroHeading: string | null;
-    heroSubheading: string | null;
     heroImage: {
         asset?: SanityImageAssetReference;
         media?: unknown;
@@ -710,49 +745,70 @@ export type HomepageQueryResult = {
         crop?: SanityImageCrop;
         _type: 'image';
     } | null;
-    heroCtaText: string | null;
-    heroCtaLink: string | null;
-    holidayWayTagline: string | null;
-    holidayWayHeading: string | null;
-    holidayWayBody: string | null;
-    ctaHeading: string | null;
-    ctaSubheading: string | null;
-    ctaImage: {
-        asset?: SanityImageAssetReference;
-        media?: unknown;
-        hotspot?: SanityImageHotspot;
-        crop?: SanityImageCrop;
-        _type: 'image';
-    } | null;
-    ctaButtonText: string | null;
-    ctaButtonLink: string | null;
-} | null;
-
-// Source: src/lib/sanity/queries.ts
-// Variable: featuredTripsQuery
-// Query: *[_type == "trip" && featured == true] | order(name asc) {    _id,    name,    slug,    difficulty,    duration,    pricingNotes,    "river": river->{ name, slug },    "mainImage": photos[0]  }
-export type FeaturedTripsQueryResult = Array<{
-    _id: string;
-    name: string | null;
-    slug: Slug | null;
-    difficulty: 'challenging' | 'easy' | 'expert' | 'moderate' | null;
-    duration: number | null;
-    pricingNotes: string | null;
-    river: {
+    featuredTrips: Array<{
+        _id: string;
         name: string | null;
         slug: Slug | null;
-    } | null;
-    mainImage: {
+        tagline: string | null;
+        subtitle: string | null;
+        ribbon: string | null;
+        startingPrice: string | null;
+        durationLabel: string | null;
+        category: string | null;
+        image: {
+            asset?: SanityImageAssetReference;
+            media?: unknown;
+            hotspot?: SanityImageHotspot;
+            crop?: SanityImageCrop;
+            alt?: string;
+            caption?: string;
+            _type: 'image';
+            _key: string;
+        } | null;
+    }> | null;
+    storyBody: string | null;
+    storyImageLeft: {
         asset?: SanityImageAssetReference;
         media?: unknown;
         hotspot?: SanityImageHotspot;
         crop?: SanityImageCrop;
-        alt?: string;
-        caption?: string;
         _type: 'image';
-        _key: string;
     } | null;
-}>;
+    storyImagePortrait: {
+        asset?: SanityImageAssetReference;
+        media?: unknown;
+        hotspot?: SanityImageHotspot;
+        crop?: SanityImageCrop;
+        _type: 'image';
+    } | null;
+    storyCtaText: string | null;
+    storyCtaLink: string | null;
+    rivers: Array<{
+        _id: string;
+        name: string | null;
+        slug: Slug | null;
+        image: {
+            asset?: SanityImageAssetReference;
+            media?: unknown;
+            hotspot?: SanityImageHotspot;
+            crop?: SanityImageCrop;
+            _type: 'image';
+        } | null;
+    }> | null;
+    learnContent: Array<{
+        _key: string;
+        title: string | null;
+        image: {
+            asset?: SanityImageAssetReference;
+            media?: unknown;
+            hotspot?: SanityImageHotspot;
+            crop?: SanityImageCrop;
+            _type: 'image';
+        } | null;
+        link: string | null;
+        isVideo: boolean | null;
+    }> | null;
+} | null;
 
 // Query TypeMap
 import '@sanity/client';
@@ -766,7 +822,6 @@ declare module '@sanity/client' {
         '\n  *[_type == "faq"] | order(category asc, order asc) {\n    _id,\n    question,\n    answer,\n    category\n  }\n': AllFaqsQueryResult;
         '\n  *[_type == "siteSettings"][0] {\n    phone,\n    email,\n    address,\n    socialLinks\n  }\n': SiteSettingsQueryResult;
         '\n  *[_type == "page" && slug.current == $slug][0] {\n    _id,\n    title,\n    slug,\n    content\n  }\n': PageBySlugQueryResult;
-        '\n  *[_type == "homepage"][0] {\n    heroHeading,\n    heroSubheading,\n    heroImage,\n    heroCtaText,\n    heroCtaLink,\n    holidayWayTagline,\n    holidayWayHeading,\n    holidayWayBody,\n    ctaHeading,\n    ctaSubheading,\n    ctaImage,\n    ctaButtonText,\n    ctaButtonLink\n  }\n': HomepageQueryResult;
-        '\n  *[_type == "trip" && featured == true] | order(name asc) {\n    _id,\n    name,\n    slug,\n    difficulty,\n    duration,\n    pricingNotes,\n    "river": river->{ name, slug },\n    "mainImage": photos[0]\n  }\n': FeaturedTripsQueryResult;
+        '\n  *[_type == "homepage"][0] {\n    heroHeading,\n    heroImage,\n    "featuredTrips": featuredTrips[]->{\n      _id,\n      name,\n      slug,\n      tagline,\n      subtitle,\n      ribbon,\n      startingPrice,\n      durationLabel,\n      "category": categories[0]->name,\n      "image": photos[0]\n    },\n    storyBody,\n    storyImageLeft,\n    storyImagePortrait,\n    storyCtaText,\n    storyCtaLink,\n    "rivers": rivers[]->{\n      _id,\n      name,\n      slug,\n      image\n    },\n    learnContent[]{\n      _key,\n      title,\n      image,\n      link,\n      isVideo\n    }\n  }\n': HomepageQueryResult;
     }
 }

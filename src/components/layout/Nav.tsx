@@ -16,7 +16,7 @@ export function DesktopNav() {
                 <Link
                     key={item.href}
                     href={item.href}
-                    className='font-alt-gothic text-link font-medium uppercase tracking-widest text-holiday-red transition-opacity hover:opacity-70'
+                    className='font-alt-gothic text-[20px] font-medium uppercase leading-none text-holiday-red transition-opacity hover:opacity-70'
                 >
                     {item.label}
                 </Link>

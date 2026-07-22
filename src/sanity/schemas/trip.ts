@@ -107,13 +107,41 @@ export const trip = defineType({
             description:
                 'Links this trip to Arctic Reservations for live availability and booking.',
         }),
+
+        // --- Trip-card display fields (homepage grid, listings) ---
         defineField({
-            name: 'featured',
-            title: 'Featured on Homepage',
-            type: 'boolean',
-            initialValue: false,
+            name: 'tagline',
+            title: 'Card Tagline',
+            type: 'string',
             description:
-                'Show this trip in the "Signature Trips" section on the homepage.',
+                'One-line summary shown on trip cards (e.g. the homepage grid).',
+        }),
+        defineField({
+            name: 'startingPrice',
+            title: 'Starting Price (display)',
+            type: 'string',
+            description:
+                'Display price shown as "Starts at …" on cards, e.g. "$1,630". Live pricing comes from Arctic.',
+        }),
+        defineField({
+            name: 'durationLabel',
+            title: 'Duration Label',
+            type: 'string',
+            description: 'Display range shown on cards, e.g. "5/6 Days".',
+        }),
+        defineField({
+            name: 'subtitle',
+            title: 'Specialty Subtitle',
+            type: 'string',
+            description:
+                'Optional red second line under the name on specialty cards (e.g. "With The Pickpockets Bluegrass").',
+        }),
+        defineField({
+            name: 'ribbon',
+            title: 'Specialty Ribbon',
+            type: 'string',
+            description:
+                'Optional ribbon label on the card image (e.g. "Specialty Music Trip"). Cards with a ribbon get the red feature frame.',
         }),
     ],
     preview: {

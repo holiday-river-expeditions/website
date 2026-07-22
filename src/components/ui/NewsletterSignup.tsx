@@ -14,7 +14,7 @@ export function NewsletterSignup() {
 
     return (
         <div className='max-w-md'>
-            <h2 className='font-alt-gothic text-h2 font-medium uppercase leading-h2 text-holiday-red'>
+            <h2 className='font-alt-gothic text-[36px] font-medium uppercase leading-[0.9] text-holiday-red'>
                 The River Is Calling.
                 <br />
                 It Told Us To Email You.
@@ -53,7 +53,7 @@ export function NewsletterSignup() {
                 </div>
             </form>
 
-            <p className='mt-4 font-alt-gothic text-body font-medium uppercase tracking-widest text-onyx'>
+            <p className='mt-4 text-body font-bold leading-body text-onyx'>
                 Stay in the loop
             </p>
             <p className='mt-2 text-body leading-body text-onyx/80'>

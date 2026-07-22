@@ -1,165 +1,100 @@
+import type { SanityImageSource } from '@sanity/image-url';
 import Image from 'next/image';
+import Link from 'next/link';
 import { Button } from '@/components/ui/Button';
 import { ContentCard } from '@/components/ui/ContentCard';
 import { Hero } from '@/components/ui/Hero';
 import { RiverSelector } from '@/components/ui/RiverSelector';
 import { Section } from '@/components/ui/Section';
 import { TripCard, type TripCardProps } from '@/components/ui/TripCard';
+import { getHomepage, urlFor } from '@/lib/sanity';
 
-const HERO_IMAGE =
-    'https://www.bikeraft.com/wp-content/uploads/2025/12/SRO_0237-scaled.jpg';
+// Re-fetch from Sanity at most once a minute so content edits in /studio appear
+// on the live site without a redeploy. (Swap for webhook-based on-demand
+// revalidation later if the team wants near-instant updates.)
+export const revalidate = 60;
 
-const HERO_HEADING =
-    'Multi-Day Raft and Bike Expeditions in the Heart of Canyon Country';
+/**
+ * Build a CDN URL for a Sanity image, cropped to the requested box (honoring the
+ * editor's hotspot). Returns '' when the image hasn't been uploaded yet so the
+ * components can show a neutral placeholder instead of a broken image.
+ */
+function imageUrl(
+    source: { asset?: { _ref?: string } } | null | undefined,
+    width: number,
+    height?: number,
+): string {
+    if (!source?.asset?._ref) return '';
+    let builder = urlFor(source as SanityImageSource)
+        .width(width)
+        .fit('crop')
+        .auto('format');
+    if (height) builder = builder.height(height);
+    return builder.url();
+}
 
-const featuredTrips: TripCardProps[] = [
-    {
-        name: 'Cataract Canyon',
-        category: 'Whitewater Rafting',
-        image: 'https://www.bikeraft.com/wp-content/uploads/2025/11/Cataract-Canyon-Rafting-Trips-4.jpg',
-        startingPrice: '$1,830',
-        duration: '5/6 Days',
-        description:
-            'Legendary whitewater through the heart of Canyonlands National Park.',
-        href: '/trips/cataract-canyon',
-    },
-    {
-        name: 'Westwater Canyon',
-        category: 'Whitewater Rafting',
-        image: 'https://www.bikeraft.com/wp-content/uploads/2025/11/Westwater-Canyon-Rafting-Trips.jpg',
-        startingPrice: '$595',
-        duration: '2/3 Days',
-        description: 'World-class whitewater within a weekend.',
-        href: '/trips/westwater-canyon',
-    },
-    {
-        name: 'The Maze',
-        category: 'Mountain Biking',
-        image: 'https://www.bikeraft.com/wp-content/uploads/2025/11/The-Maze-Canyonlands.jpg',
-        startingPrice: '$1,415',
-        duration: '4/5 Days',
-        description:
-            'Bike in solitude in the least-visited district of Canyonlands.',
-        href: '/trips/the-maze',
-    },
-    {
-        name: 'Gates of Lodore',
-        category: 'Whitewater Rafting',
-        image: 'https://www.bikeraft.com/wp-content/uploads/2025/11/Gates-of-Lodore-Rafting.jpg',
-        startingPrice: '$1,385',
-        duration: '3/4 Days',
-        description:
-            'Experience Dinosaur National Monument from a scenic river.',
-        href: '/trips/gates-of-lodore',
-    },
-    {
-        name: 'The White Rim',
-        category: 'Mountain Biking',
-        image: 'https://www.bikeraft.com/wp-content/uploads/2025/11/White-Rim-Mountain-Biking.jpg',
-        startingPrice: '$1,415',
-        duration: '3/4 Days',
-        description: 'An iconic desert mountain biking expedition.',
-        href: '/trips/white-rim',
-    },
-    {
-        name: 'Yampa River',
-        category: 'Whitewater Rafting',
-        image: 'https://www.bikeraft.com/wp-content/uploads/2025/10/Yampa-River-Rafting-Tiger-Wall.jpg',
-        startingPrice: '$1,385',
-        duration: '4/5 Days',
-        description: 'Stunning beauty on a free-flowing river.',
-        href: '/trips/yampa',
-    },
-];
+export default async function Home() {
+    const homepage = await getHomepage();
 
-const rivers = [
-    {
-        name: 'Desolation',
-        href: '/rivers/desolation',
-        image: 'https://www.bikeraft.com/wp-content/uploads/2025/11/Desolation-Canyon-Rafting-Trip-3-1.jpg',
-    },
-    {
-        name: 'Yampa',
-        href: '/rivers/yampa',
-        image: 'https://www.bikeraft.com/wp-content/uploads/2025/10/Yampa-River-Rafting-Tiger-Wall.jpg',
-    },
-    {
-        name: 'Gates of Lodore',
-        href: '/rivers/gates-of-lodore',
-        image: 'https://www.bikeraft.com/wp-content/uploads/2025/11/Gates-of-Lodore-Rafting.jpg',
-    },
-    {
-        name: 'Westwater',
-        href: '/rivers/westwater',
-        image: 'https://www.bikeraft.com/wp-content/uploads/2025/11/Westwater-Canyon-Rafting-Trips.jpg',
-    },
-    {
-        name: 'Cataract',
-        href: '/rivers/cataract',
-        image: 'https://www.bikeraft.com/wp-content/uploads/2025/11/Cataract-Canyon-whitewater-rafting.png',
-    },
-    {
-        name: 'San Juan',
-        href: '/rivers/san-juan',
-        image: 'https://www.bikeraft.com/wp-content/uploads/2025/11/San-Juan-River-Banner-1.png',
-    },
-    {
-        name: 'White Rim',
-        href: '/rivers/white-rim',
-        image: 'https://www.bikeraft.com/wp-content/uploads/2025/11/White-Rim-Mountain-Biking.jpg',
-    },
-    {
-        name: 'Maze',
-        href: '/rivers/maze',
-        image: 'https://www.bikeraft.com/wp-content/uploads/2025/11/The-Maze-Canyonlands.jpg',
-    },
-    {
-        name: 'San Rafael',
-        href: '/rivers/san-rafael',
-        image: 'https://www.bikeraft.com/wp-content/uploads/2025/11/San-Rafael-Swell.jpg',
-    },
-];
+    if (!homepage) {
+        return (
+            <Section background='white' className='py-24'>
+                <p className='text-body text-onyx'>
+                    Homepage content hasn’t been set up yet. Add it in the{' '}
+                    <Link className='text-holiday-red underline' href='/studio'>
+                        Studio
+                    </Link>
+                    .
+                </p>
+            </Section>
+        );
+    }
 
-const learnContent = [
-    {
-        title: 'River Cooking 101',
-        image: 'https://www.bikeraft.com/wp-content/uploads/2025/11/river-cooking.jpg',
-        href: '/blog/river-cooking-101',
-    },
-    {
-        title: 'Triple Rig History',
-        image: 'https://www.bikeraft.com/wp-content/uploads/2025/11/triple-rig-history.jpg',
-        href: '/blog/triple-rig-history',
-    },
-    {
-        title: 'Packing For Your Trip',
-        image: 'https://www.bikeraft.com/wp-content/uploads/2025/11/packing-for-trip.jpg',
-        href: '/blog/packing-for-your-trip',
-        isVideo: true,
-    },
-    {
-        title: 'Stargazing On The River',
-        image: 'https://www.bikeraft.com/wp-content/uploads/2025/11/stargazing-on-river.jpg',
-        href: '/blog/stargazing-on-the-river',
-    },
-];
+    const featuredTrips: TripCardProps[] = (homepage.featuredTrips ?? []).map(
+        (trip) => ({
+            name: trip.name ?? '',
+            category: trip.category ?? '',
+            image: imageUrl(trip.image, 760, 740),
+            startingPrice: trip.startingPrice ?? '',
+            duration: trip.durationLabel ?? '',
+            description: trip.tagline ?? undefined,
+            href: trip.slug?.current ? `/trips/${trip.slug.current}` : '#',
+            subtitle: trip.subtitle ?? undefined,
+            ribbon: trip.ribbon ?? undefined,
+            featured: Boolean(trip.ribbon),
+        }),
+    );
 
-const motorFreeImages = {
-    left: 'https://www.bikeraft.com/wp-content/uploads/2021/11/Holiday-River-Rafting-vintage.jpg',
-    right: 'https://www.bikeraft.com/wp-content/uploads/2021/11/Dee-Holladay-portrait.jpg',
-};
+    const rivers = (homepage.rivers ?? []).map((river) => ({
+        name: river.name ?? '',
+        href: river.slug?.current ? `/rivers/${river.slug.current}` : '#',
+        image: imageUrl(river.image, 1600, 1000),
+    }));
 
-export default function Home() {
+    const learnContent = (homepage.learnContent ?? []).map((card) => ({
+        title: card.title ?? '',
+        image: imageUrl(card.image, 616, 856),
+        href: card.link ?? '#',
+        isVideo: card.isVideo ?? false,
+    }));
+
+    const heroImage = imageUrl(homepage.heroImage, 2000);
+    const storyImageLeft = imageUrl(homepage.storyImageLeft, 700, 933);
+    const storyImagePortrait = imageUrl(homepage.storyImagePortrait, 700, 933);
+
     return (
         <>
             {/* Hero */}
-            <Hero heading={HERO_HEADING} backgroundImage={HERO_IMAGE} />
+            <Hero
+                heading={homepage.heroHeading ?? ''}
+                backgroundImage={heroImage}
+            />
 
             {/* Trip Grid */}
             <Section background='white' className='py-20 md:py-24'>
                 <div className='grid gap-10 sm:grid-cols-2 lg:grid-cols-3'>
                     {featuredTrips.map((trip) => (
-                        <TripCard key={trip.name} {...trip} />
+                        <TripCard key={trip.href} {...trip} />
                     ))}
                 </div>
                 <div className='mt-14 text-center'>
@@ -169,64 +104,100 @@ export default function Home() {
                 </div>
             </Section>
 
-            {/* Motor-Free Since 1966 */}
+            {/* Rafting Since 1966 */}
             <Section background='white' className='py-20 md:py-24'>
                 <div className='grid items-center gap-10 md:grid-cols-[1.3fr_1fr]'>
                     {/* Left: two-image collage */}
                     <div className='grid grid-cols-2 gap-4'>
-                        <div className='relative aspect-[3/4] overflow-hidden'>
-                            <Image
-                                src={motorFreeImages.left}
-                                alt='Vintage Holiday River Expeditions rafting trip'
-                                fill
-                                className='object-cover'
-                                sizes='(max-width: 768px) 50vw, 30vw'
-                            />
+                        <div className='relative aspect-[3/4] overflow-hidden bg-holiday-grey/15'>
+                            {storyImageLeft && (
+                                <Image
+                                    src={storyImageLeft}
+                                    alt='Vintage Holiday River Expeditions rafting trip'
+                                    fill
+                                    className='object-cover'
+                                    sizes='(max-width: 768px) 50vw, 30vw'
+                                />
+                            )}
                         </div>
-                        <div className='relative aspect-[3/4] translate-y-8 overflow-hidden'>
+                        {/* Portrait cell is `relative` (no clip of its own) so the
+                            founder signature + arrow can be absolutely positioned
+                            over its bottom-right corner and stay anchored to it at
+                            any screen size. The photo is clipped by the inner div. */}
+                        <div className='relative aspect-[3/4] translate-y-8'>
+                            <div className='absolute inset-0 overflow-hidden bg-holiday-grey/15'>
+                                {storyImagePortrait && (
+                                    <Image
+                                        src={storyImagePortrait}
+                                        alt='Dee Holladay, founder of Holiday River Expeditions'
+                                        fill
+                                        className='object-cover grayscale'
+                                        sizes='(max-width: 768px) 50vw, 30vw'
+                                    />
+                                )}
+                            </div>
+
+                            {/* Founder signature, composed from two separate exports.
+                                Arrow points back toward Dee's portrait; the name
+                                overhangs the bottom-right corner (per the mockup).
+                                Tune the bottom/right/w-[…] values to taste. */}
                             <Image
-                                src={motorFreeImages.right}
-                                alt='Holiday River Expeditions guide portrait'
-                                fill
-                                className='object-cover grayscale'
-                                sizes='(max-width: 768px) 50vw, 30vw'
+                                src='/hand-drawn-arrow.svg'
+                                alt=''
+                                aria-hidden='true'
+                                width={122}
+                                height={63}
+                                className='absolute bottom-[14%] right-[6%] z-10 w-[28%]'
+                            />
+                            <Image
+                                src='/dee-holiday-signature.svg'
+                                alt='Dee Holladay'
+                                width={129}
+                                height={67}
+                                className='absolute bottom-[2%] -right-[8%] z-10 w-[40%]'
                             />
                         </div>
                     </div>
 
                     {/* Right: copy */}
                     <div>
-                        <h2 className='font-alt-gothic text-h2 font-medium uppercase leading-h2 text-holiday-red'>
-                            Motor-Free Rafting
+                        <h2 className='font-alt-gothic text-h1 font-black uppercase leading-h1 text-holiday-red'>
+                            Rafting
                             <br />
-                            Since 1966
+                            Since
+                            <br />
+                            1966
                         </h2>
-                        <p className='mt-6 text-body leading-body text-onyx'>
-                            From the Holiday family to all of our guests over
-                            the decades: Thank you for making us the company we
-                            are today. Here&apos;s to many more years of joyful
-                            moments shared in wild places.
-                        </p>
-                        <div className='mt-8'>
-                            <Button href='/about' variant='outline'>
-                                Learn More
-                            </Button>
-                        </div>
+                        {homepage.storyBody && (
+                            <p className='mt-6 text-[20px] leading-[1.1] text-onyx'>
+                                {homepage.storyBody}
+                            </p>
+                        )}
+                        {homepage.storyCtaText && (
+                            <div className='mt-8'>
+                                <Button
+                                    href={homepage.storyCtaLink ?? '/about'}
+                                    variant='outline'
+                                >
+                                    {homepage.storyCtaText}
+                                </Button>
+                            </div>
+                        )}
                     </div>
                 </div>
             </Section>
 
             {/* Rivers Selector */}
-            <RiverSelector rivers={rivers} />
+            {rivers.length > 0 && <RiverSelector rivers={rivers} />}
 
             {/* Learn & Get Inspired */}
             <Section background='white' className='py-20 md:py-24'>
-                <h2 className='font-alt-gothic text-h2 font-medium uppercase leading-h2 text-holiday-red'>
+                <h2 className='font-alt-gothic text-[36px] font-black uppercase leading-[0.9] text-holiday-red'>
                     Learn &amp; Get Inspired
                 </h2>
                 <div className='mt-10 grid gap-6 sm:grid-cols-2 lg:grid-cols-4'>
                     {learnContent.map((item) => (
-                        <ContentCard key={item.title} {...item} />
+                        <ContentCard key={item.href} {...item} />
                     ))}
                 </div>
                 <div className='mt-14 text-center'>

@@ -18,7 +18,7 @@ export function RiverSelector({ rivers }: RiverSelectorProps) {
     const activeRiver = rivers[activeIndex] ?? rivers[0];
 
     return (
-        <section className='relative min-h-[600px] overflow-hidden md:min-h-[720px]'>
+        <section className='relative min-h-[600px] overflow-hidden bg-evergreen md:min-h-[720px]'>
             {/* Background images — all rendered for smooth crossfade */}
             {rivers.map((river, index) => (
                 <div
@@ -45,7 +45,7 @@ export function RiverSelector({ rivers }: RiverSelectorProps) {
                                     href={river.href}
                                     onMouseEnter={() => setActiveIndex(index)}
                                     onFocus={() => setActiveIndex(index)}
-                                    className={`block font-alt-gothic text-[44px] font-medium uppercase leading-[0.95] tracking-tight transition-colors md:text-[64px] ${
+                                    className={`block font-alt-gothic text-[40px] font-black uppercase leading-[0.9] tracking-tight transition-colors md:text-[56px] ${
                                         isActive
                                             ? 'text-holiday-red'
                                             : 'text-holiday-white hover:text-holiday-red'

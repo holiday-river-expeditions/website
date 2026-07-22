@@ -1,20 +1,23 @@
 import type { Metadata } from 'next';
-import { Open_Sans, Oswald } from 'next/font/google';
+import { PT_Sans, Oswald } from 'next/font/google';
 import { Header } from '@/components/layout/Header';
 import { Footer } from '@/components/layout/Footer';
 import './globals.css';
 
 // Oswald serves as the fallback for the brand typeface, ATF Alternate Gothic,
 // which is loaded via the Adobe Fonts (Typekit) kit linked in <head> below.
+// Weights mirror the cuts used in the mockup (medium / semibold / bold).
 const oswald = Oswald({
-    weight: ['500', '700'],
+    weight: ['500', '600', '700'],
     variable: '--font-oswald',
     display: 'swap',
     subsets: ['latin'],
 });
 
-const openSans = Open_Sans({
-    variable: '--font-open-sans',
+// PT Sans is the body face used throughout the Figma mockup.
+const ptSans = PT_Sans({
+    weight: ['400', '700'],
+    variable: '--font-pt-sans',
     display: 'swap',
     subsets: ['latin'],
 });
@@ -62,7 +65,7 @@ export default function RootLayout({
                 />
             </head>
             <body
-                className={`${oswald.variable} ${openSans.variable} antialiased`}
+                className={`${oswald.variable} ${ptSans.variable} antialiased`}
             >
                 <Header />
                 <main className='min-h-screen'>{children}</main>

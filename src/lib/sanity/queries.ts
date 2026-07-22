@@ -94,30 +94,36 @@ export const pageBySlugQuery = defineQuery(`
 export const homepageQuery = defineQuery(`
   *[_type == "homepage"][0] {
     heroHeading,
-    heroSubheading,
     heroImage,
-    heroCtaText,
-    heroCtaLink,
-    holidayWayTagline,
-    holidayWayHeading,
-    holidayWayBody,
-    ctaHeading,
-    ctaSubheading,
-    ctaImage,
-    ctaButtonText,
-    ctaButtonLink
-  }
-`);
-
-export const featuredTripsQuery = defineQuery(`
-  *[_type == "trip" && featured == true] | order(name asc) {
-    _id,
-    name,
-    slug,
-    difficulty,
-    duration,
-    pricingNotes,
-    "river": river->{ name, slug },
-    "mainImage": photos[0]
+    "featuredTrips": featuredTrips[]->{
+      _id,
+      name,
+      slug,
+      tagline,
+      subtitle,
+      ribbon,
+      startingPrice,
+      durationLabel,
+      "category": categories[0]->name,
+      "image": photos[0]
+    },
+    storyBody,
+    storyImageLeft,
+    storyImagePortrait,
+    storyCtaText,
+    storyCtaLink,
+    "rivers": rivers[]->{
+      _id,
+      name,
+      slug,
+      image
+    },
+    learnContent[]{
+      _key,
+      title,
+      image,
+      link,
+      isVideo
+    }
   }
 `);

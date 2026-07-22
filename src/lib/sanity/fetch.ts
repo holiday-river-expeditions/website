@@ -4,7 +4,6 @@ import {
     allFaqsQuery,
     allRiversQuery,
     allTripsQuery,
-    featuredTripsQuery,
     homepageQuery,
     pageBySlugQuery,
     riverBySlugQuery,
@@ -46,8 +45,4 @@ export async function getPageBySlug(slug: string) {
 
 export async function getHomepage() {
     return client.fetch(homepageQuery);
-}
-
-export async function getFeaturedTrips() {
-    return client.fetch(featuredTripsQuery);
 }

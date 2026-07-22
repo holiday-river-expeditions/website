@@ -16,7 +16,7 @@
     /* Fonts */
     --font-alt-gothic:
         alternate-gothic-atf, var(--font-oswald), Arial, sans-serif;
-    --font-sans: var(--font-open-sans), Arial, sans-serif;
+    --font-sans: var(--font-pt-sans), Arial, sans-serif;
 
     /* Typography scale — font sizes */
     --text-h1: 64px;
@@ -41,7 +41,11 @@
 }
 
 body {
-    background: var(--color-holiday-white);
-    color: var(--color-onyx);
-    font-family: var(--font-sans);
+    /* `@theme inline` tokens are inlined into utilities and NOT emitted as
+       :root custom properties, so var(--color-*) / var(--font-sans) resolve to
+       empty here. Reference concrete values and the next/font variable (which
+       IS defined on <body>) directly so body text actually uses PT Sans. */
+    background: #fcfcfc;
+    color: #2c2b29;
+    font-family: var(--font-pt-sans), Arial, sans-serif;
 }

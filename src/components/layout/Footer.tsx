@@ -26,7 +26,7 @@ const resourceLinks = [
 
 export function Footer() {
     return (
-        <footer className='bg-sand text-onyx'>
+        <footer className='bg-[#F3F0EB] text-onyx'>
             <div className='mx-auto max-w-7xl px-6 py-16'>
                 <div className='grid gap-12 lg:grid-cols-[1.2fr_repeat(3,1fr)]'>
                     {/* Left: newsletter */}
@@ -53,10 +53,10 @@ export function Footer() {
 
                     {/* Find Us */}
                     <div>
-                        <h3 className='font-alt-gothic text-body font-medium uppercase tracking-widest text-onyx'>
+                        <h3 className='font-alt-gothic text-body font-normal uppercase tracking-[0.05em] text-onyx'>
                             Find Us
                         </h3>
-                        <div className='mt-4 flex flex-col gap-2 font-alt-gothic text-body uppercase tracking-widest text-onyx'>
+                        <div className='mt-4 flex flex-col gap-2 font-alt-gothic text-body font-semibold uppercase tracking-[0.05em] text-onyx'>
                             <Link
                                 href='/contact'
                                 className='transition-opacity hover:opacity-70'
@@ -90,13 +90,12 @@ export function Footer() {
                         />
                     </Link>
 
-                    {/*
-                        TODO: Add NPS "Authorized Concessioner" shield badge
-                        once the asset is provided by the client.
-                    */}
-                    <div
-                        aria-hidden='true'
-                        className='h-16 w-16 rounded-full border border-onyx/20 md:h-20 md:w-20'
+                    <Image
+                        src='/nps-authorized-concessioner.png'
+                        alt='National Park Service Authorized Concessioner'
+                        width={120}
+                        height={150}
+                        className='h-16 w-auto md:h-20'
                     />
                 </div>
             </div>
@@ -116,7 +115,7 @@ interface FooterColumnProps {
 function FooterColumn({ title, items }: FooterColumnProps) {
     return (
         <div>
-            <h3 className='font-alt-gothic text-body font-medium uppercase tracking-widest text-onyx'>
+            <h3 className='font-alt-gothic text-body font-normal uppercase tracking-[0.05em] text-onyx'>
                 {title}
             </h3>
             <ul className='mt-4 flex flex-col gap-2'>
@@ -127,14 +126,14 @@ function FooterColumn({ title, items }: FooterColumnProps) {
                                 href={item.href}
                                 target='_blank'
                                 rel='noopener noreferrer'
-                                className='font-alt-gothic text-body uppercase tracking-widest text-onyx transition-opacity hover:opacity-70'
+                                className='font-alt-gothic text-body font-semibold uppercase tracking-[0.05em] text-onyx transition-opacity hover:opacity-70'
                             >
                                 {item.label}
                             </a>
                         ) : (
                             <Link
                                 href={item.href}
-                                className='font-alt-gothic text-body uppercase tracking-widest text-onyx transition-opacity hover:opacity-70'
+                                className='font-alt-gothic text-body font-semibold uppercase tracking-[0.05em] text-onyx transition-opacity hover:opacity-70'
                             >
                                 {item.label}
                             </Link>

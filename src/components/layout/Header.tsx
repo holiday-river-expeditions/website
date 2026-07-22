@@ -20,11 +20,11 @@ export function Header() {
                     aria-label='Holiday River Expeditions home'
                 >
                     <Image
-                        src='/icon-red.svg'
+                        src='/logo-horizontal-red.svg'
                         alt='Holiday River Expeditions'
-                        width={56}
-                        height={56}
-                        className='h-10 w-auto md:h-12'
+                        width={240}
+                        height={96}
+                        className='h-9 w-auto md:h-11'
                         priority
                     />
                 </Link>
