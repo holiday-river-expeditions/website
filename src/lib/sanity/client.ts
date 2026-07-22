@@ -5,5 +5,9 @@ export const client = createClient({
     projectId,
     dataset,
     apiVersion,
-    useCdn: true,
+    // All fetches happen server-side inside Next's cache (ISR + webhook
+    // revalidation), so hit the live API: Sanity's CDN is eventually
+    // consistent and can serve pre-publish content right after a webhook
+    // purge, defeating "instant publish". Next's cache is the perf layer.
+    useCdn: false,
 });
