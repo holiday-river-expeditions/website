@@ -118,23 +118,27 @@ export default async function Home() {
                             </div>
 
                             {/* Founder signature, composed from two separate exports.
-                                Arrow points back toward Dee's portrait; the name
-                                overhangs the bottom-right corner (per the mockup).
-                                Tune the bottom/right/w-[…] values to taste. */}
+                                Mock geometry (% of the portrait box, from the Figma
+                                API): signature sits fully OUTSIDE the photo's right
+                                edge (left edge at 106%), bottom-aligned; the arrow
+                                bridges from it back into the photo (left 84%, width
+                                26%, 4% up from the bottom), pointing at Dee. Mobile
+                                pulls both onto the photo corner so nothing overflows
+                                the viewport. */}
                             <Image
                                 src='/hand-drawn-arrow.svg'
                                 alt=''
                                 aria-hidden='true'
                                 width={122}
                                 height={63}
-                                className='absolute bottom-[14%] right-[6%] z-10 w-[28%]'
+                                className='absolute bottom-[10%] left-[58%] z-10 w-[26%] md:bottom-[4%] md:left-[84%]'
                             />
                             <Image
                                 src='/dee-holiday-signature.svg'
                                 alt='Dee Holladay'
                                 width={129}
                                 height={67}
-                                className='absolute bottom-[2%] -right-[8%] z-10 w-[40%]'
+                                className='absolute bottom-0 left-[68%] z-10 w-[31%] md:left-[106%]'
                             />
                         </div>
                     </div>

@@ -68,7 +68,7 @@ const slots = [
 
 const assetCache = new Map(); // url → asset _id
 
-async function uploadFromUrl(url, label) {
+async function uploadFromUrl(url) {
     if (assetCache.has(url)) return assetCache.get(url);
     const res = await fetch(url);
     const type = res.headers.get('content-type') ?? '';
