@@ -55,7 +55,19 @@ export const riverBySlugQuery = defineQuery(`
     name,
     slug,
     description,
-    image
+    image,
+    "trips": *[_type == "trip" && river._ref == ^._id] | order(name asc) {
+      _id,
+      name,
+      slug,
+      tagline,
+      subtitle,
+      ribbon,
+      startingPrice,
+      durationLabel,
+      "category": categories[0]->name,
+      "image": photos[0]
+    }
   }
 `);
 
