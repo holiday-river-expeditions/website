@@ -7,7 +7,9 @@ import { MobileNav } from './MobileNav';
 export function Header() {
     return (
         <header className='relative bg-holiday-white'>
-            <div className='mx-auto grid max-w-7xl grid-cols-[1fr_auto_1fr] items-center px-6 py-5'>
+            {/* Full-bleed: nav hugs the left edge, hamburger/Book Now the right
+                (mock places them ~48px from the viewport edges, no max-width). */}
+            <div className='grid grid-cols-[1fr_auto_1fr] items-center px-6 py-5 md:px-12'>
                 {/* Left: desktop nav */}
                 <div className='justify-self-start'>
                     <DesktopNav />
