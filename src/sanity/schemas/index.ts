@@ -1,9 +1,12 @@
 import { activity } from './activity';
 import { contentBlock } from './blocks/content-block';
 import { heroBlock } from './blocks/hero-block';
+import { contactSubmission } from './contact-submission';
+import { newsletterSubscriber } from './newsletter-subscriber';
 import { faq } from './faq';
 import { homepage } from './homepage';
 import { page } from './page';
+import { post } from './post';
 import { river } from './river';
 import { siteSettings } from './site-settings';
 import { trip } from './trip';
@@ -19,6 +22,11 @@ export const schemaTypes = [
     trip,
     faq,
     page,
+    post,
+
+    // Form captures (created by API routes, triaged in the Studio)
+    contactSubmission,
+    newsletterSubscriber,
 
     // Singletons
     homepage,

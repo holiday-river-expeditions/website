@@ -18,42 +18,44 @@
     },
     "dependencies": {
         "@portabletext/react": "^6.2.0",
-        "@sanity/client": "^7.22.0",
+        "@sanity/client": "^7.26.2",
         "@sanity/image-url": "^2.1.1",
-        "@sanity/vision": "^5.27.0",
-        "next": "16.2.6",
+        "@sanity/vision": "^5.31.1",
+        "next": "16.3.0",
         "next-sanity": "^12.4.5",
         "react": "19.2.3",
         "react-dom": "19.2.3",
-        "sanity": "^5.27.0"
+        "sanity": "^5.31.1",
+        "zod": "^4.4.3"
     },
     "devDependencies": {
-        "@playwright/test": "^1.60.0",
-        "@tailwindcss/postcss": "^4.3.0",
+        "@playwright/test": "^1.62.1",
+        "@tailwindcss/postcss": "^4.3.3",
         "@testing-library/dom": "^10.4.1",
         "@testing-library/jest-dom": "^6.9.1",
         "@testing-library/react": "^16.3.2",
-        "@types/node": "^25.9.1",
-        "@types/react": "^19.2.15",
-        "@types/react-dom": "^19.2.3",
+        "@types/node": "^25.9.5",
+        "@types/react": "^19.2.18",
+        "@types/react-dom": "^19.2.4",
         "@vitejs/plugin-react": "^5.2.0",
-        "eslint": "^9.39.4",
-        "eslint-config-next": "16.2.6",
+        "eslint": "^9.39.5",
+        "eslint-config-next": "16.3.0",
         "eslint-config-prettier": "^10.1.8",
         "husky": "^9.1.7",
         "jsdom": "^29.1.1",
         "lint-staged": "^16.4.0",
-        "prettier": "^3.8.3",
-        "tailwindcss": "^4.3.0",
+        "prettier": "^3.9.6",
+        "tailwindcss": "^4.3.3",
         "typescript": "^5.9.3",
-        "vitest": "^4.1.7"
+        "vitest": "^4.1.10"
     },
     "pnpm": {
         "overrides": {
             "rollup": ">=4.59.0",
-            "postcss": ">=8.5.10",
+            "postcss": ">=8.5.18",
             "uuid": ">=11.1.1",
-            "@vercel/frameworks>js-yaml": ">=3.14.2"
+            "js-yaml": ">=4.3.0",
+            "adm-zip": ">=0.6.0"
         }
     },
     "lint-staged": {
