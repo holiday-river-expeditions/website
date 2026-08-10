@@ -11,3 +11,10 @@ export const client = createClient({
     // purge, defeating "instant publish". Next's cache is the perf layer.
     useCdn: false,
 });
+
+// Token-authenticated client for API routes that write documents (contact
+// form submissions, newsletter signups). Server-only: SANITY_API_TOKEN has
+// no NEXT_PUBLIC_ prefix, so it never reaches the browser bundle.
+export const writeClient = client.withConfig({
+    token: process.env.SANITY_API_TOKEN,
+});

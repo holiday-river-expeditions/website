@@ -1,30 +1,44 @@
 import Image from 'next/image';
 import Link from 'next/link';
 import { NewsletterSignup } from '@/components/ui/NewsletterSignup';
+import { getSiteSettings } from '@/lib/sanity';
 
-const followLinks = [
-    {
-        label: 'Instagram',
-        href: 'https://www.instagram.com/holidayriverexpeditions',
+// Fallbacks if the Site Settings singleton hasn't been seeded/edited yet.
+const defaults = {
+    phone: '801-266-2087',
+    address: '544 East 3900 South\nSalt Lake City, Utah 84107',
+    socialLinks: {
+        instagram: 'https://www.instagram.com/holidayriverexpeditions',
+        facebook: 'https://www.facebook.com/HolidayRiverExpeditions',
+        youtube: 'https://www.youtube.com/@holidayriverexpeditions',
     },
-    {
-        label: 'Facebook',
-        href: 'https://www.facebook.com/HolidayRiverExpeditions',
-    },
-    {
-        label: 'YouTube',
-        href: 'https://www.youtube.com/@holidayriverexpeditions',
-    },
-] as const;
+};
 
 const resourceLinks = [
-    { label: 'Trip Dates', href: '/trip-dates' },
+    // Trip Dates points at the trip listing until the Arctic-powered
+    // Open Seats page exists (see docs/project/open-decisions.md).
+    { label: 'Trip Dates', href: '/trips' },
     { label: 'F.A.Q.', href: '/faq' },
     { label: 'Trip Insurance', href: '/trip-insurance' },
-    { label: 'Online Store', href: '/store' },
+    {
+        label: 'Online Store',
+        href: 'https://holiday-river-expeditions.square.site/',
+        external: true,
+    },
 ] as const;
 
-export function Footer() {
+export async function Footer() {
+    const settings = await getSiteSettings();
+    const phone = settings?.phone ?? defaults.phone;
+    const address = settings?.address ?? defaults.address;
+    const social = { ...defaults.socialLinks, ...settings?.socialLinks };
+    const followLinks = [
+        { label: 'Instagram', href: social.instagram },
+        { label: 'Facebook', href: social.facebook },
+        { label: 'YouTube', href: social.youtube },
+        ...(social.tiktok ? [{ label: 'TikTok', href: social.tiktok }] : []),
+    ].filter((link) => Boolean(link.href));
+
     return (
         <footer className='bg-[#F3F0EB] text-onyx'>
             <div className='mx-auto max-w-7xl px-6 py-16'>
@@ -48,6 +62,7 @@ export function Footer() {
                         items={resourceLinks.map((link) => ({
                             label: link.label,
                             href: link.href,
+                            external: 'external' in link && link.external,
                         }))}
                     />
 
@@ -63,16 +78,14 @@ export function Footer() {
                             >
                                 Contact
                             </Link>
-                            <address className='not-italic text-[11px] tracking-wider'>
-                                544 East 3900 South
-                                <br />
-                                Salt Lake City, Utah 84107
+                            <address className='whitespace-pre-line not-italic text-[11px] tracking-wider'>
+                                {address}
                             </address>
                             <a
-                                href='tel:+18012662087'
+                                href={`tel:+1${phone.replace(/\D/g, '')}`}
                                 className='text-[11px] tracking-wider transition-opacity hover:opacity-70'
                             >
-                                801-266-2087
+                                {phone}
                             </a>
                         </div>
                     </div>

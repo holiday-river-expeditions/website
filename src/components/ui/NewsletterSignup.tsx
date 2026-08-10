@@ -2,14 +2,27 @@
 
 import { useState } from 'react';
 
+type SignupStatus = 'idle' | 'submitting' | 'success' | 'error';
+
 export function NewsletterSignup() {
     const [email, setEmail] = useState('');
+    const [status, setStatus] = useState<SignupStatus>('idle');
 
-    // TODO: Wire to /api/newsletter endpoint in a follow-up task
-    function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
+    async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
         event.preventDefault();
-        // Placeholder: submission is a no-op for now
-        setEmail('');
+        setStatus('submitting');
+        try {
+            const res = await fetch('/api/newsletter', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ email }),
+            });
+            if (!res.ok) throw new Error('Signup failed');
+            setEmail('');
+            setStatus('success');
+        } catch {
+            setStatus('error');
+        }
     }
 
     return (
@@ -34,7 +47,8 @@ export function NewsletterSignup() {
                     <button
                         type='submit'
                         aria-label='Subscribe'
-                        className='absolute right-1 top-1/2 flex h-10 w-10 -translate-y-1/2 items-center justify-center rounded-full bg-holiday-red text-holiday-white transition-opacity hover:opacity-90'
+                        disabled={status === 'submitting'}
+                        className='absolute right-1 top-1/2 flex h-10 w-10 -translate-y-1/2 items-center justify-center rounded-full bg-holiday-red text-holiday-white transition-opacity hover:opacity-90 disabled:opacity-50'
                     >
                         <svg
                             width='16'
@@ -52,6 +66,19 @@ export function NewsletterSignup() {
                     </button>
                 </div>
             </form>
+
+            <div aria-live='polite'>
+                {status === 'success' && (
+                    <p className='mt-3 text-body font-bold leading-body text-holiday-red'>
+                        You&rsquo;re on the list — see you on the river!
+                    </p>
+                )}
+                {status === 'error' && (
+                    <p role='alert' className='mt-3 text-body text-holiday-red'>
+                        Something went wrong — please try again.
+                    </p>
+                )}
+            </div>
 
             <p className='mt-4 text-body font-bold leading-body text-onyx'>
                 Stay in the loop
