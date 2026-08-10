@@ -10,6 +10,13 @@ concurrency:
     group: ${{ github.workflow }}-${{ github.ref }}
     cancel-in-progress: true
 
+# Public Sanity identifiers (shipped in the browser bundle, not secrets).
+# The build prerenders Sanity-driven pages and the E2E dev server reads the
+# same dataset, so both jobs need them to boot.
+env:
+    NEXT_PUBLIC_SANITY_PROJECT_ID: jau3o5v4
+    NEXT_PUBLIC_SANITY_DATASET: production
+
 jobs:
     ci:
         name: Lint, Typecheck, Test, Build
