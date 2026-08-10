@@ -86,6 +86,28 @@ export const allActivitiesQuery = defineQuery(`
   }
 `);
 
+export const activityBySlugQuery = defineQuery(`
+  *[_type == "activity" && slug.current == $slug][0] {
+    _id,
+    name,
+    slug,
+    description,
+    image,
+    "trips": *[_type == "trip" && references(^._id)] | order(name asc) {
+      _id,
+      name,
+      slug,
+      tagline,
+      subtitle,
+      ribbon,
+      startingPrice,
+      durationLabel,
+      "category": categories[0]->name,
+      "image": photos[0]
+    }
+  }
+`);
+
 export const allFaqsQuery = defineQuery(`
   *[_type == "faq"] | order(category asc, order asc) {
     _id,
@@ -101,6 +123,31 @@ export const siteSettingsQuery = defineQuery(`
     email,
     address,
     socialLinks
+  }
+`);
+
+export const allPostsQuery = defineQuery(`
+  *[_type == "post"] | order(publishedAt desc) {
+    _id,
+    title,
+    slug,
+    excerpt,
+    mainImage,
+    publishedAt,
+    category
+  }
+`);
+
+export const postBySlugQuery = defineQuery(`
+  *[_type == "post" && slug.current == $slug][0] {
+    _id,
+    title,
+    slug,
+    excerpt,
+    mainImage,
+    publishedAt,
+    category,
+    body
   }
 `);
 

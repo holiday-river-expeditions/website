@@ -182,6 +182,90 @@ export type SanityImageHotspot = {
     width?: number;
 };
 
+export type NewsletterSubscriber = {
+    _id: string;
+    _type: 'newsletterSubscriber';
+    _createdAt: string;
+    _updatedAt: string;
+    _rev: string;
+    email?: string;
+    subscribedAt?: string;
+};
+
+export type ContactSubmission = {
+    _id: string;
+    _type: 'contactSubmission';
+    _createdAt: string;
+    _updatedAt: string;
+    _rev: string;
+    name?: string;
+    email?: string;
+    message?: string;
+    submittedAt?: string;
+};
+
+export type Post = {
+    _id: string;
+    _type: 'post';
+    _createdAt: string;
+    _updatedAt: string;
+    _rev: string;
+    title?: string;
+    slug?: Slug;
+    excerpt?: string;
+    mainImage?: {
+        asset?: SanityImageAssetReference;
+        media?: unknown;
+        hotspot?: SanityImageHotspot;
+        crop?: SanityImageCrop;
+        _type: 'image';
+    };
+    publishedAt?: string;
+    category?: 'trip-prep' | 'conservation' | 'culture-history';
+    body?: Array<
+        | {
+              children?: Array<{
+                  marks?: Array<string>;
+                  text?: string;
+                  _type: 'span';
+                  _key: string;
+              }>;
+              style?:
+                  | 'normal'
+                  | 'h1'
+                  | 'h2'
+                  | 'h3'
+                  | 'h4'
+                  | 'h5'
+                  | 'h6'
+                  | 'blockquote';
+              listItem?: 'bullet' | 'number';
+              markDefs?: Array<{
+                  href?: string;
+                  _type: 'link';
+                  _key: string;
+              }>;
+              level?: number;
+              _type: 'block';
+              _key: string;
+          }
+        | {
+              asset?: SanityImageAssetReference;
+              media?: unknown;
+              hotspot?: SanityImageHotspot;
+              crop?: SanityImageCrop;
+              _type: 'image';
+              _key: string;
+          }
+    >;
+};
+
+export type Slug = {
+    _type: 'slug';
+    current?: string;
+    source?: string;
+};
+
 export type Page = {
     _id: string;
     _type: 'page';
@@ -200,12 +284,6 @@ export type Page = {
     >;
 };
 
-export type Slug = {
-    _type: 'slug';
-    current?: string;
-    source?: string;
-};
-
 export type Faq = {
     _id: string;
     _type: 'faq';
@@ -221,14 +299,7 @@ export type Faq = {
             _key: string;
         }>;
         style?:
-            | 'normal'
-            | 'h1'
-            | 'h2'
-            | 'h3'
-            | 'h4'
-            | 'h5'
-            | 'h6'
-            | 'blockquote';
+            'normal' | 'h1' | 'h2' | 'h3' | 'h4' | 'h5' | 'h6' | 'blockquote';
         listItem?: 'bullet' | 'number';
         markDefs?: Array<{
             href?: string;
@@ -240,11 +311,7 @@ export type Faq = {
         _key: string;
     }>;
     category?:
-        | 'general'
-        | 'booking'
-        | 'trip-preparation'
-        | 'safety'
-        | 'cancellation';
+        'general' | 'booking' | 'trip-preparation' | 'safety' | 'cancellation';
     order?: number;
 };
 
@@ -291,14 +358,7 @@ export type Trip = {
             _key: string;
         }>;
         style?:
-            | 'normal'
-            | 'h1'
-            | 'h2'
-            | 'h3'
-            | 'h4'
-            | 'h5'
-            | 'h6'
-            | 'blockquote';
+            'normal' | 'h1' | 'h2' | 'h3' | 'h4' | 'h5' | 'h6' | 'blockquote';
         listItem?: 'bullet' | 'number';
         markDefs?: Array<{
             href?: string;
@@ -483,8 +543,11 @@ export type AllSanitySchemaTypes =
     | Homepage
     | SanityImageCrop
     | SanityImageHotspot
-    | Page
+    | NewsletterSubscriber
+    | ContactSubmission
+    | Post
     | Slug
+    | Page
     | Faq
     | ActivityReference
     | TripCategoryReference
@@ -558,14 +621,7 @@ export type TripBySlugQueryResult = {
             _key: string;
         }>;
         style?:
-            | 'blockquote'
-            | 'h1'
-            | 'h2'
-            | 'h3'
-            | 'h4'
-            | 'h5'
-            | 'h6'
-            | 'normal';
+            'blockquote' | 'h1' | 'h2' | 'h3' | 'h4' | 'h5' | 'h6' | 'normal';
         listItem?: 'bullet' | 'number';
         markDefs?: Array<{
             href?: string;
@@ -692,6 +748,44 @@ export type AllActivitiesQueryResult = Array<{
 }>;
 
 // Source: src/lib/sanity/queries.ts
+// Variable: activityBySlugQuery
+// Query: *[_type == "activity" && slug.current == $slug][0] {    _id,    name,    slug,    description,    image,    "trips": *[_type == "trip" && references(^._id)] | order(name asc) {      _id,      name,      slug,      tagline,      subtitle,      ribbon,      startingPrice,      durationLabel,      "category": categories[0]->name,      "image": photos[0]    }  }
+export type ActivityBySlugQueryResult = {
+    _id: string;
+    name: string | null;
+    slug: Slug | null;
+    description: string | null;
+    image: {
+        asset?: SanityImageAssetReference;
+        media?: unknown;
+        hotspot?: SanityImageHotspot;
+        crop?: SanityImageCrop;
+        _type: 'image';
+    } | null;
+    trips: Array<{
+        _id: string;
+        name: string | null;
+        slug: Slug | null;
+        tagline: string | null;
+        subtitle: string | null;
+        ribbon: string | null;
+        startingPrice: string | null;
+        durationLabel: string | null;
+        category: string | null;
+        image: {
+            asset?: SanityImageAssetReference;
+            media?: unknown;
+            hotspot?: SanityImageHotspot;
+            crop?: SanityImageCrop;
+            alt?: string;
+            caption?: string;
+            _type: 'image';
+            _key: string;
+        } | null;
+    }>;
+} | null;
+
+// Source: src/lib/sanity/queries.ts
 // Variable: allFaqsQuery
 // Query: *[_type == "faq"] | order(category asc, order asc) {    _id,    question,    answer,    category  }
 export type AllFaqsQueryResult = Array<{
@@ -705,14 +799,7 @@ export type AllFaqsQueryResult = Array<{
             _key: string;
         }>;
         style?:
-            | 'blockquote'
-            | 'h1'
-            | 'h2'
-            | 'h3'
-            | 'h4'
-            | 'h5'
-            | 'h6'
-            | 'normal';
+            'blockquote' | 'h1' | 'h2' | 'h3' | 'h4' | 'h5' | 'h6' | 'normal';
         listItem?: 'bullet' | 'number';
         markDefs?: Array<{
             href?: string;
@@ -745,6 +832,80 @@ export type SiteSettingsQueryResult = {
         youtube?: string;
         tiktok?: string;
     } | null;
+} | null;
+
+// Source: src/lib/sanity/queries.ts
+// Variable: allPostsQuery
+// Query: *[_type == "post"] | order(publishedAt desc) {    _id,    title,    slug,    excerpt,    mainImage,    publishedAt,    category  }
+export type AllPostsQueryResult = Array<{
+    _id: string;
+    title: string | null;
+    slug: Slug | null;
+    excerpt: string | null;
+    mainImage: {
+        asset?: SanityImageAssetReference;
+        media?: unknown;
+        hotspot?: SanityImageHotspot;
+        crop?: SanityImageCrop;
+        _type: 'image';
+    } | null;
+    publishedAt: string | null;
+    category: 'conservation' | 'culture-history' | 'trip-prep' | null;
+}>;
+
+// Source: src/lib/sanity/queries.ts
+// Variable: postBySlugQuery
+// Query: *[_type == "post" && slug.current == $slug][0] {    _id,    title,    slug,    excerpt,    mainImage,    publishedAt,    category,    body  }
+export type PostBySlugQueryResult = {
+    _id: string;
+    title: string | null;
+    slug: Slug | null;
+    excerpt: string | null;
+    mainImage: {
+        asset?: SanityImageAssetReference;
+        media?: unknown;
+        hotspot?: SanityImageHotspot;
+        crop?: SanityImageCrop;
+        _type: 'image';
+    } | null;
+    publishedAt: string | null;
+    category: 'conservation' | 'culture-history' | 'trip-prep' | null;
+    body: Array<
+        | {
+              children?: Array<{
+                  marks?: Array<string>;
+                  text?: string;
+                  _type: 'span';
+                  _key: string;
+              }>;
+              style?:
+                  | 'blockquote'
+                  | 'h1'
+                  | 'h2'
+                  | 'h3'
+                  | 'h4'
+                  | 'h5'
+                  | 'h6'
+                  | 'normal';
+              listItem?: 'bullet' | 'number';
+              markDefs?: Array<{
+                  href?: string;
+                  _type: 'link';
+                  _key: string;
+              }>;
+              level?: number;
+              _type: 'block';
+              _key: string;
+          }
+        | {
+              asset?: SanityImageAssetReference;
+              media?: unknown;
+              hotspot?: SanityImageHotspot;
+              crop?: SanityImageCrop;
+              _type: 'image';
+              _key: string;
+          }
+    > | null;
 } | null;
 
 // Source: src/lib/sanity/queries.ts
@@ -850,8 +1011,11 @@ declare module '@sanity/client' {
         '\n  *[_type == "river"] | order(name asc) {\n    _id,\n    name,\n    slug,\n    description,\n    image\n  }\n': AllRiversQueryResult;
         '\n  *[_type == "river" && slug.current == $slug][0] {\n    _id,\n    name,\n    slug,\n    description,\n    image,\n    "trips": *[_type == "trip" && river._ref == ^._id] | order(name asc) {\n      _id,\n      name,\n      slug,\n      tagline,\n      subtitle,\n      ribbon,\n      startingPrice,\n      durationLabel,\n      "category": categories[0]->name,\n      "image": photos[0]\n    }\n  }\n': RiverBySlugQueryResult;
         '\n  *[_type == "activity"] | order(name asc) {\n    _id,\n    name,\n    slug,\n    description,\n    image\n  }\n': AllActivitiesQueryResult;
+        '\n  *[_type == "activity" && slug.current == $slug][0] {\n    _id,\n    name,\n    slug,\n    description,\n    image,\n    "trips": *[_type == "trip" && references(^._id)] | order(name asc) {\n      _id,\n      name,\n      slug,\n      tagline,\n      subtitle,\n      ribbon,\n      startingPrice,\n      durationLabel,\n      "category": categories[0]->name,\n      "image": photos[0]\n    }\n  }\n': ActivityBySlugQueryResult;
         '\n  *[_type == "faq"] | order(category asc, order asc) {\n    _id,\n    question,\n    answer,\n    category\n  }\n': AllFaqsQueryResult;
         '\n  *[_type == "siteSettings"][0] {\n    phone,\n    email,\n    address,\n    socialLinks\n  }\n': SiteSettingsQueryResult;
+        '\n  *[_type == "post"] | order(publishedAt desc) {\n    _id,\n    title,\n    slug,\n    excerpt,\n    mainImage,\n    publishedAt,\n    category\n  }\n': AllPostsQueryResult;
+        '\n  *[_type == "post" && slug.current == $slug][0] {\n    _id,\n    title,\n    slug,\n    excerpt,\n    mainImage,\n    publishedAt,\n    category,\n    body\n  }\n': PostBySlugQueryResult;
         '\n  *[_type == "page" && slug.current == $slug][0] {\n    _id,\n    title,\n    slug,\n    content\n  }\n': PageBySlugQueryResult;
         '\n  *[_type == "homepage"][0] {\n    heroHeading,\n    heroImage,\n    "featuredTrips": featuredTrips[]->{\n      _id,\n      name,\n      slug,\n      tagline,\n      subtitle,\n      ribbon,\n      startingPrice,\n      durationLabel,\n      "category": categories[0]->name,\n      "image": photos[0]\n    },\n    storyBody,\n    storyImageLeft,\n    storyImagePortrait,\n    storyCtaText,\n    storyCtaLink,\n    "rivers": rivers[]->{\n      _id,\n      name,\n      slug,\n      image\n    },\n    learnContent[]{\n      _key,\n      title,\n      image,\n      link,\n      isVideo\n    }\n  }\n': HomepageQueryResult;
     }
