@@ -41,7 +41,7 @@ export default async function FaqPage() {
 
             <Section background='white' className='pb-20 pt-4 md:pb-24'>
                 {groups.length === 0 ? (
-                    <p className='text-body leading-body text-onyx/60'>
+                    <p className='text-body leading-body text-onyx/70'>
                         FAQs coming soon — add them in the Studio.
                     </p>
                 ) : (

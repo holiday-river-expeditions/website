@@ -42,6 +42,7 @@ export default async function Home() {
             subtitle: trip.subtitle ?? undefined,
             ribbon: trip.ribbon ?? undefined,
             featured: Boolean(trip.ribbon),
+            difficulty: trip.difficulty ?? undefined,
         }),
     );
 
@@ -66,10 +67,16 @@ export default async function Home() {
 
     return (
         <>
-            {/* Hero */}
+            {/* Hero — CTA is the low-commitment exploration entry; the nav's
+                Book Now stays the persistent high-commitment action. */}
             <Hero
                 heading={homepage.heroHeading ?? ''}
                 backgroundImage={heroImage}
+                imageAlt={homepage.heroImageAlt ?? ''}
+                cta={{
+                    text: homepage.heroCtaText ?? 'Find Your Trip',
+                    href: homepage.heroCtaLink ?? '/trips',
+                }}
             />
 
             {/* Trip Grid */}
@@ -188,7 +195,7 @@ export default async function Home() {
                 </div>
                 <div className='mt-14 text-center'>
                     <Button href='/blog' variant='outline' size='lg'>
-                        Learn More
+                        Read the Blog
                     </Button>
                 </div>
             </Section>

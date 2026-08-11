@@ -57,6 +57,7 @@ export type ContentBlock = {
               media?: unknown;
               hotspot?: SanityImageHotspot;
               crop?: SanityImageCrop;
+              alt?: string;
               _type: 'image';
               _key: string;
           }
@@ -116,11 +117,14 @@ export type Homepage = {
     _updatedAt: string;
     _rev: string;
     heroHeading?: string;
+    heroCtaText?: string;
+    heroCtaLink?: string;
     heroImage?: {
         asset?: SanityImageAssetReference;
         media?: unknown;
         hotspot?: SanityImageHotspot;
         crop?: SanityImageCrop;
+        alt?: string;
         _type: 'image';
     };
     featuredTrips?: Array<
@@ -694,7 +698,7 @@ export type AllRiversQueryResult = Array<{
 
 // Source: src/lib/sanity/queries.ts
 // Variable: riverBySlugQuery
-// Query: *[_type == "river" && slug.current == $slug][0] {    _id,    name,    slug,    description,    image,    "trips": *[_type == "trip" && river._ref == ^._id] | order(name asc) {      _id,      name,      slug,      tagline,      subtitle,      ribbon,      startingPrice,      durationLabel,      "category": categories[0]->name,      "image": photos[0]    }  }
+// Query: *[_type == "river" && slug.current == $slug][0] {    _id,    name,    slug,    description,    image,    "trips": *[_type == "trip" && river._ref == ^._id] | order(name asc) {      _id,      name,      slug,      tagline,      subtitle,      ribbon,      startingPrice,      durationLabel,      difficulty,      "category": categories[0]->name,      "image": photos[0]    }  }
 export type RiverBySlugQueryResult = {
     _id: string;
     name: string | null;
@@ -716,6 +720,7 @@ export type RiverBySlugQueryResult = {
         ribbon: string | null;
         startingPrice: string | null;
         durationLabel: string | null;
+        difficulty: 'challenging' | 'easy' | 'expert' | 'moderate' | null;
         category: string | null;
         image: {
             asset?: SanityImageAssetReference;
@@ -749,7 +754,7 @@ export type AllActivitiesQueryResult = Array<{
 
 // Source: src/lib/sanity/queries.ts
 // Variable: activityBySlugQuery
-// Query: *[_type == "activity" && slug.current == $slug][0] {    _id,    name,    slug,    description,    image,    "trips": *[_type == "trip" && references(^._id)] | order(name asc) {      _id,      name,      slug,      tagline,      subtitle,      ribbon,      startingPrice,      durationLabel,      "category": categories[0]->name,      "image": photos[0]    }  }
+// Query: *[_type == "activity" && slug.current == $slug][0] {    _id,    name,    slug,    description,    image,    "trips": *[_type == "trip" && references(^._id)] | order(name asc) {      _id,      name,      slug,      tagline,      subtitle,      ribbon,      startingPrice,      durationLabel,      difficulty,      "category": categories[0]->name,      "image": photos[0]    }  }
 export type ActivityBySlugQueryResult = {
     _id: string;
     name: string | null;
@@ -771,6 +776,7 @@ export type ActivityBySlugQueryResult = {
         ribbon: string | null;
         startingPrice: string | null;
         durationLabel: string | null;
+        difficulty: 'challenging' | 'easy' | 'expert' | 'moderate' | null;
         category: string | null;
         image: {
             asset?: SanityImageAssetReference;
@@ -927,7 +933,7 @@ export type PageBySlugQueryResult = {
 
 // Source: src/lib/sanity/queries.ts
 // Variable: homepageQuery
-// Query: *[_type == "homepage"][0] {    heroHeading,    heroImage,    "featuredTrips": featuredTrips[]->{      _id,      name,      slug,      tagline,      subtitle,      ribbon,      startingPrice,      durationLabel,      "category": categories[0]->name,      "image": photos[0]    },    storyBody,    storyImageLeft,    storyImagePortrait,    storyCtaText,    storyCtaLink,    "rivers": rivers[]->{      _id,      name,      slug,      image    },    learnContent[]{      _key,      title,      image,      link,      isVideo    }  }
+// Query: *[_type == "homepage"][0] {    heroHeading,    heroImage,    "heroImageAlt": heroImage.alt,    heroCtaText,    heroCtaLink,    "featuredTrips": featuredTrips[]->{      _id,      name,      slug,      tagline,      subtitle,      ribbon,      startingPrice,      durationLabel,      difficulty,      "category": categories[0]->name,      "image": photos[0]    },    storyBody,    storyImageLeft,    storyImagePortrait,    storyCtaText,    storyCtaLink,    "rivers": rivers[]->{      _id,      name,      slug,      image    },    learnContent[]{      _key,      title,      image,      link,      isVideo    }  }
 export type HomepageQueryResult = {
     heroHeading: string | null;
     heroImage: {
@@ -935,8 +941,12 @@ export type HomepageQueryResult = {
         media?: unknown;
         hotspot?: SanityImageHotspot;
         crop?: SanityImageCrop;
+        alt?: string;
         _type: 'image';
     } | null;
+    heroImageAlt: string | null;
+    heroCtaText: string | null;
+    heroCtaLink: string | null;
     featuredTrips: Array<{
         _id: string;
         name: string | null;
@@ -946,6 +956,7 @@ export type HomepageQueryResult = {
         ribbon: string | null;
         startingPrice: string | null;
         durationLabel: string | null;
+        difficulty: 'challenging' | 'easy' | 'expert' | 'moderate' | null;
         category: string | null;
         image: {
             asset?: SanityImageAssetReference;
@@ -1009,14 +1020,14 @@ declare module '@sanity/client' {
         '\n  *[_type == "trip"] | order(name asc) {\n    _id,\n    name,\n    slug,\n    difficulty,\n    duration,\n    pricingNotes,\n    arcticTripId,\n    tagline,\n    subtitle,\n    ribbon,\n    startingPrice,\n    durationLabel,\n    "river": river->{ name, slug },\n    "activities": activities[]->{ name, slug },\n    "categories": categories[]->{ name, slug },\n    "mainImage": photos[0]\n  }\n': AllTripsQueryResult;
         '\n  *[_type == "trip" && slug.current == $slug][0] {\n    _id,\n    name,\n    slug,\n    difficulty,\n    duration,\n    description,\n    highlights,\n    photos,\n    pricingNotes,\n    arcticTripId,\n    tagline,\n    subtitle,\n    ribbon,\n    startingPrice,\n    durationLabel,\n    "river": river->{ _id, name, slug, description, image },\n    "activities": activities[]->{ _id, name, slug },\n    "categories": categories[]->{ _id, name, slug }\n  }\n': TripBySlugQueryResult;
         '\n  *[_type == "river"] | order(name asc) {\n    _id,\n    name,\n    slug,\n    description,\n    image\n  }\n': AllRiversQueryResult;
-        '\n  *[_type == "river" && slug.current == $slug][0] {\n    _id,\n    name,\n    slug,\n    description,\n    image,\n    "trips": *[_type == "trip" && river._ref == ^._id] | order(name asc) {\n      _id,\n      name,\n      slug,\n      tagline,\n      subtitle,\n      ribbon,\n      startingPrice,\n      durationLabel,\n      "category": categories[0]->name,\n      "image": photos[0]\n    }\n  }\n': RiverBySlugQueryResult;
+        '\n  *[_type == "river" && slug.current == $slug][0] {\n    _id,\n    name,\n    slug,\n    description,\n    image,\n    "trips": *[_type == "trip" && river._ref == ^._id] | order(name asc) {\n      _id,\n      name,\n      slug,\n      tagline,\n      subtitle,\n      ribbon,\n      startingPrice,\n      durationLabel,\n      difficulty,\n      "category": categories[0]->name,\n      "image": photos[0]\n    }\n  }\n': RiverBySlugQueryResult;
         '\n  *[_type == "activity"] | order(name asc) {\n    _id,\n    name,\n    slug,\n    description,\n    image\n  }\n': AllActivitiesQueryResult;
-        '\n  *[_type == "activity" && slug.current == $slug][0] {\n    _id,\n    name,\n    slug,\n    description,\n    image,\n    "trips": *[_type == "trip" && references(^._id)] | order(name asc) {\n      _id,\n      name,\n      slug,\n      tagline,\n      subtitle,\n      ribbon,\n      startingPrice,\n      durationLabel,\n      "category": categories[0]->name,\n      "image": photos[0]\n    }\n  }\n': ActivityBySlugQueryResult;
+        '\n  *[_type == "activity" && slug.current == $slug][0] {\n    _id,\n    name,\n    slug,\n    description,\n    image,\n    "trips": *[_type == "trip" && references(^._id)] | order(name asc) {\n      _id,\n      name,\n      slug,\n      tagline,\n      subtitle,\n      ribbon,\n      startingPrice,\n      durationLabel,\n      difficulty,\n      "category": categories[0]->name,\n      "image": photos[0]\n    }\n  }\n': ActivityBySlugQueryResult;
         '\n  *[_type == "faq"] | order(category asc, order asc) {\n    _id,\n    question,\n    answer,\n    category\n  }\n': AllFaqsQueryResult;
         '\n  *[_type == "siteSettings"][0] {\n    phone,\n    email,\n    address,\n    socialLinks\n  }\n': SiteSettingsQueryResult;
         '\n  *[_type == "post"] | order(publishedAt desc) {\n    _id,\n    title,\n    slug,\n    excerpt,\n    mainImage,\n    publishedAt,\n    category\n  }\n': AllPostsQueryResult;
         '\n  *[_type == "post" && slug.current == $slug][0] {\n    _id,\n    title,\n    slug,\n    excerpt,\n    mainImage,\n    publishedAt,\n    category,\n    body\n  }\n': PostBySlugQueryResult;
         '\n  *[_type == "page" && slug.current == $slug][0] {\n    _id,\n    title,\n    slug,\n    content\n  }\n': PageBySlugQueryResult;
-        '\n  *[_type == "homepage"][0] {\n    heroHeading,\n    heroImage,\n    "featuredTrips": featuredTrips[]->{\n      _id,\n      name,\n      slug,\n      tagline,\n      subtitle,\n      ribbon,\n      startingPrice,\n      durationLabel,\n      "category": categories[0]->name,\n      "image": photos[0]\n    },\n    storyBody,\n    storyImageLeft,\n    storyImagePortrait,\n    storyCtaText,\n    storyCtaLink,\n    "rivers": rivers[]->{\n      _id,\n      name,\n      slug,\n      image\n    },\n    learnContent[]{\n      _key,\n      title,\n      image,\n      link,\n      isVideo\n    }\n  }\n': HomepageQueryResult;
+        '\n  *[_type == "homepage"][0] {\n    heroHeading,\n    heroImage,\n    "heroImageAlt": heroImage.alt,\n    heroCtaText,\n    heroCtaLink,\n    "featuredTrips": featuredTrips[]->{\n      _id,\n      name,\n      slug,\n      tagline,\n      subtitle,\n      ribbon,\n      startingPrice,\n      durationLabel,\n      difficulty,\n      "category": categories[0]->name,\n      "image": photos[0]\n    },\n    storyBody,\n    storyImageLeft,\n    storyImagePortrait,\n    storyCtaText,\n    storyCtaLink,\n    "rivers": rivers[]->{\n      _id,\n      name,\n      slug,\n      image\n    },\n    learnContent[]{\n      _key,\n      title,\n      image,\n      link,\n      isVideo\n    }\n  }\n': HomepageQueryResult;
     }
 }

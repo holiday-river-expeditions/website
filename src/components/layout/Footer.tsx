@@ -1,5 +1,6 @@
 import Image from 'next/image';
 import Link from 'next/link';
+import { ExternalLink } from '@/components/ui/ExternalLink';
 import { NewsletterSignup } from '@/components/ui/NewsletterSignup';
 import { getSiteSettings } from '@/lib/sanity';
 
@@ -72,7 +73,7 @@ export async function Footer() {
                         <div className='mt-4 flex flex-col gap-2 font-alt-gothic text-body font-semibold uppercase tracking-[0.05em] text-onyx'>
                             <Link
                                 href='/contact'
-                                className='transition-opacity hover:opacity-70'
+                                className='inline-block py-1 transition-opacity hover:opacity-70'
                             >
                                 Contact
                             </Link>
@@ -81,7 +82,7 @@ export async function Footer() {
                             </address>
                             <a
                                 href={`tel:+1${phone.replace(/\D/g, '')}`}
-                                className='text-[11px] tracking-wider transition-opacity hover:opacity-70'
+                                className='inline-block py-1 text-[11px] tracking-wider transition-opacity hover:opacity-70'
                             >
                                 {phone}
                             </a>
@@ -133,18 +134,16 @@ function FooterColumn({ title, items }: FooterColumnProps) {
                 {items.map((item) => (
                     <li key={item.href}>
                         {item.external ? (
-                            <a
+                            <ExternalLink
                                 href={item.href}
-                                target='_blank'
-                                rel='noopener noreferrer'
-                                className='font-alt-gothic text-body font-semibold uppercase tracking-[0.05em] text-onyx transition-opacity hover:opacity-70'
+                                className='py-1 font-alt-gothic text-body font-semibold uppercase tracking-[0.05em] text-onyx transition-opacity hover:opacity-70'
                             >
                                 {item.label}
-                            </a>
+                            </ExternalLink>
                         ) : (
                             <Link
                                 href={item.href}
-                                className='font-alt-gothic text-body font-semibold uppercase tracking-[0.05em] text-onyx transition-opacity hover:opacity-70'
+                                className='inline-block py-1 font-alt-gothic text-body font-semibold uppercase tracking-[0.05em] text-onyx transition-opacity hover:opacity-70'
                             >
                                 {item.label}
                             </Link>

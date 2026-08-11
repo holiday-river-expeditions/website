@@ -1,3 +1,4 @@
+import { ExternalLink } from '@/components/ui/ExternalLink';
 import type { ArcticDeparture } from '@/lib/arctic';
 
 /**
@@ -37,7 +38,7 @@ function SeatsBadge({ seats }: { seats: number | null }) {
     if (seats === null) return null;
     if (seats <= 0) {
         return (
-            <span className='inline-block bg-holiday-grey/30 px-3 py-1 font-alt-gothic text-[12px] font-medium uppercase tracking-[0.05em] text-onyx/60'>
+            <span className='inline-block bg-holiday-grey/30 px-3 py-1 font-alt-gothic text-[12px] font-medium uppercase tracking-[0.05em] text-onyx'>
                 Full
             </span>
         );
@@ -79,7 +80,7 @@ export function DepartureList({
                                 {formatDateRange(departure.start, days)}
                             </span>
                             {days && days >= 24 && (
-                                <span className='ml-3 text-[13px] uppercase tracking-wider text-holiday-grey'>
+                                <span className='ml-3 text-[13px] uppercase tracking-wider text-onyx/70'>
                                     {Math.round(days / 24)} days
                                 </span>
                             )}
@@ -92,14 +93,12 @@ export function DepartureList({
                         <div className='flex items-center gap-4'>
                             <SeatsBadge seats={seats} />
                             {bookable ? (
-                                <a
+                                <ExternalLink
                                     href={departure.onlinebookingurl ?? '#'}
-                                    target='_blank'
-                                    rel='noopener noreferrer'
-                                    className='inline-block bg-holiday-red px-6 py-2 text-center font-alt-gothic text-[19px] font-medium uppercase leading-none tracking-wide text-holiday-white transition-colors hover:bg-holiday-red/90'
+                                    className='bg-holiday-red px-6 py-2 text-center font-alt-gothic text-[19px] font-medium uppercase leading-none tracking-wide text-holiday-white transition-colors hover:bg-holiday-red/90'
                                 >
                                     Book
-                                </a>
+                                </ExternalLink>
                             ) : (
                                 <a
                                     href='tel:+18012662087'

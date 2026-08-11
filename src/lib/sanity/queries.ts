@@ -70,6 +70,7 @@ export const riverBySlugQuery = defineQuery(`
       ribbon,
       startingPrice,
       durationLabel,
+      difficulty,
       "category": categories[0]->name,
       "image": photos[0]
     }
@@ -102,6 +103,7 @@ export const activityBySlugQuery = defineQuery(`
       ribbon,
       startingPrice,
       durationLabel,
+      difficulty,
       "category": categories[0]->name,
       "image": photos[0]
     }
@@ -164,6 +166,9 @@ export const homepageQuery = defineQuery(`
   *[_type == "homepage"][0] {
     heroHeading,
     heroImage,
+    "heroImageAlt": heroImage.alt,
+    heroCtaText,
+    heroCtaLink,
     "featuredTrips": featuredTrips[]->{
       _id,
       name,
@@ -173,6 +178,7 @@ export const homepageQuery = defineQuery(`
       ribbon,
       startingPrice,
       durationLabel,
+      difficulty,
       "category": categories[0]->name,
       "image": photos[0]
     },

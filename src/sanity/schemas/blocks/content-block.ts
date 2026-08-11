@@ -14,7 +14,21 @@ export const contentBlock = defineType({
             name: 'body',
             title: 'Body',
             type: 'array',
-            of: [{ type: 'block' }, { type: 'image' }],
+            of: [
+                { type: 'block' },
+                {
+                    type: 'image',
+                    fields: [
+                        defineField({
+                            name: 'alt',
+                            title: 'Alt Text',
+                            type: 'string',
+                            description:
+                                'Describes the image for screen readers.',
+                        }),
+                    ],
+                },
+            ],
         }),
     ],
     preview: {

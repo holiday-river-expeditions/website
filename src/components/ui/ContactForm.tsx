@@ -1,16 +1,23 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { Button } from '@/components/ui/Button';
 
 type FormStatus = 'idle' | 'submitting' | 'success' | 'error';
 
 const inputStyles =
-    'w-full border border-onyx/30 bg-holiday-white px-4 py-3 text-body text-onyx placeholder:text-holiday-grey focus:border-holiday-red focus:outline-none';
+    'w-full border border-onyx/30 bg-holiday-white px-4 py-3 text-body text-onyx placeholder:text-holiday-grey focus:border-holiday-red';
 
 export function ContactForm() {
     const [status, setStatus] = useState<FormStatus>('idle');
     const [error, setError] = useState<string | null>(null);
+    const successRef = useRef<HTMLParagraphElement>(null);
+
+    // The success state replaces the form, which screen readers can miss —
+    // announce it via the aria-live wrapper and move focus to the message.
+    useEffect(() => {
+        if (status === 'success') successRef.current?.focus();
+    }, [status]);
 
     async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
         event.preventDefault();
@@ -45,8 +52,15 @@ export function ContactForm() {
 
     if (status === 'success') {
         return (
-            <div className='border-l-2 border-holiday-red pl-4'>
-                <p className='text-paragraph font-bold leading-paragraph text-onyx'>
+            <div
+                aria-live='polite'
+                className='border-l-2 border-holiday-red pl-4'
+            >
+                <p
+                    ref={successRef}
+                    tabIndex={-1}
+                    className='text-paragraph font-bold leading-paragraph text-onyx'
+                >
                     Thanks for reaching out!
                 </p>
                 <p className='mt-2 text-body leading-body text-onyx'>

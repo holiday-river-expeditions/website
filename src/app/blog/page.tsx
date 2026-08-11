@@ -42,7 +42,7 @@ export default async function BlogPage() {
 
             <Section background='white' className='pb-20 pt-8 md:pb-24'>
                 {posts.length === 0 ? (
-                    <p className='text-body leading-body text-onyx/60'>
+                    <p className='text-body leading-body text-onyx/70'>
                         Posts coming soon — add them in the Studio.
                     </p>
                 ) : (
@@ -64,7 +64,7 @@ export default async function BlogPage() {
                                                     src={photo}
                                                     alt={post.title ?? ''}
                                                     fill
-                                                    className='object-cover transition-transform duration-500 group-hover:scale-105'
+                                                    className='object-cover motion-safe:transition-transform motion-safe:duration-500 motion-safe:group-hover:scale-105'
                                                     sizes='(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw'
                                                 />
                                             )}
@@ -78,7 +78,7 @@ export default async function BlogPage() {
                                             {post.title}
                                         </h2>
                                         {post.publishedAt && (
-                                            <p className='mt-1 text-[13px] uppercase tracking-wider text-holiday-grey'>
+                                            <p className='mt-1 text-[13px] uppercase tracking-wider text-onyx/70'>
                                                 {dateFormat.format(
                                                     new Date(post.publishedAt),
                                                 )}

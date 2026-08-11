@@ -5,7 +5,7 @@ export default function NotFound() {
     return (
         <Section background='white' className='py-24 md:py-32'>
             <div className='mx-auto max-w-2xl text-center'>
-                <p className='font-alt-gothic text-h3 font-medium uppercase leading-h3 text-holiday-grey'>
+                <p className='font-alt-gothic text-h3 font-medium uppercase leading-h3 text-onyx/70'>
                     404
                 </p>
                 <h1 className='mt-4 font-alt-gothic text-h2 font-black uppercase leading-h2 text-holiday-red md:text-h1 md:leading-h1'>

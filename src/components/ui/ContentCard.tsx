@@ -19,7 +19,7 @@ export function ContentCard({
             className='group relative block aspect-[3/4] overflow-hidden'
         >
             <div
-                className='absolute inset-0 bg-cover bg-center transition-transform duration-500 group-hover:scale-105'
+                className='absolute inset-0 bg-cover bg-center motion-safe:transition-transform motion-safe:duration-500 motion-safe:group-hover:scale-105'
                 style={{ backgroundImage: `url(${image})` }}
             />
             <div className='absolute inset-0 bg-gradient-to-t from-onyx/80 via-onyx/10 to-transparent' />

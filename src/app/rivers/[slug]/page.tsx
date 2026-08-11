@@ -64,7 +64,7 @@ export default async function RiverPage({ params }: RiverPageProps) {
                         {river.description}
                     </p>
                 ) : (
-                    <p className='max-w-3xl text-body leading-body text-onyx/60'>
+                    <p className='max-w-3xl text-body leading-body text-onyx/70'>
                         River description coming soon — add it in the Studio.
                     </p>
                 )}
@@ -89,6 +89,7 @@ export default async function RiverPage({ params }: RiverPageProps) {
                                 subtitle={trip.subtitle ?? undefined}
                                 ribbon={trip.ribbon ?? undefined}
                                 featured={Boolean(trip.ribbon)}
+                                difficulty={trip.difficulty ?? undefined}
                                 href={
                                     trip.slug?.current
                                         ? `/trips/${trip.slug.current}`

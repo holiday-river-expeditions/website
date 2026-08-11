@@ -1,11 +1,20 @@
 import Image from 'next/image';
+import { Button } from '@/components/ui/Button';
 
 interface HeroProps {
     heading: string;
     backgroundImage: string;
+    /** Alt text for the banner photo; empty string = decorative. */
+    imageAlt?: string;
+    cta?: { text: string; href: string };
 }
 
-export function Hero({ heading, backgroundImage }: HeroProps) {
+export function Hero({
+    heading,
+    backgroundImage,
+    imageAlt = '',
+    cta,
+}: HeroProps) {
     return (
         // Inset banner — image sits below the header with side margins (per mockup),
         // not full-bleed. The seal straddles the banner's bottom-left edge, so the
@@ -15,19 +24,32 @@ export function Hero({ heading, backgroundImage }: HeroProps) {
                 {/* Banner image, clipped to the inset rectangle. The evergreen
                     base keeps the white headline legible before a photo is set. */}
                 <div className='absolute inset-0 overflow-hidden bg-evergreen'>
-                    <div
-                        className='absolute inset-0 bg-cover bg-center'
-                        style={{ backgroundImage: `url(${backgroundImage})` }}
-                    />
+                    {backgroundImage && (
+                        <Image
+                            src={backgroundImage}
+                            alt={imageAlt}
+                            fill
+                            priority
+                            sizes='100vw'
+                            className='object-cover motion-safe:animate-hero-drift'
+                        />
+                    )}
                     {/* Subtle overlay for headline legibility */}
                     <div className='absolute inset-0 bg-onyx/20' />
                 </div>
 
-                {/* Headline */}
-                <div className='relative z-10 flex h-full items-center justify-center px-6'>
+                {/* Headline + CTA */}
+                <div className='relative z-10 flex h-full flex-col items-center justify-center px-6'>
                     <h1 className='mx-auto max-w-5xl text-center font-alt-gothic text-h2 font-black uppercase leading-h2 text-holiday-white md:text-h1 md:leading-h1'>
                         {heading}
                     </h1>
+                    {cta && (
+                        <div className='mt-8'>
+                            <Button href={cta.href} size='lg'>
+                                {cta.text}
+                            </Button>
+                        </div>
+                    )}
                 </div>
 
                 {/* 60-years anniversary seal — straddles the bottom-left edge */}

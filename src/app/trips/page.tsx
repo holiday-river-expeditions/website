@@ -41,6 +41,7 @@ export default async function TripsPage() {
                                 subtitle={trip.subtitle ?? undefined}
                                 ribbon={trip.ribbon ?? undefined}
                                 featured={Boolean(trip.ribbon)}
+                                difficulty={trip.difficulty ?? undefined}
                                 href={
                                     trip.slug?.current
                                         ? `/trips/${trip.slug.current}`
@@ -50,7 +51,7 @@ export default async function TripsPage() {
                         ))}
                     </div>
                 ) : (
-                    <p className='text-body leading-body text-onyx/60'>
+                    <p className='text-body leading-body text-onyx/70'>
                         Trips are being added — check back soon.
                     </p>
                 )}

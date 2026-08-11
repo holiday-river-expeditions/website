@@ -15,11 +15,18 @@ const portableComponents: PortableTextComponents = {
         image: ({ value }) => {
             const src = imageUrl(value, 1400, 900);
             if (!src) return null;
+            const alt =
+                typeof value === 'object' &&
+                value !== null &&
+                'alt' in value &&
+                typeof value.alt === 'string'
+                    ? value.alt
+                    : '';
             return (
                 <div className='relative my-8 aspect-[3/2] overflow-hidden bg-holiday-grey/15'>
                     <Image
                         src={src}
-                        alt=''
+                        alt={alt}
                         fill
                         className='object-cover'
                         sizes='(max-width: 768px) 100vw, 768px'

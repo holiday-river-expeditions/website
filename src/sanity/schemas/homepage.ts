@@ -21,11 +21,35 @@ export const homepage = defineType({
             validation: (rule) => rule.required(),
         }),
         defineField({
+            name: 'heroCtaText',
+            title: 'Hero CTA Text',
+            type: 'string',
+            group: 'hero',
+            description:
+                'Button under the hero headline, e.g. "Find Your Trip". Leave empty to hide.',
+        }),
+        defineField({
+            name: 'heroCtaLink',
+            title: 'Hero CTA Link',
+            type: 'string',
+            group: 'hero',
+            description: 'Where the hero button goes, e.g. /trips.',
+        }),
+        defineField({
             name: 'heroImage',
             title: 'Hero Background Image',
             type: 'image',
             group: 'hero',
             options: { hotspot: true },
+            fields: [
+                defineField({
+                    name: 'alt',
+                    title: 'Alt Text',
+                    type: 'string',
+                    description:
+                        'Describes the photo for screen readers, e.g. "Rafts on a beach below red canyon walls".',
+                }),
+            ],
             description:
                 'Full-width banner photo behind the hero headline. The 60-year seal is a fixed brand graphic and is not set here.',
             validation: (rule) => rule.required(),

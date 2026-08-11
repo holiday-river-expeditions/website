@@ -101,7 +101,7 @@ export default async function TripPage({ params }: TripPageProps) {
                     <dl className='flex flex-wrap gap-x-12 gap-y-4'>
                         {facts.map((fact) => (
                             <div key={fact.label}>
-                                <dt className='font-alt-gothic text-[12px] font-medium uppercase tracking-[0.05em] text-holiday-grey'>
+                                <dt className='font-alt-gothic text-[12px] font-medium uppercase tracking-[0.05em] text-onyx/70'>
                                     {fact.label}
                                 </dt>
                                 <dd className='mt-1 font-alt-gothic text-h3 font-semibold uppercase leading-h3 text-holiday-red'>
@@ -137,7 +137,7 @@ export default async function TripPage({ params }: TripPageProps) {
                                 <PortableText value={trip.description} />
                             </div>
                         ) : (
-                            <p className='mt-6 text-body leading-body text-onyx/60'>
+                            <p className='mt-6 text-body leading-body text-onyx/70'>
                                 Trip description coming soon — add it in the
                                 Studio.
                             </p>

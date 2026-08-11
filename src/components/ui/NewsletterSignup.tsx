@@ -42,7 +42,7 @@ export function NewsletterSignup() {
                         onChange={(event) => setEmail(event.target.value)}
                         placeholder='Enter Email'
                         aria-label='Email address'
-                        className='w-full rounded-full border border-onyx/30 bg-holiday-white px-5 py-3 pr-14 text-body text-onyx placeholder:text-holiday-grey focus:border-holiday-red focus:outline-none'
+                        className='w-full rounded-full border border-onyx/30 bg-holiday-white px-5 py-3 pr-14 text-body text-onyx placeholder:text-holiday-grey focus:border-holiday-red'
                     />
                     <button
                         type='submit'
@@ -74,7 +74,7 @@ export function NewsletterSignup() {
                     </p>
                 )}
                 {status === 'error' && (
-                    <p role='alert' className='mt-3 text-body text-holiday-red'>
+                    <p className='mt-3 text-body text-holiday-red'>
                         Something went wrong — please try again.
                     </p>
                 )}

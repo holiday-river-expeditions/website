@@ -15,7 +15,16 @@ export interface TripCardProps {
     ribbon?: string;
     /** When true, frames the image in a red border (specialty/featured trips). */
     featured?: boolean;
+    /** Sanity difficulty value (easy/moderate/challenging/expert). */
+    difficulty?: string;
 }
+
+const difficultyLabels: Record<string, string> = {
+    easy: 'Easy',
+    moderate: 'Moderate',
+    challenging: 'Challenging',
+    expert: 'Expert',
+};
 
 export function TripCard({
     name,
@@ -28,9 +37,14 @@ export function TripCard({
     subtitle,
     ribbon,
     featured = false,
+    difficulty,
 }: TripCardProps) {
     // Category tag is a solid fill: teal for rafting, sand for biking (per mockup).
-    const tagColor = /bik/i.test(category) ? 'bg-sand' : 'bg-teal';
+    // Sand fill needs dark text for WCAG AA contrast; teal carries white.
+    const tagColor = /bik/i.test(category)
+        ? 'bg-sand text-onyx'
+        : 'bg-teal text-holiday-white';
+    const difficultyLabel = difficulty ? difficultyLabels[difficulty] : null;
 
     return (
         <Link href={href} className='group block'>
@@ -40,7 +54,7 @@ export function TripCard({
                 }`}
             >
                 <div
-                    className='absolute inset-0 bg-cover bg-center transition-transform duration-500 group-hover:scale-105'
+                    className='absolute inset-0 bg-cover bg-center motion-safe:transition-transform motion-safe:duration-500 motion-safe:group-hover:scale-105'
                     style={{ backgroundImage: `url(${image})` }}
                 />
                 {ribbon && (
@@ -50,12 +64,19 @@ export function TripCard({
                 )}
             </div>
             <div className='mt-4 flex items-start justify-between gap-4'>
-                <span
-                    className={`inline-block ${tagColor} px-3 py-1 font-alt-gothic text-[12px] font-medium uppercase tracking-[0.05em] text-holiday-white`}
-                >
-                    {category}
+                <span className='flex flex-wrap gap-2'>
+                    <span
+                        className={`inline-block ${tagColor} px-3 py-1 font-alt-gothic text-[12px] font-medium uppercase tracking-[0.05em]`}
+                    >
+                        {category}
+                    </span>
+                    {difficultyLabel && (
+                        <span className='inline-block border border-onyx/40 px-3 py-1 font-alt-gothic text-[12px] font-medium uppercase tracking-[0.05em] text-onyx'>
+                            {difficultyLabel}
+                        </span>
+                    )}
                 </span>
-                <div className='text-right font-alt-gothic text-[16px] font-semibold uppercase leading-tight text-holiday-grey'>
+                <div className='text-right font-alt-gothic text-[16px] font-semibold uppercase leading-tight text-onyx/70'>
                     <div>Starts at {startingPrice}</div>
                     <div>{duration}</div>
                 </div>

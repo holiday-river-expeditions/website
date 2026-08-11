@@ -86,7 +86,7 @@ export default async function PostPage({ params }: PostPageProps) {
                             <PortableText value={post.body} />
                         </div>
                     ) : (
-                        <p className='text-body leading-body text-onyx/60'>
+                        <p className='text-body leading-body text-onyx/70'>
                             Post body coming soon — add it in the Studio.
                         </p>
                     )}

@@ -38,6 +38,20 @@
 
     /* Letter spacing */
     --tracking-tight: -0.5px;
+
+    /* Motion — "life of the river": slow, drifting, never abrupt. All usage
+       must be motion-safe (Tailwind motion-safe: variant or the media query
+       below) so reduced-motion users get a static site. */
+    --animate-hero-drift: hero-drift 25s ease-out both;
+}
+
+@keyframes hero-drift {
+    from {
+        transform: scale(1);
+    }
+    to {
+        transform: scale(1.05);
+    }
 }
 
 body {
@@ -48,4 +62,15 @@ body {
     background: #fcfcfc;
     color: #2c2b29;
     font-family: var(--font-pt-sans), Arial, sans-serif;
+}
+
+/* Branded keyboard focus: red ring with a white halo filling the offset gap,
+   so the indicator reads on white, evergreen, onyx, and red surfaces alike.
+   Mouse/touch interactions don't trigger :focus-visible, so this only shows
+   for keyboard (and other modality-based) focus. */
+:focus-visible {
+    outline: 2px solid #d00a0b;
+    outline-offset: 2px;
+    box-shadow: 0 0 0 2px #fcfcfc;
+    border-radius: 2px;
 }
