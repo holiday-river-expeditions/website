@@ -40,7 +40,29 @@ export const tripBySlugQuery = defineQuery(`
     durationLabel,
     "river": river->{ _id, name, slug, description, image },
     "activities": activities[]->{ _id, name, slug },
-    "categories": categories[]->{ _id, name, slug }
+    "categories": categories[]->{ _id, name, slug },
+    minAge,
+    season,
+    featuredReview,
+    itinerary,
+    "faqs": faqs[]->{ _id, question, answer, category },
+    "relatedTrips": select(
+      count(relatedTrips) > 0 => relatedTrips[]->{
+        _id, name, slug, tagline, subtitle, ribbon, startingPrice,
+        durationLabel, difficulty,
+        "category": categories[0]->name,
+        "image": photos[0]
+      },
+      *[_type == "trip" && slug.current != $slug &&
+        (river._ref == ^.river._ref ||
+         count(activities[@._ref in ^.^.activities[]._ref]) > 0)
+      ] | order(name asc) [0...3] {
+        _id, name, slug, tagline, subtitle, ribbon, startingPrice,
+        durationLabel, difficulty,
+        "category": categories[0]->name,
+        "image": photos[0]
+      }
+    )
   }
 `);
 
@@ -124,7 +146,8 @@ export const siteSettingsQuery = defineQuery(`
     phone,
     email,
     address,
-    socialLinks
+    socialLinks,
+    reviews
   }
 `);
 

@@ -88,6 +88,11 @@ export type SiteSettings = {
     phone?: string;
     email?: string;
     address?: string;
+    reviews?: {
+        ratingLabel?: string;
+        tripadvisorUrl?: string;
+        googleUrl?: string;
+    };
     socialLinks?: {
         facebook?: string;
         instagram?: string;
@@ -333,6 +338,13 @@ export type TripCategoryReference = {
     [internalGroqTypeReferenceTo]?: 'tripCategory';
 };
 
+export type FaqReference = {
+    _ref: string;
+    _type: 'reference';
+    _weak?: boolean;
+    [internalGroqTypeReferenceTo]?: 'faq';
+};
+
 export type Trip = {
     _id: string;
     _type: 'trip';
@@ -374,6 +386,30 @@ export type Trip = {
         _key: string;
     }>;
     highlights?: Array<string>;
+    minAge?: number;
+    season?: string;
+    featuredReview?: {
+        quote?: string;
+        author?: string;
+        source?: string;
+    };
+    itinerary?: Array<{
+        day?: string;
+        title?: string;
+        description?: string;
+        _type: 'itineraryDay';
+        _key: string;
+    }>;
+    faqs?: Array<
+        {
+            _key: string;
+        } & FaqReference
+    >;
+    relatedTrips?: Array<
+        {
+            _key: string;
+        } & TripReference
+    >;
     photos?: Array<{
         asset?: SanityImageAssetReference;
         media?: unknown;
@@ -555,6 +591,7 @@ export type AllSanitySchemaTypes =
     | Faq
     | ActivityReference
     | TripCategoryReference
+    | FaqReference
     | Trip
     | TripCategory
     | Activity
@@ -610,7 +647,7 @@ export type AllTripsQueryResult = Array<{
 
 // Source: src/lib/sanity/queries.ts
 // Variable: tripBySlugQuery
-// Query: *[_type == "trip" && slug.current == $slug][0] {    _id,    name,    slug,    difficulty,    duration,    description,    highlights,    photos,    pricingNotes,    arcticTripId,    tagline,    subtitle,    ribbon,    startingPrice,    durationLabel,    "river": river->{ _id, name, slug, description, image },    "activities": activities[]->{ _id, name, slug },    "categories": categories[]->{ _id, name, slug }  }
+// Query: *[_type == "trip" && slug.current == $slug][0] {    _id,    name,    slug,    difficulty,    duration,    description,    highlights,    photos,    pricingNotes,    arcticTripId,    tagline,    subtitle,    ribbon,    startingPrice,    durationLabel,    "river": river->{ _id, name, slug, description, image },    "activities": activities[]->{ _id, name, slug },    "categories": categories[]->{ _id, name, slug },    minAge,    season,    featuredReview,    itinerary,    "faqs": faqs[]->{ _id, question, answer, category },    "relatedTrips": select(      count(relatedTrips) > 0 => relatedTrips[]->{        _id, name, slug, tagline, subtitle, ribbon, startingPrice,        durationLabel, difficulty,        "category": categories[0]->name,        "image": photos[0]      },      *[_type == "trip" && slug.current != $slug &&        (river._ref == ^.river._ref ||         count(activities[@._ref in ^.^.activities[]._ref]) > 0)      ] | order(name asc) [0...3] {        _id, name, slug, tagline, subtitle, ribbon, startingPrice,        durationLabel, difficulty,        "category": categories[0]->name,        "image": photos[0]      }    )  }
 export type TripBySlugQueryResult = {
     _id: string;
     name: string | null;
@@ -676,6 +713,79 @@ export type TripBySlugQueryResult = {
         _id: string;
         name: string | null;
         slug: Slug | null;
+    }> | null;
+    minAge: number | null;
+    season: string | null;
+    featuredReview: {
+        quote?: string;
+        author?: string;
+        source?: string;
+    } | null;
+    itinerary: Array<{
+        day?: string;
+        title?: string;
+        description?: string;
+        _type: 'itineraryDay';
+        _key: string;
+    }> | null;
+    faqs: Array<{
+        _id: string;
+        question: string | null;
+        answer: Array<{
+            children?: Array<{
+                marks?: Array<string>;
+                text?: string;
+                _type: 'span';
+                _key: string;
+            }>;
+            style?:
+                | 'blockquote'
+                | 'h1'
+                | 'h2'
+                | 'h3'
+                | 'h4'
+                | 'h5'
+                | 'h6'
+                | 'normal';
+            listItem?: 'bullet' | 'number';
+            markDefs?: Array<{
+                href?: string;
+                _type: 'link';
+                _key: string;
+            }>;
+            level?: number;
+            _type: 'block';
+            _key: string;
+        }> | null;
+        category:
+            | 'booking'
+            | 'cancellation'
+            | 'general'
+            | 'safety'
+            | 'trip-preparation'
+            | null;
+    }> | null;
+    relatedTrips: Array<{
+        _id: string;
+        name: string | null;
+        slug: Slug | null;
+        tagline: string | null;
+        subtitle: string | null;
+        ribbon: string | null;
+        startingPrice: string | null;
+        durationLabel: string | null;
+        difficulty: 'challenging' | 'easy' | 'expert' | 'moderate' | null;
+        category: string | null;
+        image: {
+            asset?: SanityImageAssetReference;
+            media?: unknown;
+            hotspot?: SanityImageHotspot;
+            crop?: SanityImageCrop;
+            alt?: string;
+            caption?: string;
+            _type: 'image';
+            _key: string;
+        } | null;
     }> | null;
 } | null;
 
@@ -827,7 +937,7 @@ export type AllFaqsQueryResult = Array<{
 
 // Source: src/lib/sanity/queries.ts
 // Variable: siteSettingsQuery
-// Query: *[_type == "siteSettings"][0] {    phone,    email,    address,    socialLinks  }
+// Query: *[_type == "siteSettings"][0] {    phone,    email,    address,    socialLinks,    reviews  }
 export type SiteSettingsQueryResult = {
     phone: string | null;
     email: string | null;
@@ -837,6 +947,11 @@ export type SiteSettingsQueryResult = {
         instagram?: string;
         youtube?: string;
         tiktok?: string;
+    } | null;
+    reviews: {
+        ratingLabel?: string;
+        tripadvisorUrl?: string;
+        googleUrl?: string;
     } | null;
 } | null;
 
@@ -1018,13 +1133,13 @@ import '@sanity/client';
 declare module '@sanity/client' {
     interface SanityQueries {
         '\n  *[_type == "trip"] | order(name asc) {\n    _id,\n    name,\n    slug,\n    difficulty,\n    duration,\n    pricingNotes,\n    arcticTripId,\n    tagline,\n    subtitle,\n    ribbon,\n    startingPrice,\n    durationLabel,\n    "river": river->{ name, slug },\n    "activities": activities[]->{ name, slug },\n    "categories": categories[]->{ name, slug },\n    "mainImage": photos[0]\n  }\n': AllTripsQueryResult;
-        '\n  *[_type == "trip" && slug.current == $slug][0] {\n    _id,\n    name,\n    slug,\n    difficulty,\n    duration,\n    description,\n    highlights,\n    photos,\n    pricingNotes,\n    arcticTripId,\n    tagline,\n    subtitle,\n    ribbon,\n    startingPrice,\n    durationLabel,\n    "river": river->{ _id, name, slug, description, image },\n    "activities": activities[]->{ _id, name, slug },\n    "categories": categories[]->{ _id, name, slug }\n  }\n': TripBySlugQueryResult;
+        '\n  *[_type == "trip" && slug.current == $slug][0] {\n    _id,\n    name,\n    slug,\n    difficulty,\n    duration,\n    description,\n    highlights,\n    photos,\n    pricingNotes,\n    arcticTripId,\n    tagline,\n    subtitle,\n    ribbon,\n    startingPrice,\n    durationLabel,\n    "river": river->{ _id, name, slug, description, image },\n    "activities": activities[]->{ _id, name, slug },\n    "categories": categories[]->{ _id, name, slug },\n    minAge,\n    season,\n    featuredReview,\n    itinerary,\n    "faqs": faqs[]->{ _id, question, answer, category },\n    "relatedTrips": select(\n      count(relatedTrips) > 0 => relatedTrips[]->{\n        _id, name, slug, tagline, subtitle, ribbon, startingPrice,\n        durationLabel, difficulty,\n        "category": categories[0]->name,\n        "image": photos[0]\n      },\n      *[_type == "trip" && slug.current != $slug &&\n        (river._ref == ^.river._ref ||\n         count(activities[@._ref in ^.^.activities[]._ref]) > 0)\n      ] | order(name asc) [0...3] {\n        _id, name, slug, tagline, subtitle, ribbon, startingPrice,\n        durationLabel, difficulty,\n        "category": categories[0]->name,\n        "image": photos[0]\n      }\n    )\n  }\n': TripBySlugQueryResult;
         '\n  *[_type == "river"] | order(name asc) {\n    _id,\n    name,\n    slug,\n    description,\n    image\n  }\n': AllRiversQueryResult;
         '\n  *[_type == "river" && slug.current == $slug][0] {\n    _id,\n    name,\n    slug,\n    description,\n    image,\n    "trips": *[_type == "trip" && river._ref == ^._id] | order(name asc) {\n      _id,\n      name,\n      slug,\n      tagline,\n      subtitle,\n      ribbon,\n      startingPrice,\n      durationLabel,\n      difficulty,\n      "category": categories[0]->name,\n      "image": photos[0]\n    }\n  }\n': RiverBySlugQueryResult;
         '\n  *[_type == "activity"] | order(name asc) {\n    _id,\n    name,\n    slug,\n    description,\n    image\n  }\n': AllActivitiesQueryResult;
         '\n  *[_type == "activity" && slug.current == $slug][0] {\n    _id,\n    name,\n    slug,\n    description,\n    image,\n    "trips": *[_type == "trip" && references(^._id)] | order(name asc) {\n      _id,\n      name,\n      slug,\n      tagline,\n      subtitle,\n      ribbon,\n      startingPrice,\n      durationLabel,\n      difficulty,\n      "category": categories[0]->name,\n      "image": photos[0]\n    }\n  }\n': ActivityBySlugQueryResult;
         '\n  *[_type == "faq"] | order(category asc, order asc) {\n    _id,\n    question,\n    answer,\n    category\n  }\n': AllFaqsQueryResult;
-        '\n  *[_type == "siteSettings"][0] {\n    phone,\n    email,\n    address,\n    socialLinks\n  }\n': SiteSettingsQueryResult;
+        '\n  *[_type == "siteSettings"][0] {\n    phone,\n    email,\n    address,\n    socialLinks,\n    reviews\n  }\n': SiteSettingsQueryResult;
         '\n  *[_type == "post"] | order(publishedAt desc) {\n    _id,\n    title,\n    slug,\n    excerpt,\n    mainImage,\n    publishedAt,\n    category\n  }\n': AllPostsQueryResult;
         '\n  *[_type == "post" && slug.current == $slug][0] {\n    _id,\n    title,\n    slug,\n    excerpt,\n    mainImage,\n    publishedAt,\n    category,\n    body\n  }\n': PostBySlugQueryResult;
         '\n  *[_type == "page" && slug.current == $slug][0] {\n    _id,\n    title,\n    slug,\n    content\n  }\n': PageBySlugQueryResult;

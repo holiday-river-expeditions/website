@@ -70,6 +70,88 @@ export const trip = defineType({
             of: [{ type: 'string' }],
         }),
         defineField({
+            name: 'minAge',
+            title: 'Minimum Age',
+            type: 'number',
+            validation: (rule) => rule.min(0).integer(),
+        }),
+        defineField({
+            name: 'season',
+            title: 'Season',
+            type: 'string',
+            description: 'e.g. "May – September"',
+        }),
+        defineField({
+            name: 'featuredReview',
+            title: 'Featured Review',
+            type: 'object',
+            description:
+                'One standout guest quote, shown as a pull-quote band on the trip page.',
+            fields: [
+                defineField({ name: 'quote', title: 'Quote', type: 'text' }),
+                defineField({
+                    name: 'author',
+                    title: 'Author',
+                    type: 'string',
+                }),
+                defineField({
+                    name: 'source',
+                    title: 'Source',
+                    type: 'string',
+                    description: 'e.g. TripAdvisor, Google',
+                }),
+            ],
+        }),
+        defineField({
+            name: 'itinerary',
+            title: 'Itinerary',
+            type: 'array',
+            description: 'Day-by-day sample itinerary.',
+            of: [
+                {
+                    type: 'object',
+                    name: 'itineraryDay',
+                    fields: [
+                        defineField({
+                            name: 'day',
+                            title: 'Day Label',
+                            type: 'string',
+                            description: 'e.g. "Day 1" or "Days 2–3"',
+                            validation: (rule) => rule.required(),
+                        }),
+                        defineField({
+                            name: 'title',
+                            title: 'Title',
+                            type: 'string',
+                        }),
+                        defineField({
+                            name: 'description',
+                            title: 'Description',
+                            type: 'text',
+                        }),
+                    ],
+                    preview: {
+                        select: { title: 'day', subtitle: 'title' },
+                    },
+                },
+            ],
+        }),
+        defineField({
+            name: 'faqs',
+            title: 'Trip FAQs',
+            type: 'array',
+            description: 'FAQ entries shown on this trip page.',
+            of: [{ type: 'reference', to: [{ type: 'faq' }] }],
+        }),
+        defineField({
+            name: 'relatedTrips',
+            title: 'Related Trips',
+            type: 'array',
+            description:
+                'Curated "keep exploring" trips. Leave empty to auto-pick trips on the same river or activity.',
+            of: [{ type: 'reference', to: [{ type: 'trip' }] }],
+        }),
+        defineField({
             name: 'photos',
             title: 'Photos',
             type: 'array',

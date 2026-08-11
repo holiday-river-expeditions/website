@@ -5,8 +5,12 @@ import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { AvailabilitySection } from '@/components/ui/AvailabilitySection';
 import { Button } from '@/components/ui/Button';
+import { FeaturedReview } from '@/components/ui/FeaturedReview';
+import { ItinerarySection } from '@/components/ui/ItinerarySection';
+import { RelatedTrips } from '@/components/ui/RelatedTrips';
 import { Section } from '@/components/ui/Section';
-import { getTripBySlug, imageUrl } from '@/lib/sanity';
+import { TrustStrip } from '@/components/ui/TrustStrip';
+import { getSiteSettings, getTripBySlug, imageUrl } from '@/lib/sanity';
 
 // Same ISR window as the homepage: Studio edits go live within a minute.
 export const revalidate = 60;
@@ -36,7 +40,10 @@ export async function generateMetadata({
 
 export default async function TripPage({ params }: TripPageProps) {
     const { slug } = await params;
-    const trip = await getTripBySlug(slug);
+    const [trip, settings] = await Promise.all([
+        getTripBySlug(slug),
+        getSiteSettings(),
+    ]);
     if (!trip) notFound();
 
     const category = trip.categories?.[0]?.name ?? null;
@@ -52,6 +59,9 @@ export default async function TripPage({ params }: TripPageProps) {
     if (trip.durationLabel)
         facts.push({ label: 'Duration', value: trip.durationLabel });
     if (difficulty) facts.push({ label: 'Difficulty', value: difficulty });
+    if (trip.season) facts.push({ label: 'Season', value: trip.season });
+    if (trip.minAge)
+        facts.push({ label: 'Min Age', value: String(trip.minAge) });
     if (trip.river?.name)
         facts.push({
             label: 'River',
@@ -164,8 +174,20 @@ export default async function TripPage({ params }: TripPageProps) {
                 </div>
             </Section>
 
+            {/* Featured review — social proof before the pitch deepens */}
+            {trip.featuredReview?.quote && (
+                <FeaturedReview
+                    quote={trip.featuredReview.quote}
+                    author={trip.featuredReview.author}
+                    source={trip.featuredReview.source}
+                />
+            )}
+
             {/* Live availability from Arctic */}
             <AvailabilitySection arcticTripId={trip.arcticTripId ?? null} />
+
+            {/* Day-by-day itinerary */}
+            <ItinerarySection days={trip.itinerary ?? []} />
 
             {/* Photo gallery */}
             {galleryPhotos.length > 0 && (
@@ -188,6 +210,49 @@ export default async function TripPage({ params }: TripPageProps) {
                     </div>
                 </Section>
             )}
+
+            {/* Trip-specific FAQs */}
+            {trip.faqs && trip.faqs.length > 0 && (
+                <Section background='white' className='pb-16 pt-0 md:pb-20'>
+                    <div className='max-w-3xl'>
+                        <h2 className='font-alt-gothic text-[36px] font-black uppercase leading-[0.9] text-holiday-red'>
+                            Good to Know
+                        </h2>
+                        <div className='mt-6 divide-y divide-holiday-grey/40 border-y border-holiday-grey/40'>
+                            {trip.faqs.map((faq) => (
+                                <details key={faq._id} className='group py-4'>
+                                    <summary className='flex cursor-pointer list-none items-center justify-between gap-4 font-alt-gothic text-h3 font-semibold uppercase leading-h3 text-onyx transition-opacity hover:opacity-70 [&::-webkit-details-marker]:hidden'>
+                                        {faq.question}
+                                        <span
+                                            aria-hidden
+                                            className='text-holiday-red transition-transform group-open:rotate-45'
+                                        >
+                                            +
+                                        </span>
+                                    </summary>
+                                    {faq.answer && (
+                                        <div className='mt-3 space-y-3 text-body leading-body text-onyx [&_a]:text-holiday-red [&_a]:underline'>
+                                            <PortableText value={faq.answer} />
+                                        </div>
+                                    )}
+                                </details>
+                            ))}
+                        </div>
+                    </div>
+                </Section>
+            )}
+
+            {/* Third-party review trust strip */}
+            {settings?.reviews?.ratingLabel && (
+                <TrustStrip
+                    ratingLabel={settings.reviews.ratingLabel}
+                    tripadvisorUrl={settings.reviews.tripadvisorUrl}
+                    googleUrl={settings.reviews.googleUrl}
+                />
+            )}
+
+            {/* Cross-sell */}
+            <RelatedTrips trips={trip.relatedTrips ?? []} />
         </>
     );
 }
