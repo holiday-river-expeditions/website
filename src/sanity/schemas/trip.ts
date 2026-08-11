@@ -102,10 +102,10 @@ export const trip = defineType({
         }),
         defineField({
             name: 'arcticTripId',
-            title: 'Arctic Trip ID',
+            title: 'Arctic Trip Type ID(s)',
             type: 'string',
             description:
-                'Links this trip to Arctic Reservations for live availability and booking.',
+                'Arctic Reservations trip-type id for live availability and booking. Comma-separate multiple ids when one trip page covers several Arctic trip types (e.g. "37,38" for Cataract 5-day + 6-day).',
         }),
 
         // --- Trip-card display fields (homepage grid, listings) ---

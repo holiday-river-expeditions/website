@@ -21,11 +21,14 @@ export default function BookPage() {
                     on the river
                 </h1>
                 <p className='mt-6 text-paragraph leading-paragraph text-onyx'>
-                    Online booking is coming soon. Until then, our crew in Salt
-                    Lake City will set you up in one call — dates, gear
+                    Check live availability on the Open Seats page, or let our
+                    crew in Salt Lake City set you up in one call — dates, gear
                     questions, all of it.
                 </p>
-                <div className='mt-10'>
+                <div className='mt-10 flex flex-wrap items-center justify-center gap-4'>
+                    <Button href='/open-seats' size='lg'>
+                        See Open Seats
+                    </Button>
                     <a
                         href='tel:+18012662087'
                         className='inline-block rounded-full bg-holiday-red px-10 py-4 font-alt-gothic text-[24px] font-medium uppercase leading-none text-holiday-white transition-colors hover:bg-holiday-red/90'

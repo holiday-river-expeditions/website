@@ -15,9 +15,7 @@ const defaults = {
 };
 
 const resourceLinks = [
-    // Trip Dates points at the trip listing until the Arctic-powered
-    // Open Seats page exists (see docs/project/open-decisions.md).
-    { label: 'Trip Dates', href: '/trips' },
+    { label: 'Trip Dates', href: '/open-seats' },
     { label: 'F.A.Q.', href: '/faq' },
     { label: 'Trip Insurance', href: '/trip-insurance' },
     {

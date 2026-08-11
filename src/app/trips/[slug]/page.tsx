@@ -3,6 +3,7 @@ import type { Metadata } from 'next';
 import Image from 'next/image';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
+import { AvailabilitySection } from '@/components/ui/AvailabilitySection';
 import { Button } from '@/components/ui/Button';
 import { Section } from '@/components/ui/Section';
 import { getTripBySlug, imageUrl } from '@/lib/sanity';
@@ -162,6 +163,9 @@ export default async function TripPage({ params }: TripPageProps) {
                     )}
                 </div>
             </Section>
+
+            {/* Live availability from Arctic */}
+            <AvailabilitySection arcticTripId={trip.arcticTripId ?? null} />
 
             {/* Photo gallery */}
             {galleryPhotos.length > 0 && (
