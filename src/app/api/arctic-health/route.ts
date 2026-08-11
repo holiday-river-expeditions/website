@@ -29,6 +29,12 @@ export async function GET(req: Request) {
         ARCTIC_CLIENT_SECRET: envInfo('ARCTIC_CLIENT_SECRET'),
         ARCTIC_USERNAME: envInfo('ARCTIC_USERNAME'),
         ARCTIC_PASSWORD: envInfo('ARCTIC_PASSWORD'),
+        // Flag value is not secret; expose it verbatim so misconfigurations
+        // (quotes, whitespace, wrong environment) are visible at a glance.
+        BOOKING_NATIVE: {
+            value: process.env.BOOKING_NATIVE ?? null,
+            active: process.env.BOOKING_NATIVE === 'true',
+        },
     };
 
     let probe: string;
