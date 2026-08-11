@@ -56,10 +56,15 @@ export function GET() {
     --onyx: #2c2b29; --cream: #f3f0eb;
   }
   * { box-sizing: border-box; margin: 0; padding: 0; }
+  html { height: 100%; }
   body {
     background: var(--white); color: var(--onyx);
     font-family: 'PT Sans', Arial, sans-serif; font-size: 16px; line-height: 1.4;
+    /* Sticky footer: short Arctic pages otherwise leave the footer floating
+       mid-viewport with dead space below. */
+    min-height: 100vh; display: flex; flex-direction: column;
   }
+  main.hre { flex: 1; }
   .gothic { font-family: alternate-gothic-atf, Oswald, Arial, sans-serif; text-transform: uppercase; }
   a { color: var(--red); }
   :focus-visible { outline: 2px solid var(--red); outline-offset: 2px; }
@@ -133,6 +138,47 @@ export function GET() {
   }
   footer.hre ul a:hover { opacity: 0.7; }
   footer.hre .badge img { height: 64px; width: auto; }
+
+  /* --- Arctic widget skin: restyle the reservation UI injected into
+         {SITE-BODY} (tabs, forms, buttons ship with Arctic's default
+         Bootstrap-era look). Selectors target Arctic's guest-site markup. --- */
+  main.hre h1, main.hre h2, main.hre h3, main.hre legend {
+    font-family: alternate-gothic-atf, Oswald, Arial, sans-serif;
+    text-transform: uppercase; color: var(--onyx);
+  }
+  main.hre .btn-primary, main.hre .btn.btn-primary,
+  main.hre input[type="submit"], main.hre button[type="submit"] {
+    background: var(--red) !important; background-image: none !important;
+    border: none !important; border-radius: 999px !important;
+    color: var(--white) !important; text-shadow: none !important;
+    font-family: alternate-gothic-atf, Oswald, Arial, sans-serif !important;
+    text-transform: uppercase !important; letter-spacing: 0.04em;
+    font-size: 17px !important; padding: 10px 24px !important;
+    cursor: pointer;
+  }
+  main.hre .btn-primary:hover, main.hre input[type="submit"]:hover,
+  main.hre button[type="submit"]:hover { background: #b90909 !important; }
+  main.hre .btn, main.hre button { cursor: pointer; }
+  main.hre input[type="text"], main.hre input[type="email"],
+  main.hre input[type="tel"], main.hre input[type="number"],
+  main.hre input[type="date"], main.hre select, main.hre textarea {
+    border: 1px solid rgba(44, 43, 41, 0.3); border-radius: 0;
+    background: var(--white); padding: 8px 12px;
+    font-family: 'PT Sans', Arial, sans-serif;
+  }
+  /* Arctic's tab strip (Book Trip / My Activities / …) */
+  main.hre .nav-tabs, main.hre ul.nav {
+    border-bottom: 2px solid rgba(44, 43, 41, 0.15);
+  }
+  main.hre .nav-tabs a, main.hre ul.nav a {
+    font-family: alternate-gothic-atf, Oswald, Arial, sans-serif;
+    text-transform: uppercase; letter-spacing: 0.04em;
+    color: var(--onyx); text-decoration: none;
+  }
+  main.hre .nav-tabs .active a, main.hre ul.nav .active a {
+    color: var(--red); background: transparent;
+    border-bottom: 2px solid var(--red);
+  }
 </style>
 </head>
 <body>

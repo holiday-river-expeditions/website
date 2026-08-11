@@ -16,6 +16,12 @@ import {
  * re-check here is friendly early messaging — Arctic enforces at checkout.
  */
 
+/** Arctic writes summaries lowercase ("reservation for…"); present them
+ *  sentence-cased. */
+function sentenceCase(text: string): string {
+    return text.charAt(0).toUpperCase() + text.slice(1);
+}
+
 const bookRequestSchema = z.object({
     departureId: z.number().int().positive(),
     counts: z
@@ -95,7 +101,9 @@ export async function POST(req: Request) {
         const res = NextResponse.json({
             ok: true,
             checkoutUrl: created.checkoutUrl,
-            itemSummary: created.itemSummary,
+            itemSummary: created.itemSummary
+                ? sentenceCase(created.itemSummary)
+                : null,
             cost: created.cost,
             cartCount: cart.count,
         });

@@ -64,6 +64,15 @@ body {
     font-family: var(--font-pt-sans), Arial, sans-serif;
 }
 
+/* Tailwind v4's preflight follows the browser default of cursor: default on
+   buttons; interactive affordance wins here — anything clickable gets the
+   pointer. */
+button:not(:disabled),
+[role='button']:not([aria-disabled='true']),
+summary {
+    cursor: pointer;
+}
+
 /* Branded keyboard focus: red ring with a white halo filling the offset gap,
    so the indicator reads on white, evergreen, onyx, and red surfaces alike.
    Mouse/touch interactions don't trigger :focus-visible, so this only shows

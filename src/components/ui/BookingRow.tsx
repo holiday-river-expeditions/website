@@ -144,9 +144,9 @@ export function BookingRow({
             : 0;
 
     const primaryButton =
-        'bg-holiday-red px-6 py-2 text-center font-alt-gothic text-[19px] font-medium uppercase leading-none tracking-wide text-holiday-white transition-colors hover:bg-holiday-red/90 disabled:opacity-40 disabled:hover:bg-holiday-red';
+        'rounded-full bg-holiday-red px-6 py-2 text-center font-alt-gothic text-[19px] font-medium uppercase leading-none tracking-wide text-holiday-white transition-colors hover:bg-holiday-red/90 disabled:opacity-40 disabled:hover:bg-holiday-red';
     const outlineButton =
-        'border-2 border-holiday-red px-6 py-2 text-center font-alt-gothic text-[19px] font-medium uppercase leading-none tracking-wide text-holiday-red transition-colors hover:bg-holiday-red hover:text-holiday-white';
+        'rounded-full border-2 border-holiday-red px-6 py-2 text-center font-alt-gothic text-[19px] font-medium uppercase leading-none tracking-wide text-holiday-red transition-colors hover:bg-holiday-red hover:text-holiday-white';
 
     return (
         <>
@@ -172,12 +172,37 @@ export function BookingRow({
         return (
             <div>
                 {flow.step === 'loading-pricing' && (
-                    <p
-                        className='py-2 text-body text-onyx/70'
+                    // Skeleton mirroring the selector's final layout — the
+                    // NN/g-preferred shape for short waits: reserves the
+                    // space (no layout shift) and previews the structure.
+                    <div
                         aria-live='polite'
+                        aria-label='Loading rates'
+                        className='mt-3 border-l-2 border-holiday-red bg-holiday-grey/10 p-4 sm:p-5'
                     >
-                        Loading rates…
-                    </p>
+                        <span className='sr-only'>Loading rates…</span>
+                        {[0, 1].map((row) => (
+                            <div
+                                key={row}
+                                aria-hidden
+                                className='flex items-center justify-between gap-6 py-3'
+                            >
+                                <div className='space-y-2'>
+                                    <div className='h-4 w-36 bg-holiday-grey/40 motion-safe:animate-pulse' />
+                                    <div className='h-3 w-24 bg-holiday-grey/25 motion-safe:animate-pulse' />
+                                </div>
+                                <div className='flex items-center gap-2'>
+                                    <div className='h-9 w-9 bg-holiday-grey/25 motion-safe:animate-pulse' />
+                                    <div className='h-9 w-14 bg-holiday-grey/40 motion-safe:animate-pulse' />
+                                    <div className='h-9 w-9 bg-holiday-grey/25 motion-safe:animate-pulse' />
+                                </div>
+                            </div>
+                        ))}
+                        <div className='mt-3 flex items-center justify-end gap-3 border-t border-holiday-grey/40 pt-4'>
+                            <div className='h-9 w-28 rounded-full bg-holiday-grey/25 motion-safe:animate-pulse' />
+                            <div className='h-9 w-36 rounded-full bg-holiday-grey/40 motion-safe:animate-pulse' />
+                        </div>
+                    </div>
                 )}
 
                 {(flow.step === 'selecting' || flow.step === 'submitting') && (

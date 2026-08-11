@@ -12,7 +12,7 @@ import {
  * can't resolve) the Book action stays an external link into Arctic's
  * hosted reserve flow — that link is also the no-JS fallback.
  */
-const NATIVE_BOOKING = process.env.BOOKING_NATIVE === 'true';
+const nativeBookingEnabled = () => process.env.BOOKING_NATIVE === 'true';
 
 /**
  * Renders Arctic departures as a month-grouped schedule: month subheads
@@ -84,7 +84,7 @@ function DepartureRow({
             data-triptype={departure.triptypeid ?? undefined}
             className='grid grid-cols-1 items-center gap-x-6 gap-y-2 py-4 sm:grid-cols-[minmax(200px,1fr)_auto]'
         >
-            {bookable && NATIVE_BOOKING && departure.triptypeid ? (
+            {bookable && nativeBookingEnabled() && departure.triptypeid ? (
                 // BookingRow owns the row internals so its expanded panel can
                 // span both grid columns; the server-rendered cells pass
                 // through as slots.
@@ -108,14 +108,14 @@ function DepartureRow({
                         {bookable ? (
                             <ExternalLink
                                 href={departure.onlinebookingurl ?? '#'}
-                                className='bg-holiday-red px-6 py-2 text-center font-alt-gothic text-[19px] font-medium uppercase leading-none tracking-wide text-holiday-white transition-colors hover:bg-holiday-red/90'
+                                className='rounded-full bg-holiday-red px-6 py-2 text-center font-alt-gothic text-[19px] font-medium uppercase leading-none tracking-wide text-holiday-white transition-colors hover:bg-holiday-red/90'
                             >
                                 Book
                             </ExternalLink>
                         ) : (
                             <a
                                 href='tel:+18012662087'
-                                className='inline-block border-2 border-holiday-red px-6 py-2 text-center font-alt-gothic text-[19px] font-medium uppercase leading-none tracking-wide text-holiday-red transition-colors hover:bg-holiday-red hover:text-holiday-white'
+                                className='inline-block rounded-full border-2 border-holiday-red px-6 py-2 text-center font-alt-gothic text-[19px] font-medium uppercase leading-none tracking-wide text-holiday-red transition-colors hover:bg-holiday-red hover:text-holiday-white'
                             >
                                 Call to Book
                             </a>
@@ -202,7 +202,7 @@ export function DepartureList({
             ))}
             {collapsedGroups.length > 0 && (
                 <details data-departure-overflow className='group'>
-                    <summary className='inline-flex cursor-pointer list-none items-center gap-2 border-2 border-holiday-red px-6 py-2 font-alt-gothic text-[19px] font-medium uppercase leading-none tracking-wide text-holiday-red transition-colors hover:bg-holiday-red hover:text-holiday-white group-open:hidden [&::-webkit-details-marker]:hidden'>
+                    <summary className='inline-flex cursor-pointer list-none items-center gap-2 rounded-full border-2 border-holiday-red px-6 py-2 font-alt-gothic text-[19px] font-medium uppercase leading-none tracking-wide text-holiday-red transition-colors hover:bg-holiday-red hover:text-holiday-white group-open:hidden [&::-webkit-details-marker]:hidden'>
                         Show all {departures.length} departures
                         <span aria-hidden>↓</span>
                     </summary>

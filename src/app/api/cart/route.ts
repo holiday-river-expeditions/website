@@ -5,6 +5,12 @@ import { readCartCookie, withCartCookies } from '@/lib/cart-cookie';
 
 /** Mini-cart backend: list and remove items in the guest's Arctic cart. */
 
+/** Arctic writes summaries lowercase ("reservation for…"); present them
+ *  sentence-cased. */
+function sentenceCase(text: string): string {
+    return text.charAt(0).toUpperCase() + text.slice(1);
+}
+
 export async function GET() {
     const cart = await readCartCookie();
     if (!cart) return NextResponse.json({ items: [], checkoutUrl: null });
@@ -19,7 +25,9 @@ export async function GET() {
         const res = NextResponse.json({
             items: items.map((item) => ({
                 id: item.id,
-                summary: item.description ?? item.name ?? 'Reservation',
+                summary: sentenceCase(
+                    item.description ?? item.name ?? 'Reservation',
+                ),
                 cost: item.cost ?? null,
             })),
             checkoutUrl: items.length > 0 ? cart.checkout : null,
@@ -62,7 +70,9 @@ export async function DELETE(req: Request) {
         const res = NextResponse.json({
             items: items.map((item) => ({
                 id: item.id,
-                summary: item.description ?? item.name ?? 'Reservation',
+                summary: sentenceCase(
+                    item.description ?? item.name ?? 'Reservation',
+                ),
                 cost: item.cost ?? null,
             })),
             checkoutUrl: items.length > 0 ? cart.checkout : null,
