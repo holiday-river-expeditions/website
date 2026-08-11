@@ -1,38 +1,25 @@
 import { ExternalLink } from '@/components/ui/ExternalLink';
 import type { ArcticDeparture } from '@/lib/arctic';
+import {
+    durationToDays,
+    formatDateRange,
+    groupDeparturesByMonth,
+} from '@/lib/departures';
 
 /**
- * Renders Arctic departures as a schedule table: date range, trip variant,
- * seats remaining with urgency states, and a book action per row.
- * Server-rendered; data comes from the Arctic read API at ISR time.
+ * Renders Arctic departures as a month-grouped schedule: month subheads
+ * (with years when the list spans them), seats remaining with urgency
+ * states, and a book action per row. Long lists collapse behind a native
+ * <details> so the schedule stays scannable without JavaScript.
+ *
+ * Server component; rows carry data-triptype so DepartureVariantChips
+ * (a sibling client island) can filter visibility.
  */
 
 const LOW_SEATS_THRESHOLD = 4;
 
-const dateFormat = new Intl.DateTimeFormat('en-US', {
-    month: 'short',
-    day: 'numeric',
-    timeZone: 'UTC',
-});
-
-function formatDateRange(start: string, durationHours: number | null): string {
-    const startDate = new Date(`${start}T00:00:00Z`);
-    if (Number.isNaN(startDate.getTime())) return start;
-    const days = durationHours
-        ? Math.max(1, Math.round(durationHours / 24))
-        : null;
-    if (!days || days === 1) return dateFormat.format(startDate);
-    const endDate = new Date(startDate);
-    endDate.setUTCDate(endDate.getUTCDate() + days - 1);
-    return `${dateFormat.format(startDate)} – ${dateFormat.format(endDate)}`;
-}
-
-/** Arctic serializes duration as "HH:MM:SS" (e.g. "120:00:00" = 5 days). */
-function durationToHours(duration: string | null | undefined): number | null {
-    if (!duration) return null;
-    const hours = Number(duration.split(':')[0]);
-    return Number.isFinite(hours) && hours > 0 ? hours : null;
-}
+/** Rows shown before the rest collapses behind "Show all". */
+const VISIBLE_ROWS = 8;
 
 function SeatsBadge({ seats }: { seats: number | null }) {
     if (seats === null) return null;
@@ -53,6 +40,99 @@ function SeatsBadge({ seats }: { seats: number | null }) {
     );
 }
 
+function DepartureRow({
+    departure,
+    showTripName,
+}: {
+    departure: ArcticDeparture;
+    showTripName: boolean;
+}) {
+    const seats = departure.remainingopenings ?? null;
+    const bookable = seats !== null && seats > 0 && departure.onlinebookingurl;
+    const days = durationToDays(departure.duration);
+
+    return (
+        <li
+            data-triptype={departure.triptypeid ?? undefined}
+            className='grid grid-cols-1 items-center gap-x-6 gap-y-2 py-4 sm:grid-cols-[minmax(200px,1fr)_auto]'
+        >
+            <div>
+                <div>
+                    <span className='font-alt-gothic text-h3 font-semibold uppercase leading-h3 text-onyx'>
+                        {formatDateRange(departure.start, departure.duration)}
+                    </span>
+                    {days && days > 1 && (
+                        <span className='ml-3 text-[13px] uppercase tracking-wider text-onyx/70'>
+                            {days} days
+                        </span>
+                    )}
+                </div>
+                {showTripName && departure.name && (
+                    <div className='mt-0.5 text-body leading-body text-onyx/80'>
+                        {departure.name}
+                    </div>
+                )}
+            </div>
+            <div className='flex items-center gap-4 justify-self-start sm:justify-self-end'>
+                <SeatsBadge seats={seats} />
+                {bookable ? (
+                    <ExternalLink
+                        href={departure.onlinebookingurl ?? '#'}
+                        className='bg-holiday-red px-6 py-2 text-center font-alt-gothic text-[19px] font-medium uppercase leading-none tracking-wide text-holiday-white transition-colors hover:bg-holiday-red/90'
+                    >
+                        Book
+                    </ExternalLink>
+                ) : (
+                    <a
+                        href='tel:+18012662087'
+                        className='inline-block border-2 border-holiday-red px-6 py-2 text-center font-alt-gothic text-[19px] font-medium uppercase leading-none tracking-wide text-holiday-red transition-colors hover:bg-holiday-red hover:text-holiday-white'
+                    >
+                        Call to Book
+                    </a>
+                )}
+            </div>
+        </li>
+    );
+}
+
+interface MonthGroupData {
+    monthLabel: string;
+    year: number;
+    showYear: boolean;
+    departures: ArcticDeparture[];
+}
+
+function monthGroupLabel(group: MonthGroupData): string {
+    return group.showYear && group.year > 0
+        ? `${group.monthLabel} ${group.year}`
+        : group.monthLabel;
+}
+
+function MonthGroup({
+    group,
+    showTripName,
+}: {
+    group: MonthGroupData;
+    showTripName: boolean;
+}) {
+    return (
+        <div>
+            <h3 className='pb-1 pt-2 font-alt-gothic text-[15px] font-semibold uppercase tracking-[0.1em] text-teal'>
+                {monthGroupLabel(group)}
+            </h3>
+            <ul className='divide-y divide-holiday-grey/40 border-y border-holiday-grey/40'>
+                {group.departures.map((departure) => (
+                    <DepartureRow
+                        key={departure.id}
+                        departure={departure}
+                        showTripName={showTripName}
+                    />
+                ))}
+            </ul>
+        </div>
+    );
+}
+
 interface DepartureListProps {
     departures: ArcticDeparture[];
     /** Show the Arctic trip name per row (for pages mixing variants). */
@@ -63,54 +143,48 @@ export function DepartureList({
     departures,
     showTripName = false,
 }: DepartureListProps) {
+    const groups = groupDeparturesByMonth(departures);
+
+    // Split whole month-groups so roughly VISIBLE_ROWS rows show before the
+    // native <details> collapse — months never get sliced mid-group.
+    let visibleCount = 0;
+    const visibleGroups: MonthGroupData[] = [];
+    const collapsedGroups: MonthGroupData[] = [];
+    for (const group of groups) {
+        if (visibleCount < VISIBLE_ROWS) {
+            visibleGroups.push(group);
+            visibleCount += group.departures.length;
+        } else {
+            collapsedGroups.push(group);
+        }
+    }
+
     return (
-        <ul className='divide-y divide-holiday-grey/40 border-y border-holiday-grey/40'>
-            {departures.map((departure) => {
-                const seats = departure.remainingopenings ?? null;
-                const bookable =
-                    seats !== null && seats > 0 && departure.onlinebookingurl;
-                const days = durationToHours(departure.duration);
-                return (
-                    <li
-                        key={departure.id}
-                        className='flex flex-wrap items-center justify-between gap-x-6 gap-y-2 py-4'
-                    >
-                        <div className='min-w-[180px]'>
-                            <span className='font-alt-gothic text-h3 font-semibold uppercase leading-h3 text-onyx'>
-                                {formatDateRange(departure.start, days)}
-                            </span>
-                            {days && days >= 24 && (
-                                <span className='ml-3 text-[13px] uppercase tracking-wider text-onyx/70'>
-                                    {Math.round(days / 24)} days
-                                </span>
-                            )}
-                        </div>
-                        {showTripName && departure.name && (
-                            <span className='grow text-body leading-body text-onyx'>
-                                {departure.name}
-                            </span>
-                        )}
-                        <div className='flex items-center gap-4'>
-                            <SeatsBadge seats={seats} />
-                            {bookable ? (
-                                <ExternalLink
-                                    href={departure.onlinebookingurl ?? '#'}
-                                    className='bg-holiday-red px-6 py-2 text-center font-alt-gothic text-[19px] font-medium uppercase leading-none tracking-wide text-holiday-white transition-colors hover:bg-holiday-red/90'
-                                >
-                                    Book
-                                </ExternalLink>
-                            ) : (
-                                <a
-                                    href='tel:+18012662087'
-                                    className='inline-block border-2 border-holiday-red px-6 py-2 text-center font-alt-gothic text-[19px] font-medium uppercase leading-none tracking-wide text-holiday-red transition-colors hover:bg-holiday-red hover:text-holiday-white'
-                                >
-                                    Call to Book
-                                </a>
-                            )}
-                        </div>
-                    </li>
-                );
-            })}
-        </ul>
+        <div data-departure-list className='space-y-8'>
+            {visibleGroups.map((group) => (
+                <MonthGroup
+                    key={`${group.year}-${group.monthLabel}`}
+                    group={group}
+                    showTripName={showTripName}
+                />
+            ))}
+            {collapsedGroups.length > 0 && (
+                <details data-departure-overflow className='group'>
+                    <summary className='inline-flex cursor-pointer list-none items-center gap-2 border-2 border-holiday-red px-6 py-2 font-alt-gothic text-[19px] font-medium uppercase leading-none tracking-wide text-holiday-red transition-colors hover:bg-holiday-red hover:text-holiday-white group-open:hidden [&::-webkit-details-marker]:hidden'>
+                        Show all {departures.length} departures
+                        <span aria-hidden>↓</span>
+                    </summary>
+                    <div className='space-y-8'>
+                        {collapsedGroups.map((group) => (
+                            <MonthGroup
+                                key={`${group.year}-${group.monthLabel}`}
+                                group={group}
+                                showTripName={showTripName}
+                            />
+                        ))}
+                    </div>
+                </details>
+            )}
+        </div>
     );
 }

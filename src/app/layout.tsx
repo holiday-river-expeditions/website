@@ -1,6 +1,7 @@
 import type { Metadata } from 'next';
 import { PT_Sans, Oswald } from 'next/font/google';
 import { Header } from '@/components/layout/Header';
+import { RevealObserver } from '@/components/ui/RevealObserver';
 import { Footer } from '@/components/layout/Footer';
 import './globals.css';
 
@@ -67,6 +68,7 @@ export default function RootLayout({
             <body
                 className={`${oswald.variable} ${ptSans.variable} antialiased`}
             >
+                <RevealObserver />
                 <Header />
                 <main className='min-h-screen'>{children}</main>
                 <Footer />

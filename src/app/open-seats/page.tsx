@@ -7,6 +7,11 @@ import {
     getAllUpcomingDepartures,
     getBookableTripTypes,
 } from '@/lib/arctic';
+import {
+    cleanTypeName,
+    formatDateRange,
+    nextAvailable,
+} from '@/lib/departures';
 import { getAllTrips } from '@/lib/sanity';
 
 // Availability changes as reservations come in; regenerate every minute.
@@ -69,13 +74,19 @@ export default async function OpenSeatsPage() {
                 : `arctic:${typeId}`;
             let group = byGroup.get(key);
             if (!group) {
+                // Sanity is the naming source of truth; unmapped Arctic types
+                // fall back to their cleaned online-reservation name. The
+                // durable fix is authoring the remaining trips in Sanity
+                // (content phase).
+                const type = publicTypes.get(typeId);
                 group = {
                     key,
                     title:
                         sanityTrip?.name ??
-                        publicTypes.get(typeId)?.name ??
-                        departure.name ??
-                        'Trip',
+                        cleanTypeName(
+                            type?.name ?? departure.name ?? 'Trip',
+                            type?.orname,
+                        ),
                     href: sanityTrip ? `/trips/${sanityTrip.slug}` : null,
                     departures: [],
                 };
@@ -129,32 +140,47 @@ export default async function OpenSeatsPage() {
                     </p>
                 ) : (
                     <div className='max-w-4xl space-y-14'>
-                        {groups.map((group) => (
-                            <div key={group.key}>
-                                <h2 className='font-alt-gothic text-[36px] font-black uppercase leading-[0.9] text-onyx'>
-                                    {group.href ? (
-                                        <Link
-                                            href={group.href}
-                                            className='transition-opacity hover:opacity-70'
-                                        >
-                                            {group.title}
-                                        </Link>
-                                    ) : (
-                                        group.title
-                                    )}
-                                </h2>
-                                <div className='mt-5'>
-                                    <DepartureList
-                                        departures={group.departures}
-                                        showTripName={group.departures.some(
-                                            (d) =>
-                                                d.triptypeid !==
-                                                group.departures[0]?.triptypeid,
+                        {groups.map((group) => {
+                            const next = nextAvailable(group.departures);
+                            return (
+                                <div key={group.key} data-availability>
+                                    <div className='flex flex-wrap items-center gap-x-5 gap-y-2'>
+                                        <h2 className='font-alt-gothic text-[36px] font-black uppercase leading-[0.9] text-onyx'>
+                                            {group.href ? (
+                                                <Link
+                                                    href={group.href}
+                                                    className='transition-opacity hover:opacity-70'
+                                                >
+                                                    {group.title}
+                                                </Link>
+                                            ) : (
+                                                group.title
+                                            )}
+                                        </h2>
+                                        {next && (
+                                            <span className='inline-block bg-teal px-3 py-1.5 font-alt-gothic text-[13px] font-medium uppercase tracking-[0.05em] leading-none text-holiday-white'>
+                                                Next:{' '}
+                                                {formatDateRange(
+                                                    next.start,
+                                                    next.duration,
+                                                )}
+                                            </span>
                                         )}
-                                    />
+                                    </div>
+                                    <div className='mt-5'>
+                                        <DepartureList
+                                            departures={group.departures}
+                                            showTripName={group.departures.some(
+                                                (d) =>
+                                                    d.triptypeid !==
+                                                    group.departures[0]
+                                                        ?.triptypeid,
+                                            )}
+                                        />
+                                    </div>
                                 </div>
-                            </div>
-                        ))}
+                            );
+                        })}
                     </div>
                 )}
             </Section>
