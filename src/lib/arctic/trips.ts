@@ -30,6 +30,19 @@ function upcoming(departures: ArcticDeparture[]): ArcticDeparture[] {
         .sort((a, b) => a.start.localeCompare(b.start));
 }
 
+/** Single departure by id (used for the pre-book availability re-check). */
+export async function getDeparture(
+    id: number,
+): Promise<ArcticDeparture | null> {
+    if (!isArcticConfigured()) return null;
+    try {
+        return await arcticGet(`trip/${id}`, departureSchema);
+    } catch (error) {
+        console.error(`[arctic] getDeparture(${id}) failed:`, error);
+        return null;
+    }
+}
+
 export async function getTripType(id: string | number) {
     if (!isArcticConfigured()) return null;
     try {

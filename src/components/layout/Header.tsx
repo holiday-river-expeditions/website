@@ -1,6 +1,7 @@
 import Image from 'next/image';
 import Link from 'next/link';
 import { Button } from '@/components/ui/Button';
+import { MiniCart } from '@/components/ui/MiniCart';
 import { DesktopNav } from './Nav';
 import { MobileNav } from './MobileNav';
 
@@ -31,9 +32,10 @@ export function Header() {
                     />
                 </Link>
 
-                {/* Right: hamburger + BOOK NOW */}
+                {/* Right: hamburger + cart + BOOK NOW */}
                 <div className='flex items-center justify-end gap-3'>
                     <MobileNav />
+                    <MiniCart />
                     <Button href='/book' size='default'>
                         Book Now
                     </Button>

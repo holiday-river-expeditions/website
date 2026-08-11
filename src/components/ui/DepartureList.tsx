@@ -1,3 +1,4 @@
+import { BookingRow } from '@/components/ui/BookingRow';
 import { ExternalLink } from '@/components/ui/ExternalLink';
 import type { ArcticDeparture } from '@/lib/arctic';
 import {
@@ -5,6 +6,13 @@ import {
     formatDateRange,
     groupDeparturesByMonth,
 } from '@/lib/departures';
+
+/**
+ * Native in-row booking is feature-flagged: off (or when a row's pricing
+ * can't resolve) the Book action stays an external link into Arctic's
+ * hosted reserve flow — that link is also the no-JS fallback.
+ */
+const NATIVE_BOOKING = process.env.BOOKING_NATIVE === 'true';
 
 /**
  * Renders Arctic departures as a month-grouped schedule: month subheads
@@ -51,46 +59,70 @@ function DepartureRow({
     const bookable = seats !== null && seats > 0 && departure.onlinebookingurl;
     const days = durationToDays(departure.duration);
 
+    const dateCell = (
+        <div>
+            <div>
+                <span className='font-alt-gothic text-h3 font-semibold uppercase leading-h3 text-onyx'>
+                    {formatDateRange(departure.start, departure.duration)}
+                </span>
+                {days && days > 1 && (
+                    <span className='ml-3 text-[13px] uppercase tracking-wider text-onyx/70'>
+                        {days} days
+                    </span>
+                )}
+            </div>
+            {showTripName && departure.name && (
+                <div className='mt-0.5 text-body leading-body text-onyx/80'>
+                    {departure.name}
+                </div>
+            )}
+        </div>
+    );
+
     return (
         <li
             data-triptype={departure.triptypeid ?? undefined}
             className='grid grid-cols-1 items-center gap-x-6 gap-y-2 py-4 sm:grid-cols-[minmax(200px,1fr)_auto]'
         >
-            <div>
-                <div>
-                    <span className='font-alt-gothic text-h3 font-semibold uppercase leading-h3 text-onyx'>
-                        {formatDateRange(departure.start, departure.duration)}
-                    </span>
-                    {days && days > 1 && (
-                        <span className='ml-3 text-[13px] uppercase tracking-wider text-onyx/70'>
-                            {days} days
-                        </span>
+            {bookable && NATIVE_BOOKING && departure.triptypeid ? (
+                // BookingRow owns the row internals so its expanded panel can
+                // span both grid columns; the server-rendered cells pass
+                // through as slots.
+                <BookingRow
+                    departureId={departure.id}
+                    triptypeid={departure.triptypeid}
+                    seatsRemaining={seats}
+                    fallbackUrl={departure.onlinebookingurl ?? '#'}
+                    dateLabel={formatDateRange(
+                        departure.start,
+                        departure.duration,
                     )}
-                </div>
-                {showTripName && departure.name && (
-                    <div className='mt-0.5 text-body leading-body text-onyx/80'>
-                        {departure.name}
+                    dateSlot={dateCell}
+                    badgeSlot={<SeatsBadge seats={seats} />}
+                />
+            ) : (
+                <>
+                    {dateCell}
+                    <div className='flex flex-wrap items-center gap-4 justify-self-start sm:justify-self-end'>
+                        <SeatsBadge seats={seats} />
+                        {bookable ? (
+                            <ExternalLink
+                                href={departure.onlinebookingurl ?? '#'}
+                                className='bg-holiday-red px-6 py-2 text-center font-alt-gothic text-[19px] font-medium uppercase leading-none tracking-wide text-holiday-white transition-colors hover:bg-holiday-red/90'
+                            >
+                                Book
+                            </ExternalLink>
+                        ) : (
+                            <a
+                                href='tel:+18012662087'
+                                className='inline-block border-2 border-holiday-red px-6 py-2 text-center font-alt-gothic text-[19px] font-medium uppercase leading-none tracking-wide text-holiday-red transition-colors hover:bg-holiday-red hover:text-holiday-white'
+                            >
+                                Call to Book
+                            </a>
+                        )}
                     </div>
-                )}
-            </div>
-            <div className='flex items-center gap-4 justify-self-start sm:justify-self-end'>
-                <SeatsBadge seats={seats} />
-                {bookable ? (
-                    <ExternalLink
-                        href={departure.onlinebookingurl ?? '#'}
-                        className='bg-holiday-red px-6 py-2 text-center font-alt-gothic text-[19px] font-medium uppercase leading-none tracking-wide text-holiday-white transition-colors hover:bg-holiday-red/90'
-                    >
-                        Book
-                    </ExternalLink>
-                ) : (
-                    <a
-                        href='tel:+18012662087'
-                        className='inline-block border-2 border-holiday-red px-6 py-2 text-center font-alt-gothic text-[19px] font-medium uppercase leading-none tracking-wide text-holiday-red transition-colors hover:bg-holiday-red hover:text-holiday-white'
-                    >
-                        Call to Book
-                    </a>
-                )}
-            </div>
+                </>
+            )}
         </li>
     );
 }

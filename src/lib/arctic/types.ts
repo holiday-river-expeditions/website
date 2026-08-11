@@ -48,3 +48,63 @@ export type ArcticDeparture = z.infer<typeof departureSchema>;
 export function listEnvelope<T extends z.ZodTypeAny>(entry: T) {
     return z.object({ entries: z.array(entry) });
 }
+
+/**
+ * A public pricing level for a trip type (from
+ * /api/rest/triptype/{id}/pricinglevel). The cart API's form field for a
+ * level is `pl_` + slugified uniquename — verified live 2026-08-10.
+ */
+export const pricingLevelSchema = z.object({
+    id: looseInt,
+    name: z.string(),
+    description: z.string().nullish(),
+    uniquename: z.string(),
+    amount: z.coerce.number().nullish(),
+    showonline: looseBool.nullish(),
+    deleted: looseBool.nullish(),
+    default: looseBool.nullish(),
+});
+export type ArcticPricingLevel = z.infer<typeof pricingLevelSchema>;
+
+export const cartSchema = z.object({
+    id: looseInt,
+    sessid: z.string(),
+});
+export type ArcticCart = z.infer<typeof cartSchema>;
+
+export const cartItemSchema = z.object({
+    id: looseInt,
+    name: z.string().nullish(),
+    description: z.string().nullish(),
+    summary: z.string().nullish(),
+    is_available: looseBool.nullish(),
+    quantity: looseInt.nullish(),
+    cost: z.coerce.number().nullish(),
+});
+export type ArcticCartItem = z.infer<typeof cartItemSchema>;
+
+/** POST {guest}/reserve/api/book/{departureId} response. */
+export const bookResponseSchema = z.union([
+    z.object({
+        success: z.literal(true),
+        cart: cartSchema,
+        item: cartItemSchema,
+        checkout: z.string(),
+        interstitial: z.string().nullish(),
+    }),
+    z.object({
+        success: z.literal(false),
+        error: z.string().nullish(),
+        details: z.string().nullish(),
+    }),
+]);
+export type ArcticBookResponse = z.infer<typeof bookResponseSchema>;
+
+/** GET {guest}/cart/api/item response. */
+export const cartContentsSchema = z.object({
+    success: z.boolean(),
+    cart: cartSchema
+        .extend({ items: z.array(cartItemSchema).nullish() })
+        .nullish(),
+});
+export type ArcticCartContents = z.infer<typeof cartContentsSchema>;
