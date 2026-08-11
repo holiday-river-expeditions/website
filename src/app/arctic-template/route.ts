@@ -1,0 +1,189 @@
+/**
+ * Design-import template for Arctic Reservations' guest-facing site.
+ *
+ * Arctic's "Import Design" analyzer scrapes this URL and uses it as the
+ * chrome for checkout/reserve pages, injecting its content where it finds
+ * the literal {SITE-TITLE} and {SITE-BODY} placeholders.
+ *
+ * Served as a route handler (not a page) so the root layout's interactive
+ * header/footer never wrap it — a scraped clone can't hydrate, so this
+ * document is deliberately self-contained:
+ *  - every href/src is ABSOLUTE back to this site (relative URLs would
+ *    resolve against Arctic's domain on the clone)
+ *  - zero JavaScript, no forms, no client components
+ *  - styling is a small hand-written stylesheet mirroring the brand tokens
+ *    (globals.css), because the built Tailwind CSS has hashed URLs
+ *  - fonts come from the Typekit kit (guz5fen) — the Arctic guest domain
+ *    must be on the kit's allowed-domains list
+ *
+ * Not for humans: noindexed via header and meta.
+ */
+
+// || (not ??): the env var exists but is empty in some environments, and an
+// empty base would silently produce relative links — broken on the clone.
+const SITE = (
+    process.env.NEXT_PUBLIC_SITE_URL || 'https://website-phi-six-25.vercel.app'
+).replace(/\/$/, '');
+
+const NAV = [
+    { label: 'Rafting', href: `${SITE}/rafting` },
+    { label: 'Biking', href: `${SITE}/biking` },
+    { label: 'About Us', href: `${SITE}/about` },
+    { label: 'Blog', href: `${SITE}/blog` },
+];
+
+const FOOTER_LINKS = [
+    { label: 'Trip Dates', href: `${SITE}/open-seats` },
+    { label: 'F.A.Q.', href: `${SITE}/faq` },
+    { label: 'Trip Insurance', href: `${SITE}/trip-insurance` },
+    { label: 'Contact', href: `${SITE}/contact` },
+];
+
+export function GET() {
+    const html = `<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex, nofollow">
+<title>{SITE-TITLE}</title>
+<link rel="stylesheet" href="https://use.typekit.net/guz5fen.css">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=PT+Sans:wght@400;700&display=swap">
+<style>
+  :root {
+    --red: #d00a0b; --white: #fcfcfc; --grey: #b6b6b6;
+    --onyx: #2c2b29; --cream: #f3f0eb;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    background: var(--white); color: var(--onyx);
+    font-family: 'PT Sans', Arial, sans-serif; font-size: 16px; line-height: 1.4;
+  }
+  .gothic { font-family: alternate-gothic-atf, Oswald, Arial, sans-serif; text-transform: uppercase; }
+  a { color: var(--red); }
+  :focus-visible { outline: 2px solid var(--red); outline-offset: 2px; }
+
+  header.hre {
+    display: grid; grid-template-columns: 1fr auto 1fr; align-items: center;
+    gap: 16px; padding: 20px 48px; background: var(--white);
+  }
+  header.hre nav ul { display: flex; gap: 32px; list-style: none; }
+  header.hre nav a {
+    font-family: alternate-gothic-atf, Oswald, Arial, sans-serif;
+    text-transform: uppercase; font-size: 19px; font-weight: 500;
+    color: var(--red); text-decoration: none; letter-spacing: 0.02em;
+  }
+  header.hre nav a:hover { opacity: 0.7; }
+  header.hre .logo { justify-self: center; }
+  header.hre .logo img { height: 44px; width: auto; display: block; }
+  header.hre .cta { justify-self: end; }
+  header.hre .cta a {
+    display: inline-block; background: var(--red); color: var(--white);
+    font-family: alternate-gothic-atf, Oswald, Arial, sans-serif;
+    text-transform: uppercase; font-size: 19px; font-weight: 500;
+    line-height: 1; letter-spacing: 0.02em; text-decoration: none;
+    padding: 10px 24px; border-radius: 999px;
+  }
+  header.hre .cta a:hover { background: #b90909; }
+  @media (max-width: 767px) {
+    header.hre { padding: 16px 24px; }
+    header.hre nav { display: none; }
+  }
+
+  .hre-title { padding: 40px 48px 8px; background: var(--white); }
+  .hre-title h1 {
+    max-width: 1024px; margin: 0 auto;
+    font-family: alternate-gothic-atf, Oswald, Arial, sans-serif;
+    text-transform: uppercase; font-weight: 900; color: var(--red);
+    font-size: 44px; line-height: 0.95;
+  }
+  main.hre { padding: 24px 48px 80px; background: var(--white); }
+  main.hre .body { max-width: 1024px; margin: 0 auto; }
+  @media (max-width: 767px) {
+    .hre-title { padding: 28px 24px 8px; }
+    .hre-title h1 { font-size: 34px; }
+    main.hre { padding: 16px 24px 64px; }
+  }
+
+  footer.hre { background: var(--cream); color: var(--onyx); }
+  footer.hre .inner {
+    max-width: 1280px; margin: 0 auto; padding: 48px 24px;
+    display: flex; flex-wrap: wrap; gap: 40px; align-items: flex-start;
+    justify-content: space-between;
+  }
+  footer.hre .logo img { height: 56px; width: auto; display: block; }
+  footer.hre address {
+    font-style: normal; font-size: 12px; letter-spacing: 0.05em;
+    line-height: 1.7; margin-top: 16px;
+  }
+  footer.hre address a { color: var(--red); font-weight: 700; text-decoration: none; }
+  footer.hre h2 {
+    font-family: alternate-gothic-atf, Oswald, Arial, sans-serif;
+    text-transform: uppercase; font-size: 16px; font-weight: 400;
+    letter-spacing: 0.05em;
+  }
+  footer.hre ul { list-style: none; margin-top: 16px; }
+  footer.hre ul li { margin-bottom: 8px; }
+  footer.hre ul a {
+    font-family: alternate-gothic-atf, Oswald, Arial, sans-serif;
+    text-transform: uppercase; font-size: 16px; font-weight: 600;
+    letter-spacing: 0.05em; color: var(--onyx); text-decoration: none;
+    display: inline-block; padding: 4px 0;
+  }
+  footer.hre ul a:hover { opacity: 0.7; }
+  footer.hre .badge img { height: 64px; width: auto; }
+</style>
+</head>
+<body>
+<header class="hre">
+  <nav aria-label="Main">
+    <ul>
+      ${NAV.map((l) => `<li><a href="${l.href}">${l.label}</a></li>`).join('\n      ')}
+    </ul>
+  </nav>
+  <a class="logo" href="${SITE}" aria-label="Holiday River Expeditions home">
+    <img src="${SITE}/logo-horizontal-red.svg" alt="Holiday River Expeditions" width="240" height="96">
+  </a>
+  <div class="cta"><a href="${SITE}/open-seats">Open Seats</a></div>
+</header>
+
+<div class="hre-title"><h1>{SITE-TITLE}</h1></div>
+
+<main class="hre">
+  <div class="body">{SITE-BODY}</div>
+</main>
+
+<footer class="hre">
+  <div class="inner">
+    <div>
+      <a class="logo" href="${SITE}" aria-label="Holiday River Expeditions home">
+        <img src="${SITE}/logo-horizontal-red.svg" alt="Holiday River Expeditions" width="240" height="96">
+      </a>
+      <address>
+        544 East 3900 South<br>
+        Salt Lake City, Utah 84107<br>
+        <a href="tel:+18012662087">801-266-2087</a>
+      </address>
+    </div>
+    <div>
+      <h2>Resources</h2>
+      <ul>
+        ${FOOTER_LINKS.map((l) => `<li><a href="${l.href}">${l.label}</a></li>`).join('\n        ')}
+      </ul>
+    </div>
+    <div class="badge">
+      <img src="${SITE}/nps-authorized-concessioner.png" alt="National Park Service Authorized Concessioner" width="120" height="150">
+    </div>
+  </div>
+</footer>
+</body>
+</html>`;
+
+    return new Response(html, {
+        headers: {
+            'Content-Type': 'text/html; charset=utf-8',
+            'X-Robots-Tag': 'noindex, nofollow',
+        },
+    });
+}
