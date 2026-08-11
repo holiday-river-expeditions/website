@@ -107,7 +107,9 @@ async function run() {
             ],
         })
         .commit();
-    console.log('trip-cataract-canyon → itinerary, review, facts, related, faqs');
+    console.log(
+        'trip-cataract-canyon → itinerary, review, facts, related, faqs',
+    );
 
     await client
         .patch('siteSettings')
