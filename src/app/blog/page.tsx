@@ -40,14 +40,65 @@ export default async function BlogPage() {
                 </p>
             </Section>
 
-            <Section background='white' className='pb-20 pt-8 md:pb-24'>
+            {/* Featured (latest) post — full-width band on sand */}
+            {posts.length > 0 && (
+                <Section background='sand' className='py-12 md:py-14'>
+                    {(() => {
+                        const featured = posts[0];
+                        const href = featured.slug?.current
+                            ? `/blog/${featured.slug.current}`
+                            : '#';
+                        const photo = imageUrl(featured.mainImage, 1200, 800);
+                        return (
+                            <Link
+                                href={href}
+                                className='group grid items-center gap-8 md:grid-cols-[1.2fr_1fr]'
+                            >
+                                <div className='relative aspect-[3/2] overflow-hidden bg-holiday-grey/15'>
+                                    {photo && (
+                                        <Image
+                                            src={photo}
+                                            alt={featured.title ?? ''}
+                                            fill
+                                            priority
+                                            className='object-cover motion-safe:transition-transform motion-safe:duration-500 motion-safe:group-hover:scale-105'
+                                            sizes='(max-width: 768px) 100vw, 60vw'
+                                        />
+                                    )}
+                                </div>
+                                <div>
+                                    <span className='font-alt-gothic text-[13px] font-semibold uppercase tracking-[0.1em] text-onyx'>
+                                        Latest Story
+                                    </span>
+                                    <h2 className='mt-2 font-alt-gothic text-[36px] font-black uppercase leading-[0.9] text-onyx transition-opacity group-hover:opacity-70 md:text-h2'>
+                                        {featured.title}
+                                    </h2>
+                                    {featured.excerpt && (
+                                        <p className='mt-3 text-paragraph leading-paragraph text-onyx'>
+                                            {featured.excerpt}
+                                        </p>
+                                    )}
+                                    <span className='mt-4 inline-block font-alt-gothic text-[15px] font-semibold uppercase tracking-[0.05em] text-holiday-red'>
+                                        Read the Story →
+                                    </span>
+                                </div>
+                            </Link>
+                        );
+                    })()}
+                </Section>
+            )}
+
+            <Section background='white' className='pb-20 pt-12 md:pb-24'>
                 {posts.length === 0 ? (
                     <p className='text-body leading-body text-onyx/70'>
                         Posts coming soon — add them in the Studio.
                     </p>
                 ) : (
-                    <div className='grid gap-10 sm:grid-cols-2 lg:grid-cols-3'>
-                        {posts.map((post) => {
+                    <div
+                        data-reveal-stagger
+                        className='grid gap-10 sm:grid-cols-2 lg:grid-cols-3'
+                    >
+                        {posts.slice(1).map((post) => {
                             const href = post.slug?.current
                                 ? `/blog/${post.slug.current}`
                                 : '#';

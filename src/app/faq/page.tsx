@@ -37,47 +37,84 @@ export default async function FaqPage() {
                 <h1 className='font-alt-gothic text-h2 font-black uppercase leading-h2 text-holiday-red md:text-h1 md:leading-h1'>
                     Frequently Asked Questions
                 </h1>
+                <p className='mt-4 max-w-2xl text-paragraph leading-paragraph text-onyx'>
+                    Everything guests ask before a trip — and a phone number for
+                    everything else:{' '}
+                    <a
+                        href='tel:+18012662087'
+                        className='font-bold text-holiday-red transition-opacity hover:opacity-70'
+                    >
+                        801-266-2087
+                    </a>
+                    .
+                </p>
             </Section>
 
-            <Section background='white' className='pb-20 pt-4 md:pb-24'>
+            <Section background='white' className='pb-20 pt-6 md:pb-24'>
                 {groups.length === 0 ? (
                     <p className='text-body leading-body text-onyx/70'>
                         FAQs coming soon — add them in the Studio.
                     </p>
                 ) : (
-                    <div className='max-w-3xl space-y-12'>
-                        {groups.map((group) => (
-                            <div key={group.value}>
-                                <h2 className='font-alt-gothic text-[36px] font-black uppercase leading-[0.9] text-onyx'>
-                                    {group.label}
-                                </h2>
-                                <div className='mt-6 divide-y divide-holiday-grey/40 border-y border-holiday-grey/40'>
-                                    {group.faqs.map((faq) => (
-                                        <details
-                                            key={faq._id}
-                                            className='group py-4'
+                    <div className='grid gap-12 lg:grid-cols-[220px_1fr]'>
+                        {/* Sticky category nav — plain anchors, no JS. */}
+                        <nav
+                            aria-label='FAQ categories'
+                            className='hidden lg:block'
+                        >
+                            <ul className='sticky top-8 space-y-1 border-l-2 border-holiday-grey/40'>
+                                {groups.map((group) => (
+                                    <li key={group.value}>
+                                        <a
+                                            href={`#faq-${group.value}`}
+                                            className='-ml-0.5 block border-l-2 border-transparent py-1.5 pl-4 font-alt-gothic text-[15px] font-semibold uppercase tracking-[0.05em] text-onyx/70 transition-colors hover:border-holiday-red hover:text-holiday-red'
                                         >
-                                            <summary className='flex cursor-pointer list-none items-center justify-between gap-4 font-alt-gothic text-h3 font-semibold uppercase leading-h3 text-onyx transition-opacity hover:opacity-70 [&::-webkit-details-marker]:hidden'>
-                                                {faq.question}
-                                                <span
-                                                    aria-hidden
-                                                    className='text-holiday-red transition-transform group-open:rotate-45'
-                                                >
-                                                    +
-                                                </span>
-                                            </summary>
-                                            {faq.answer && (
-                                                <div className='mt-3 space-y-3 text-body leading-body text-onyx [&_a]:text-holiday-red [&_a]:underline'>
-                                                    <PortableText
-                                                        value={faq.answer}
-                                                    />
-                                                </div>
-                                            )}
-                                        </details>
-                                    ))}
+                                            {group.label}
+                                        </a>
+                                    </li>
+                                ))}
+                            </ul>
+                        </nav>
+
+                        <div className='max-w-3xl space-y-12'>
+                            {groups.map((group) => (
+                                <div
+                                    key={group.value}
+                                    id={`faq-${group.value}`}
+                                    data-reveal
+                                    className='scroll-mt-8'
+                                >
+                                    <h2 className='font-alt-gothic text-[36px] font-black uppercase leading-[0.9] text-onyx'>
+                                        {group.label}
+                                    </h2>
+                                    <div className='mt-6 divide-y divide-holiday-grey/40 border-y border-holiday-grey/40'>
+                                        {group.faqs.map((faq) => (
+                                            <details
+                                                key={faq._id}
+                                                className='group py-4'
+                                            >
+                                                <summary className='flex cursor-pointer list-none items-center justify-between gap-4 font-alt-gothic text-h3 font-semibold uppercase leading-h3 text-onyx transition-opacity hover:opacity-70 [&::-webkit-details-marker]:hidden'>
+                                                    {faq.question}
+                                                    <span
+                                                        aria-hidden
+                                                        className='text-holiday-red transition-transform group-open:rotate-45'
+                                                    >
+                                                        +
+                                                    </span>
+                                                </summary>
+                                                {faq.answer && (
+                                                    <div className='mt-3 space-y-3 text-body leading-body text-onyx [&_a]:text-holiday-red [&_a]:underline'>
+                                                        <PortableText
+                                                            value={faq.answer}
+                                                        />
+                                                    </div>
+                                                )}
+                                            </details>
+                                        ))}
+                                    </div>
                                 </div>
-                            </div>
-                        ))}
+                            ))}
+                        </div>
                     </div>
                 )}
             </Section>

@@ -19,6 +19,9 @@ for (const { name, path } of pages) {
     test(`${name} (${path}) has no serious accessibility violations`, async ({
         page,
     }) => {
+        // Scan the static presentation — reveal transitions produce
+        // mid-blend colors that read as false contrast failures.
+        await page.emulateMedia({ reducedMotion: 'reduce' });
         await page.goto(path);
         const results = await new AxeBuilder({ page })
             .withTags(['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa'])

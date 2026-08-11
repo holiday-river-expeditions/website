@@ -41,22 +41,53 @@ interface PageBuilderProps {
     content: PageContent;
 }
 
+// Auto-alternation for unset content-block backgrounds — "changing light on
+// a river trip" per the design-review rhythm recommendation.
+const RHYTHM = ['white', 'sand', 'white', 'opal'] as const;
+
 export function PageBuilder({ content }: PageBuilderProps) {
+    let contentIndex = 0;
     return (
         <>
-            {content.map((block, index) => (
-                <Block key={block._key} block={block} isFirst={index === 0} />
-            ))}
+            {content.map((block, index) => {
+                const rhythmSlot =
+                    block._type === 'contentBlock'
+                        ? RHYTHM[contentIndex++ % RHYTHM.length]
+                        : 'white';
+                return (
+                    <Block
+                        key={block._key}
+                        block={block}
+                        isFirst={index === 0}
+                        fallbackBackground={rhythmSlot}
+                    />
+                );
+            })}
         </>
     );
 }
 
-function Block({ block, isFirst }: { block: PageBlock; isFirst: boolean }) {
+type SectionBackground = 'white' | 'sand' | 'opal' | 'evergreen';
+
+function Block({
+    block,
+    isFirst,
+    fallbackBackground,
+}: {
+    block: PageBlock;
+    isFirst: boolean;
+    fallbackBackground: SectionBackground;
+}) {
     switch (block._type) {
         case 'heroBlock':
             return <HeroBlockSection block={block} isFirst={isFirst} />;
         case 'contentBlock':
-            return <ContentBlockSection block={block} />;
+            return (
+                <ContentBlockSection
+                    block={block}
+                    fallbackBackground={fallbackBackground}
+                />
+            );
         default:
             return null;
     }
@@ -111,19 +142,32 @@ function HeroBlockSection({
 
 function ContentBlockSection({
     block,
+    fallbackBackground,
 }: {
     block: Extract<PageBlock, { _type: 'contentBlock' }>;
+    fallbackBackground: SectionBackground;
 }) {
+    const background =
+        (block.background as SectionBackground | undefined) ??
+        fallbackBackground;
+    const onDark = background === 'evergreen';
     return (
-        <Section background='white' className='py-12 md:py-16'>
-            <div className='mx-auto max-w-3xl'>
+        <Section
+            background={background}
+            className={`py-12 md:py-16 ${onDark ? 'bg-topo' : ''}`}
+        >
+            <div data-reveal className='mx-auto max-w-3xl'>
                 {block.heading && (
-                    <h2 className='font-alt-gothic text-[36px] font-black uppercase leading-[0.9] text-holiday-red'>
+                    <h2
+                        className={`font-alt-gothic text-[36px] font-black uppercase leading-[0.9] ${onDark ? 'text-holiday-white' : 'text-holiday-red'}`}
+                    >
                         {block.heading}
                     </h2>
                 )}
                 {block.body && (
-                    <div className='mt-6 space-y-4 text-body leading-body text-onyx [&_a]:text-holiday-red [&_a]:underline [&_h3]:font-alt-gothic [&_h3]:text-h3 [&_h3]:font-black [&_h3]:uppercase [&_h3]:leading-h3 [&_h3]:text-onyx [&_li]:ml-5 [&_ul]:list-disc'>
+                    <div
+                        className={`mt-6 space-y-4 text-body leading-body [&_a]:underline [&_h3]:font-alt-gothic [&_h3]:text-h3 [&_h3]:font-black [&_h3]:uppercase [&_h3]:leading-h3 [&_li]:ml-5 [&_ul]:list-disc ${onDark ? 'text-holiday-white/90 [&_a]:text-holiday-white [&_h3]:text-holiday-white' : 'text-onyx [&_a]:text-holiday-red [&_h3]:text-onyx'}`}
+                    >
                         <PortableText
                             value={block.body}
                             components={portableComponents}

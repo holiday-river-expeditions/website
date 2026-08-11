@@ -22,13 +22,13 @@ const locations = [
         name: 'Green River Headquarters',
         lines: ['Green River, Utah'],
         phones: [{ label: '435-564-3273', href: 'tel:+14355643273' }],
-        note: 'Trip headquarters, open May–September. Call immediately before or after your trip.',
+        note: 'Trip headquarters, open May–September.',
     },
     {
         name: 'Vernal Headquarters',
         lines: ['Vernal, Utah'],
         phones: [{ label: '435-789-4586', href: 'tel:+14357894586' }],
-        note: 'Trip headquarters, open May–September. Call immediately before or after your trip.',
+        note: 'Trip headquarters, open May–September.',
     },
 ] as const;
 
@@ -53,43 +53,46 @@ export default function ContactPage() {
             </Section>
 
             <Section background='white' className='pb-20 pt-8 md:pb-24'>
-                <div className='grid gap-12 lg:grid-cols-[1fr_1.2fr]'>
-                    {/* Locations */}
-                    <div className='space-y-8'>
-                        {locations.map((location) => (
-                            <div
-                                key={location.name}
-                                className='border-l-2 border-holiday-red pl-4'
-                            >
-                                <h2 className='font-alt-gothic text-h3 font-black uppercase leading-h3 text-onyx'>
-                                    {location.name}
-                                </h2>
-                                <address className='mt-2 not-italic text-body leading-body text-onyx'>
-                                    {location.lines.map((line) => (
-                                        <div key={line}>{line}</div>
-                                    ))}
-                                </address>
-                                <div className='mt-1 flex gap-4'>
-                                    {location.phones.map((phone) => (
-                                        <a
-                                            key={phone.href}
-                                            href={phone.href}
-                                            className='text-body font-bold text-holiday-red transition-opacity hover:opacity-70'
-                                        >
-                                            {phone.label}
-                                        </a>
-                                    ))}
+                {/* Split panel: evergreen info card beside the form. */}
+                <div className='grid overflow-hidden lg:grid-cols-[1fr_1.2fr]'>
+                    <div className='bg-topo bg-evergreen p-8 md:p-10'>
+                        <h2 className='font-alt-gothic text-[28px] font-black uppercase leading-[0.95] text-holiday-white'>
+                            Find Us on
+                            <br />
+                            Dry Land
+                        </h2>
+                        <div className='mt-8 space-y-8'>
+                            {locations.map((location) => (
+                                <div key={location.name}>
+                                    <h3 className='font-alt-gothic text-[17px] font-semibold uppercase tracking-[0.03em] text-opal'>
+                                        {location.name}
+                                    </h3>
+                                    <address className='mt-1.5 not-italic text-body leading-body text-holiday-white/90'>
+                                        {location.lines.map((line) => (
+                                            <div key={line}>{line}</div>
+                                        ))}
+                                    </address>
+                                    <div className='mt-1 flex gap-4'>
+                                        {location.phones.map((phone) => (
+                                            <a
+                                                key={phone.href}
+                                                href={phone.href}
+                                                className='inline-block py-1 text-body font-bold text-holiday-white underline decoration-opal underline-offset-4 transition-opacity hover:opacity-80'
+                                            >
+                                                {phone.label}
+                                            </a>
+                                        ))}
+                                    </div>
+                                    <p className='mt-1 text-[13px] leading-snug text-holiday-white/70'>
+                                        {location.note}
+                                    </p>
                                 </div>
-                                <p className='mt-2 text-body leading-body text-onyx/70'>
-                                    {location.note}
-                                </p>
-                            </div>
-                        ))}
+                            ))}
+                        </div>
                     </div>
 
-                    {/* Form */}
-                    <div>
-                        <h2 className='font-alt-gothic text-[36px] font-black uppercase leading-[0.9] text-holiday-red'>
+                    <div className='border border-holiday-grey/30 p-8 md:p-10'>
+                        <h2 className='font-alt-gothic text-[28px] font-black uppercase leading-[0.95] text-holiday-red'>
                             Send Us a Message
                         </h2>
                         <div className='mt-6'>

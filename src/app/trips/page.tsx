@@ -28,7 +28,10 @@ export default async function TripsPage() {
 
             <Section background='white' className='py-14 md:py-20'>
                 {trips.length > 0 ? (
-                    <div className='grid gap-10 sm:grid-cols-2 lg:grid-cols-3'>
+                    <div
+                        data-reveal-stagger
+                        className='grid gap-10 sm:grid-cols-2 lg:grid-cols-3'
+                    >
                         {trips.map((trip) => (
                             <TripCard
                                 key={trip._id}

@@ -11,6 +11,21 @@ export const contentBlock = defineType({
             type: 'string',
         }),
         defineField({
+            name: 'background',
+            title: 'Background',
+            type: 'string',
+            description:
+                'Section background. Leave unset to auto-alternate (white → sand → white → opal).',
+            options: {
+                list: [
+                    { title: 'White', value: 'white' },
+                    { title: 'Sand', value: 'sand' },
+                    { title: 'Opal', value: 'opal' },
+                    { title: 'Evergreen', value: 'evergreen' },
+                ],
+            },
+        }),
+        defineField({
             name: 'body',
             title: 'Body',
             type: 'array',

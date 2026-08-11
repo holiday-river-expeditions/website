@@ -25,6 +25,7 @@ export type SanityImageAssetReference = {
 export type ContentBlock = {
     _type: 'contentBlock';
     heading?: string;
+    background?: 'white' | 'sand' | 'opal' | 'evergreen';
     body?: Array<
         | {
               children?: Array<{

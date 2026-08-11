@@ -76,7 +76,10 @@ export default async function RiverPage({ params }: RiverPageProps) {
                     <h2 className='font-alt-gothic text-[36px] font-black uppercase leading-[0.9] text-holiday-red'>
                         Trips on the {river.name}
                     </h2>
-                    <div className='mt-10 grid gap-10 sm:grid-cols-2 lg:grid-cols-3'>
+                    <div
+                        data-reveal-stagger
+                        className='mt-10 grid gap-10 sm:grid-cols-2 lg:grid-cols-3'
+                    >
                         {trips.map((trip) => (
                             <TripCard
                                 key={trip._id}

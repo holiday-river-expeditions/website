@@ -28,7 +28,7 @@ export function FeaturedReview({
                     {quote}
                 </blockquote>
                 {(author || source) && (
-                    <figcaption className='mt-5 text-body font-bold uppercase tracking-wider text-onyx/80'>
+                    <figcaption className='mt-5 text-body font-bold uppercase tracking-wider text-onyx'>
                         {author}
                         {author && source && ' · '}
                         {source && <span>via {source}</span>}

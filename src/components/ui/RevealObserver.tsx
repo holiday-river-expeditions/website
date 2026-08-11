@@ -23,8 +23,10 @@ export function RevealObserver() {
         }
         root.dataset.reveal = 'on';
 
+        let observerFired = false;
         const observer = new IntersectionObserver(
             (entries) => {
+                observerFired = true;
                 for (const entry of entries) {
                     if (entry.isIntersecting) {
                         (entry.target as HTMLElement).dataset.revealed = '';
@@ -35,9 +37,22 @@ export function RevealObserver() {
             { rootMargin: '0px 0px -10% 0px', threshold: 0.1 },
         );
 
+        // Dead-observer failsafe: in any environment where IO exists but
+        // never delivers callbacks (embedded webviews, some emulators), the
+        // initial in-view elements would stay hidden. Healthy browsers fire
+        // within one frame, so this never affects them.
+        const failsafe = setTimeout(() => {
+            if (observerFired) return;
+            for (const el of document.querySelectorAll<HTMLElement>(
+                'main [data-reveal], main [data-reveal-stagger]',
+            )) {
+                el.dataset.revealed = '';
+            }
+        }, 3000);
+
         const observeAll = () => {
             for (const el of document.querySelectorAll(
-                '[data-reveal]:not([data-revealed]), [data-reveal-stagger]:not([data-revealed])',
+                'main [data-reveal]:not([data-revealed]), main [data-reveal-stagger]:not([data-revealed])',
             )) {
                 observer.observe(el);
             }
@@ -49,6 +64,7 @@ export function RevealObserver() {
         mutations.observe(document.body, { childList: true, subtree: true });
 
         return () => {
+            clearTimeout(failsafe);
             observer.disconnect();
             mutations.disconnect();
             delete root.dataset.reveal;

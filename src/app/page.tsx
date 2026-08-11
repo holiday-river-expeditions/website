@@ -81,7 +81,10 @@ export default async function Home() {
 
             {/* Trip Grid */}
             <Section background='white' className='py-20 md:py-24'>
-                <div className='grid gap-10 sm:grid-cols-2 lg:grid-cols-3'>
+                <div
+                    data-reveal-stagger
+                    className='grid gap-10 sm:grid-cols-2 lg:grid-cols-3'
+                >
                     {featuredTrips.map((trip) => (
                         <TripCard key={trip.href} {...trip} />
                     ))}
