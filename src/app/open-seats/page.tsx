@@ -110,7 +110,7 @@ export default async function OpenSeatsPage() {
                 </h1>
                 <p className='mt-4 max-w-2xl text-paragraph leading-paragraph text-onyx'>
                     Live availability on upcoming departures, straight from our
-                    reservation system. See one you like? Grab it — rivers fill
+                    reservation system. See one you like? Grab it. Rivers fill
                     up fast.
                 </p>
             </Section>
@@ -129,7 +129,7 @@ export default async function OpenSeatsPage() {
                     </p>
                 ) : groups.length === 0 ? (
                     <p className='max-w-2xl text-body leading-body text-onyx'>
-                        Nothing is listed online right now — call{' '}
+                        Nothing is listed online right now. Call{' '}
                         <a
                             href='tel:+18012662087'
                             className='font-bold text-holiday-red transition-opacity hover:opacity-70'

@@ -22,7 +22,7 @@ export default function BookPage() {
                 </h1>
                 <p className='mt-6 text-paragraph leading-paragraph text-onyx'>
                     Check live availability on the Open Seats page, or let our
-                    crew in Salt Lake City set you up in one call — dates, gear
+                    crew in Salt Lake City set you up in one call: dates, gear
                     questions, all of it.
                 </p>
                 <div className='mt-10 flex flex-wrap items-center justify-center gap-4'>

@@ -146,7 +146,7 @@ export function MiniCart() {
                     </h2>
                     {error ? (
                         <p className='mt-3 text-body leading-body text-onyx'>
-                            Cart is momentarily unavailable — call{' '}
+                            Cart is momentarily unavailable. Call{' '}
                             <a
                                 href='tel:+18012662087'
                                 className='font-bold text-holiday-red'

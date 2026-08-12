@@ -14,8 +14,8 @@ export default function NotFound() {
                     missed the take-out
                 </h1>
                 <p className='mt-6 text-paragraph leading-paragraph text-onyx'>
-                    This page doesn&apos;t exist — but the river&apos;s still
-                    out there.
+                    This page doesn&apos;t exist, but the river&apos;s still out
+                    there.
                 </p>
                 <div className='mt-10 flex flex-wrap items-center justify-center gap-4'>
                     <Button href='/trips' size='lg'>

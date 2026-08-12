@@ -5,18 +5,18 @@ import { Section } from '@/components/ui/Section';
 export const metadata: Metadata = {
     title: 'Contact Us',
     description:
-        'Get in touch with Holiday River Expeditions — call, email, or send us a message.',
+        'Get in touch with Holiday River Expeditions: call, email, or send us a message.',
 };
 
 const locations = [
     {
-        name: 'Main Office — Salt Lake City',
+        name: 'Salt Lake City Main Office',
         lines: ['544 East 3900 South', 'Salt Lake City, Utah 84107'],
         phones: [
             { label: '800-624-6323', href: 'tel:+18006246323' },
             { label: '801-266-2087', href: 'tel:+18012662087' },
         ],
-        note: 'Open year-round — the best place to reach us.',
+        note: 'Open year-round, and the best place to reach us.',
     },
     {
         name: 'Green River Headquarters',

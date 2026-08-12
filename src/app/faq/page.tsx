@@ -38,7 +38,7 @@ export default async function FaqPage() {
                     Frequently Asked Questions
                 </h1>
                 <p className='mt-4 max-w-2xl text-paragraph leading-paragraph text-onyx'>
-                    Everything guests ask before a trip — and a phone number for
+                    Everything guests ask before a trip, plus a phone number for
                     everything else:{' '}
                     <a
                         href='tel:+18012662087'
@@ -53,7 +53,7 @@ export default async function FaqPage() {
             <Section background='white' className='pb-20 pt-6 md:pb-24'>
                 {groups.length === 0 ? (
                     <p className='text-body leading-body text-onyx/70'>
-                        FAQs coming soon — add them in the Studio.
+                        FAQs coming soon. Add them in the Studio.
                     </p>
                 ) : (
                     <div className='grid gap-12 lg:grid-cols-[220px_1fr]'>

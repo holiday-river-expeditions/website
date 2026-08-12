@@ -148,7 +148,7 @@ export default async function TripPage({ params }: TripPageProps) {
                             </div>
                         ) : (
                             <p className='mt-6 text-body leading-body text-onyx/70'>
-                                Trip description coming soon — add it in the
+                                Trip description coming soon. Add it in the
                                 Studio.
                             </p>
                         )}

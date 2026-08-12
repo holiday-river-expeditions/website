@@ -25,7 +25,7 @@ export function ItinerarySection({ days }: { days: ItineraryDay[] }) {
                     A Day on the River
                 </h2>
                 <p className='mt-3 max-w-xl text-body leading-body text-holiday-white/80'>
-                    A sample itinerary — every trip flexes with the water, the
+                    A sample itinerary: every trip flexes with the water, the
                     weather, and the group. Going with the flow is the point.
                 </p>
                 <div className='mt-8 divide-y divide-holiday-white/20 border-y border-holiday-white/20'>

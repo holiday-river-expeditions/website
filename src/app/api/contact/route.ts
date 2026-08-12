@@ -38,7 +38,7 @@ export async function POST(req: Request) {
         });
     } catch {
         return NextResponse.json(
-            { error: 'Something went wrong — please call us instead.' },
+            { error: 'Something went wrong. Please call us instead.' },
             { status: 500 },
         );
     }

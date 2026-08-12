@@ -87,7 +87,7 @@ export default async function PostPage({ params }: PostPageProps) {
                         </div>
                     ) : (
                         <p className='text-body leading-body text-onyx/70'>
-                            Post body coming soon — add it in the Studio.
+                            Post body coming soon. Add it in the Studio.
                         </p>
                     )}
                     <div className='mt-12'>

@@ -55,7 +55,7 @@ export default async function TripsPage() {
                     </div>
                 ) : (
                     <p className='text-body leading-body text-onyx/70'>
-                        Trips are being added — check back soon.
+                        Trips are being added. Check back soon.
                     </p>
                 )}
             </Section>

@@ -43,7 +43,7 @@ export async function POST(req: Request) {
         });
     } catch {
         return NextResponse.json(
-            { error: 'Something went wrong — please try again.' },
+            { error: 'Something went wrong. Please try again.' },
             { status: 500 },
         );
     }

@@ -65,7 +65,7 @@ export default async function RiverPage({ params }: RiverPageProps) {
                     </p>
                 ) : (
                     <p className='max-w-3xl text-body leading-body text-onyx/70'>
-                        River description coming soon — add it in the Studio.
+                        River description coming soon. Add it in the Studio.
                     </p>
                 )}
             </Section>

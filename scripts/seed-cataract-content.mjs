@@ -39,7 +39,7 @@ const itinerary = [
         day: 'Night Before',
         title: 'Meet the Crew',
         description:
-            'We gather at the Green River warehouse at 7 p.m. for orientation — meet your guides, get your dry bags, and pack for the river.',
+            'We gather at the Green River warehouse at 7 p.m. for orientation: meet your guides, get your dry bags, and pack for the river.',
     },
     {
         _key: 'day-1',

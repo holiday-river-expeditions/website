@@ -10,7 +10,7 @@ export const revalidate = 60;
 export const metadata: Metadata = {
     title: 'Blog',
     description:
-        'Stories from the canyon — trip preparation, conservation, and the culture and history of river country.',
+        'Stories from the canyon: trip preparation, conservation, and the culture and history of river country.',
 };
 
 const categoryLabels: Record<string, string> = {
@@ -91,7 +91,7 @@ export default async function BlogPage() {
             <Section background='white' className='pb-20 pt-12 md:pb-24'>
                 {posts.length === 0 ? (
                     <p className='text-body leading-body text-onyx/70'>
-                        Posts coming soon — add them in the Studio.
+                        Posts coming soon. Add them in the Studio.
                     </p>
                 ) : (
                     <div

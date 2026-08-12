@@ -77,7 +77,7 @@ const activities = [
         name: 'River Rafting',
         slug: slug('rafting'),
         description:
-            'Multi-day oar-powered rafting expeditions on the Green, Colorado, Yampa, and San Juan rivers — no motors, ever. Just the current, the canyon, and the crew.',
+            'Multi-day oar-powered rafting expeditions on the Green, Colorado, Yampa, and San Juan rivers. No motors, ever. Just the current, the canyon, and the crew.',
     },
     {
         _type: 'activity',
@@ -85,7 +85,7 @@ const activities = [
         name: 'Mountain Biking',
         slug: slug('biking'),
         description:
-            'Fully supported mountain bike tours on the White Rim Trail, the Maze, and the San Rafael Swell — plus bike-raft combination trips found nowhere else.',
+            'Fully supported mountain bike tours on the White Rim Trail, the Maze, and the San Rafael Swell, plus bike-raft combination trips found nowhere else.',
     },
 ];
 
@@ -113,7 +113,7 @@ const aboutPage = {
                     'Dee Holladay took his first river trip in 1960, ran his first commercial trip two years later, and incorporated Holiday River Expeditions with his wife Sue in 1966. What began as a weekend operation became full-time summer expeditions by 1968, with headquarters established in Green River, Utah in 1973.',
                 ),
                 block(
-                    'Six decades later, Holiday is still family-owned and still runs rivers the same way Dee did: oar-powered, motor-free, moving at the speed of the current. That choice shaped more than our trips — Dee’s outfitting practices and conservation policies were later adopted by the National Parks and Western land agencies as part of their Leave No Trace protocols.',
+                    'Six decades later, Holiday is still family-owned and still runs rivers the same way Dee did: oar-powered, motor-free, moving at the speed of the current. That choice shaped more than our trips. Dee’s outfitting practices and conservation policies were later adopted by the National Parks and Western land agencies as part of their Leave No Trace protocols.',
                 ),
                 block(
                     'From the Gates of Lodore and the Yampa to Cataract Canyon and the San Juan, we added mountain biking in 1991 and pioneered bike-raft combination trips in 1993. Dee was inducted into the River Runner’s Hall of Fame in 1998, and his legacy guides every trip we run.',
@@ -129,7 +129,7 @@ const aboutPage = {
                     'The Holiday Way is how we describe the philosophy Dee and Sue built the company on: flow with nature, practice humility, and do the work right the first time. It means celebrating the rain alongside the sunshine, and treating wild places as something we borrow, not own.',
                 ),
                 block(
-                    'Our rafts move downstream using only current and oar power. Our guides train every year in river safety, wilderness first aid, interpretation, and inclusivity — skilled professionals and passionate storytellers in equal measure. And Sue’s standard for hospitality, from camp kitchens to quality meals, has been part of every expedition since 1966.',
+                    'Our rafts move downstream using only current and oar power. Our guides train every year in river safety, wilderness first aid, interpretation, and inclusivity: skilled professionals and passionate storytellers in equal measure. And Sue’s standard for hospitality, from camp kitchens to quality meals, has been part of every expedition since 1966.',
                 ),
             ],
         },
@@ -158,7 +158,7 @@ const tripInsurancePage = {
                 ),
                 ...bullets([
                     'Cancellations 90 or more days before your trip are refundable, less a service charge per person.',
-                    'Cancellations within 90 days of your trip are non-refundable — including cancellations due to illness, injury, or travel delays.',
+                    'Cancellations within 90 days of your trip are non-refundable, including cancellations due to illness, injury, or travel delays.',
                     'If Holiday cancels a trip due to river conditions, weather, or insufficient reservations, you receive a full refund.',
                 ]),
                 block(
@@ -190,7 +190,7 @@ const faqDefs = [
     {
         cat: 'general',
         q: 'What is a typical day on the river like?',
-        a: 'Guides are up around 6 a.m. making coffee and breakfast, and we aim to push off the beach around 9 a.m. — river time permitting. Days mix floating and whitewater with side hikes and a riverside lunch, and we make camp around 4–5 p.m.',
+        a: 'Guides are up around 6 a.m. making coffee and breakfast, and we aim to push off the beach around 9 a.m., river time permitting. Days mix floating and whitewater with side hikes and a riverside lunch, and we make camp around 4–5 p.m.',
     },
     {
         cat: 'general',
@@ -205,7 +205,7 @@ const faqDefs = [
     {
         cat: 'general',
         q: 'What if I have never camped before?',
-        a: 'You only need to set up your tent and pick your campsite — the guides handle everything else, including all food preparation and cleanup.',
+        a: 'You only need to set up your tent and pick your campsite. The guides handle everything else, including all food preparation and cleanup.',
     },
     // booking
     {
@@ -232,7 +232,7 @@ const faqDefs = [
     {
         cat: 'trip-preparation',
         q: 'How do the dry bags work?',
-        a: 'You get two: a large bag for camp-only items and a small day bag for things you want on the water — sunscreen, camera, rain gear.',
+        a: 'You get two: a large bag for camp-only items and a small day bag for things you want on the water: sunscreen, camera, rain gear.',
     },
     {
         cat: 'trip-preparation',
@@ -242,7 +242,7 @@ const faqDefs = [
     {
         cat: 'trip-preparation',
         q: 'When should I arrive?',
-        a: 'Arrive the day before your trip — most trips hold a 7 p.m. pre-trip meeting the night before. Salt Lake City International is the most practical airport, about a three-hour drive from both Green River and Vernal.',
+        a: 'Arrive the day before your trip. Most trips hold a 7 p.m. pre-trip meeting the night before. Salt Lake City International is the most practical airport, about a three-hour drive from both Green River and Vernal.',
     },
     // safety
     {
@@ -269,7 +269,7 @@ const faqDefs = [
     {
         cat: 'cancellation',
         q: 'Does Holiday offer trip insurance?',
-        a: 'We do not sell insurance directly, but strongly recommend purchasing coverage through a provider such as Travel Guard — see our Trip Insurance page for details.',
+        a: 'We do not sell insurance directly, but strongly recommend purchasing coverage through a provider such as Travel Guard. See our Trip Insurance page for details.',
     },
 ];
 

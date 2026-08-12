@@ -70,12 +70,12 @@ export function NewsletterSignup() {
             <div aria-live='polite'>
                 {status === 'success' && (
                     <p className='mt-3 text-body font-bold leading-body text-holiday-red'>
-                        You&rsquo;re on the list — see you on the river!
+                        You&rsquo;re on the list. See you on the river!
                     </p>
                 )}
                 {status === 'error' && (
                     <p className='mt-3 text-body text-holiday-red'>
-                        Something went wrong — please try again.
+                        Something went wrong. Please try again.
                     </p>
                 )}
             </div>

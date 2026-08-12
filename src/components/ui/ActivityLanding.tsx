@@ -49,7 +49,7 @@ export function ActivityLanding({ activity }: ActivityLandingProps) {
                     </p>
                 ) : (
                     <p className='max-w-3xl text-body leading-body text-onyx/70'>
-                        Description coming soon — add it in the Studio.
+                        Description coming soon. Add it in the Studio.
                     </p>
                 )}
             </Section>

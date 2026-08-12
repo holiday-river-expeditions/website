@@ -105,7 +105,7 @@ export function BookingRow({
                     step: 'error',
                     message:
                         body.error ??
-                        'Something went wrong — call 801-266-2087 to book.',
+                        'Something went wrong. Call 801-266-2087 to book.',
                     recoverable: res.status === 409,
                 });
                 return;
@@ -127,7 +127,7 @@ export function BookingRow({
             setFlow({
                 step: 'error',
                 message:
-                    'Online booking is momentarily unavailable — call 801-266-2087 to grab your seat.',
+                    'Online booking is momentarily unavailable. Call 801-266-2087 to grab your seat.',
                 recoverable: false,
             });
         }
@@ -269,7 +269,7 @@ export function BookingRow({
                             <p className='mt-1 text-body leading-body text-onyx/80'>
                                 {flow.itemSummary}
                                 {flow.cost !== null &&
-                                    ` — ${currency.format(flow.cost)} incl. fees`}
+                                    ` · ${currency.format(flow.cost)} incl. fees`}
                             </p>
                         )}
                         <p className='mt-3 text-body leading-body text-onyx'>

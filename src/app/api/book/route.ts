@@ -75,7 +75,7 @@ export async function POST(req: Request) {
                 {
                     error:
                         remaining <= 0
-                            ? 'This date just filled up — call 801-266-2087 and we may be able to help.'
+                            ? 'This date just filled up. Call 801-266-2087 and we may be able to help.'
                             : `Only ${remaining} ${remaining === 1 ? 'seat' : 'seats'} left on this date.`,
                 },
                 { status: 409 },
@@ -115,7 +115,7 @@ export async function POST(req: Request) {
         console.error('[api/book] failed:', error);
         return NextResponse.json(
             {
-                error: 'Online booking is momentarily unavailable — call 801-266-2087 to grab your seat.',
+                error: 'Online booking is momentarily unavailable. Call 801-266-2087 to grab your seat.',
             },
             { status: 503 },
         );
