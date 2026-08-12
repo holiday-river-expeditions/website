@@ -52,7 +52,7 @@ export async function AvailabilitySection({
     const next = departures ? nextAvailable(departures) : null;
 
     return (
-        <Section background='white' className='pb-20 pt-0 md:pb-24'>
+        <Section background='white' className='pb-20 pt-12 md:pb-24 md:pt-16'>
             <div data-availability className='max-w-4xl'>
                 <div className='flex flex-wrap items-center gap-x-6 gap-y-3'>
                     <h2 className='font-alt-gothic text-[36px] font-black uppercase leading-[0.9] text-holiday-red'>

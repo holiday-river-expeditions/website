@@ -166,18 +166,65 @@ export function GET() {
     background: var(--white); padding: 8px 12px;
     font-family: 'PT Sans', Arial, sans-serif;
   }
-  /* Arctic's tab strip (Book Trip / My Activities / …) */
-  main.hre .nav-tabs, main.hre ul.nav {
-    border-bottom: 2px solid rgba(44, 43, 41, 0.15);
+  /* Arctic's guest toolbar (injected by toolbar.js as .gfs-toolbar):
+     Book Trip / My Activities / Photos / Gift Certificate + Cart / Login */
+  main.hre .gfs-toolbar {
+    background: transparent !important; border: none !important;
+    border-bottom: 2px solid rgba(44, 43, 41, 0.15) !important;
+    border-radius: 0 !important; box-shadow: none !important;
+    display: flex; flex-wrap: wrap; justify-content: space-between;
+    padding: 0 !important; margin-bottom: 24px;
   }
-  main.hre .nav-tabs a, main.hre ul.nav a {
+  main.hre .gfs-toolbar ul {
+    list-style: none; display: flex; flex-wrap: wrap; gap: 2px;
+    margin: 0; padding: 0; background: transparent;
+  }
+  main.hre .gfs-toolbar li { margin: 0; }
+  main.hre .gfs-toolbar a {
+    display: inline-block; padding: 10px 14px;
+    font-family: alternate-gothic-atf, Oswald, Arial, sans-serif;
+    text-transform: uppercase; letter-spacing: 0.04em; font-size: 15px;
+    color: var(--onyx); text-decoration: none;
+    background: transparent !important; border: none !important;
+  }
+  main.hre .gfs-toolbar a:hover { color: var(--red); }
+  main.hre .gfs-toolbar li.active a {
+    color: var(--red);
+    box-shadow: inset 0 -2px 0 var(--red);
+  }
+
+  /* Bootstrap-era horizontal forms: stack labels above inputs and
+     left-align, replacing the cramped right-aligned label column. */
+  main.hre .form-horizontal .control-group {
+    display: block; margin: 0 0 20px;
+  }
+  main.hre .form-horizontal .control-label {
+    float: none; width: auto; text-align: left; padding: 0 0 6px;
+    font-family: alternate-gothic-atf, Oswald, Arial, sans-serif;
+    text-transform: uppercase; letter-spacing: 0.05em; font-size: 13px;
+    color: var(--onyx);
+  }
+  main.hre .form-horizontal .controls { margin-left: 0 !important; }
+
+  /* Grey wells and action strips become brand panels. */
+  main.hre .well, main.hre .book-form {
+    background: #f6f4f0 !important; border: none !important;
+    border-left: 3px solid var(--red) !important;
+    border-radius: 0 !important; box-shadow: none !important;
+    padding: 20px 24px !important;
+  }
+  main.hre .form-actions {
+    background: transparent !important; border: none !important;
+    padding-left: 0 !important; margin-left: 0 !important;
+  }
+  main.hre input:focus, main.hre select:focus, main.hre textarea:focus {
+    border-color: var(--red) !important; outline: none;
+    box-shadow: 0 0 0 2px rgba(208, 10, 11, 0.15) !important;
+  }
+  main.hre .table th {
     font-family: alternate-gothic-atf, Oswald, Arial, sans-serif;
     text-transform: uppercase; letter-spacing: 0.04em;
-    color: var(--onyx); text-decoration: none;
-  }
-  main.hre .nav-tabs .active a, main.hre ul.nav .active a {
-    color: var(--red); background: transparent;
-    border-bottom: 2px solid var(--red);
+    color: var(--onyx);
   }
 </style>
 </head>

@@ -16,7 +16,7 @@ export function ItinerarySection({ days }: { days: ItineraryDay[] }) {
     if (days.length === 0) return null;
 
     return (
-        <Section background='evergreen' className='bg-topo py-16 md:py-20'>
+        <Section background='evergreen' className='bg-topo py-20 md:py-24'>
             <div className='mx-auto max-w-3xl'>
                 <h2
                     data-reveal

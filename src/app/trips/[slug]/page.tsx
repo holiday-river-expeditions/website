@@ -191,7 +191,10 @@ export default async function TripPage({ params }: TripPageProps) {
 
             {/* Photo gallery */}
             {galleryPhotos.length > 0 && (
-                <Section background='white' className='pb-20 pt-0 md:pb-24'>
+                <Section
+                    background='white'
+                    className='pb-20 pt-12 md:pb-24 md:pt-16'
+                >
                     <div className='grid gap-4 sm:grid-cols-2 lg:grid-cols-3'>
                         {galleryPhotos.map((photo) => (
                             <div
@@ -213,7 +216,10 @@ export default async function TripPage({ params }: TripPageProps) {
 
             {/* Trip-specific FAQs */}
             {trip.faqs && trip.faqs.length > 0 && (
-                <Section background='white' className='pb-16 pt-0 md:pb-20'>
+                <Section
+                    background='white'
+                    className='pb-16 pt-12 md:pb-20 md:pt-16'
+                >
                     <div className='max-w-3xl'>
                         <h2 className='font-alt-gothic text-[36px] font-black uppercase leading-[0.9] text-holiday-red'>
                             Good to Know
