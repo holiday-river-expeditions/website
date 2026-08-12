@@ -1,7 +1,7 @@
 import Link from 'next/link';
 
 export type ButtonVariant = 'primary' | 'outline' | 'onyx';
-export type ButtonSize = 'default' | 'compact' | 'lg' | 'xl';
+export type ButtonSize = 'sm' | 'default' | 'compact' | 'lg' | 'xl';
 
 interface ButtonBaseProps {
     variant?: ButtonVariant;
@@ -37,6 +37,9 @@ const variantStyles: Record<ButtonVariant, string> = {
 // sizes, so every size carries some. `lg` gets more because it sits alone as a
 // hero CTA where the extra openness reads as deliberate.
 const sizeStyles: Record<ButtonSize, string> = {
+    // For narrow containers — `default` is flush to the pixel inside the 288px
+    // MiniCart panel, which the wider Oswald fallback would overflow.
+    sm: 'px-6 py-2.5 text-[17px] leading-none tracking-[0.025em]',
     default: 'px-6 py-2 text-[19px] leading-none tracking-[0.025em]',
     // Shrinks to fit alongside the logo + hamburger + cart on phones,
     // then matches `default` from md up.

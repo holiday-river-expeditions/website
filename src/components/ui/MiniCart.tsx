@@ -190,6 +190,7 @@ export function MiniCart() {
                                     href={checkoutUrl}
                                     className={buttonClasses({
                                         variant: 'primary',
+                                        size: 'sm',
                                         display: 'block',
                                         className: 'mt-3 text-center',
                                     })}

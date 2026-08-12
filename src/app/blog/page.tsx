@@ -70,7 +70,11 @@ export default async function BlogPage() {
                                     <span className='font-alt-gothic text-[13px] font-semibold uppercase tracking-[0.1em] text-onyx'>
                                         Latest Story
                                     </span>
-                                    <h2 className='mt-2 font-alt-gothic text-[36px] font-black uppercase leading-[0.9] text-onyx transition-opacity group-hover:opacity-70 md:text-h2'>
+                                    {/* leading-[0.9] is deliberate, not
+                                        redundant: it sets --tw-leading, which
+                                        md:text-h2 defers to, holding 0.9 at md
+                                        instead of h2's 0.95. */}
+                                    <h2 className='mt-2 font-alt-gothic text-section font-black uppercase leading-[0.9] text-onyx transition-opacity group-hover:opacity-70 md:text-h2'>
                                         {featured.title}
                                     </h2>
                                     {featured.excerpt && (

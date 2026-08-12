@@ -30,7 +30,10 @@
     --text-body: 16px;
     --text-link: 12px;
 
-    /* Typography scale — line heights */
+    /* Typography scale — line heights.
+       Paired with the font size above, so `text-body` alone already applies
+       its line height: Tailwind compiles the pair into the font-size utility
+       as `line-height: var(--tw-leading, <value>)`. */
     --text-h1--line-height: 0.92;
     --text-h2--line-height: 0.95;
     --text-section--line-height: 0.9;
@@ -39,6 +42,24 @@
     --text-paragraph--line-height: 24px;
     --text-body--line-height: 22.4px;
     --text-link--line-height: 1.5;
+
+    /* Standalone leading utilities (`leading-body`, `leading-h3`, …).
+       These need their own --leading-* namespace: the --text-*--line-height
+       pairs above only feed the font-size utilities, so without these the
+       leading-* classes compile to nothing at all and silently no-op.
+
+       Values MUST mirror the pairs above. They can't reference them with
+       var() — `@theme inline` inlines values instead of emitting :root custom
+       properties, so a var() here would resolve to empty (same trap as
+       --font-sans, see the body rule below). Change one, change both. */
+    --leading-h1: 0.92;
+    --leading-h2: 0.95;
+    --leading-section: 0.9;
+    --leading-h3: 1;
+    --leading-subheading: 30px;
+    --leading-paragraph: 24px;
+    --leading-body: 22.4px;
+    --leading-link: 1.5;
 
     /* Letter spacing */
     --tracking-tight: -0.5px;

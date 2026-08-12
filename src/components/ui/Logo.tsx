@@ -13,6 +13,9 @@ import Image from 'next/image';
  */
 export function Logo({
     variant = 'stack',
+    // Deliberately arbitrary rather than text-section/text-h2: those tokens
+    // carry a line-height, and the lockup sets its own leading per variant to
+    // match the mark's height. Bare font-size utilities emit no line-height.
     size = 'text-[36px] md:text-[44px]',
     color = 'text-holiday-red',
     className = '',
