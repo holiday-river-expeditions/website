@@ -46,10 +46,18 @@ export default async function Home() {
         }),
     );
 
+    // 16:9 master large enough for 2x DPR full-bleed; next/image scales it
+    // down per device so smaller screens don't pay for the big crop.
+    // A river name links straight to its trip when it has exactly one —
+    // the river pages are too thin to be a useful stop. Zero trips (or,
+    // someday, several) falls back to the full trip listing.
     const rivers = (homepage.rivers ?? []).map((river) => ({
         name: river.name ?? '',
-        href: river.slug?.current ? `/rivers/${river.slug.current}` : '#',
-        image: imageUrl(river.image, 1600, 1000),
+        href:
+            river.tripCount === 1 && river.tripSlug
+                ? `/trips/${river.tripSlug}`
+                : '/trips',
+        image: imageUrl(river.image, 2880, 1620),
     }));
 
     const learnContent = (homepage.learnContent ?? []).map((card) => ({
@@ -60,10 +68,11 @@ export default async function Home() {
     }));
 
     // Wide banner crop for the full-bleed hero; the editor-set hotspot in
-    // Studio controls which part of the photo shows at every viewport.
-    const heroImage = imageUrl(homepage.heroImage, 2560, 860);
-    const storyImageLeft = imageUrl(homepage.storyImageLeft, 700, 933);
-    const storyImagePortrait = imageUrl(homepage.storyImagePortrait, 700, 933);
+    // Studio controls which part of the photo shows at every viewport. The
+    // 1440:523 box matches the Hero's display aspect (from the mock) at 2x DPR.
+    const heroImage = imageUrl(homepage.heroImage, 2880, 1046);
+    const storyImageLeft = imageUrl(homepage.storyImageLeft, 940, 1058);
+    const storyImagePortrait = imageUrl(homepage.storyImagePortrait, 940, 1410);
 
     return (
         <>
@@ -98,17 +107,22 @@ export default async function Home() {
 
             {/* Rafting Since 1966 */}
             <Section background='white' className='py-20 md:py-24'>
-                <div className='grid items-center gap-10 md:grid-cols-[1.3fr_1fr]'>
+                {/* Mock geometry: the collage owns ~3/4 of the row and the copy
+                    sits in a narrow right rail, so the photography carries the
+                    section. Everything top-aligns: the near-square (8:9) action
+                    shot and the copy hang from the same line as the taller 2:3
+                    founder portrait, which runs past both. */}
+                <div className='grid items-start gap-10 md:grid-cols-[3.2fr_1fr]'>
                     {/* Left: two-image collage */}
-                    <div className='grid grid-cols-2 gap-4'>
-                        <div className='relative aspect-[3/4] overflow-hidden bg-holiday-grey/15'>
+                    <div className='grid grid-cols-2 items-start gap-5'>
+                        <div className='relative aspect-[8/9] overflow-hidden bg-holiday-grey/15'>
                             {storyImageLeft && (
                                 <Image
                                     src={storyImageLeft}
-                                    alt='Vintage Holiday River Expeditions rafting trip'
+                                    alt='Whitewater rafting on a Holiday River Expeditions trip'
                                     fill
                                     className='object-cover'
-                                    sizes='(max-width: 768px) 50vw, 30vw'
+                                    sizes='(max-width: 768px) 50vw, 33vw'
                                 />
                             )}
                         </div>
@@ -116,7 +130,7 @@ export default async function Home() {
                             founder signature + arrow can be absolutely positioned
                             over its bottom-right corner and stay anchored to it at
                             any screen size. The photo is clipped by the inner div. */}
-                        <div className='relative aspect-[3/4] translate-y-8'>
+                        <div className='relative aspect-[2/3]'>
                             <div className='absolute inset-0 overflow-hidden bg-holiday-grey/15'>
                                 {storyImagePortrait && (
                                     <Image
@@ -124,7 +138,7 @@ export default async function Home() {
                                         alt='Dee Holladay, founder of Holiday River Expeditions'
                                         fill
                                         className='object-cover grayscale'
-                                        sizes='(max-width: 768px) 50vw, 30vw'
+                                        sizes='(max-width: 768px) 50vw, 33vw'
                                     />
                                 )}
                             </div>

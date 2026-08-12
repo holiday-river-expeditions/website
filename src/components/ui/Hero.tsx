@@ -19,8 +19,12 @@ export function Hero({
         // Full-bleed banner at restrained height (well under viewport, so the
         // next section always peeks — no illusion of completeness). The seal
         // straddles the banner's bottom-left edge, so the section must not clip.
+        // Desktop height tracks the mock's 1440:523 banner proportion instead of
+        // a fixed pixel height, so wider screens don't degrade into an
+        // ever-thinner letterbox crop; the vh cap keeps the peek on short
+        // viewports.
         <section>
-            <div className='relative h-[460px] md:h-[523px]'>
+            <div className='relative h-[460px] md:aspect-[1440/523] md:h-auto md:max-h-[75vh] md:w-full'>
                 {/* Banner image. The evergreen base keeps the white headline
                     legible before a photo is set. */}
                 <div className='absolute inset-0 overflow-hidden bg-evergreen'>
@@ -29,7 +33,7 @@ export function Hero({
                             src={backgroundImage}
                             alt={imageAlt}
                             fill
-                            priority
+                            preload
                             sizes='100vw'
                             className='object-cover motion-safe:animate-hero-drift'
                         />
@@ -58,7 +62,7 @@ export function Hero({
                     alt='60 years of going with the flow'
                     width={164}
                     height={164}
-                    priority
+                    preload
                     className='absolute bottom-0 left-6 z-20 h-32 w-32 translate-y-[15%] md:left-10 md:h-48 md:w-48'
                 />
             </div>

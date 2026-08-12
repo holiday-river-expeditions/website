@@ -1,5 +1,6 @@
 'use client';
 
+import Image from 'next/image';
 import Link from 'next/link';
 import { useState } from 'react';
 
@@ -19,17 +20,29 @@ export function RiverSelector({ rivers }: RiverSelectorProps) {
 
     return (
         <section className='relative min-h-[600px] overflow-hidden bg-evergreen md:min-h-[720px]'>
-            {/* Background images — all rendered for smooth crossfade */}
-            {rivers.map((river, index) => (
-                <div
-                    key={river.name}
-                    className={`absolute inset-0 bg-cover bg-center transition-opacity duration-500 ${
-                        index === activeIndex ? 'opacity-100' : 'opacity-0'
-                    }`}
-                    style={{ backgroundImage: `url(${river.image})` }}
-                    aria-hidden='true'
-                />
-            ))}
+            {/* Background images — all rendered for smooth crossfade.
+                next/image (not CSS backgrounds) so each device gets a
+                properly-sized, DPR-aware file instead of upscaling one small
+                crop into a grainy full-bleed. Hidden layers still load once
+                the section is in view, keeping the crossfade instant. */}
+            {rivers.map(
+                (river, index) =>
+                    river.image && (
+                        <Image
+                            key={river.name}
+                            src={river.image}
+                            alt=''
+                            aria-hidden='true'
+                            fill
+                            sizes='100vw'
+                            className={`object-cover transition-opacity duration-500 ${
+                                index === activeIndex
+                                    ? 'opacity-100'
+                                    : 'opacity-0'
+                            }`}
+                        />
+                    ),
+            )}
 
             {/* Dark overlay for legibility */}
             <div className='absolute inset-0 bg-onyx/30' />
