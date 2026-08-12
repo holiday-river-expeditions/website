@@ -80,8 +80,17 @@ export function GET() {
     color: var(--red); text-decoration: none; letter-spacing: 0.02em;
   }
   header.hre nav a:hover { opacity: 0.7; }
-  header.hre .logo { justify-self: center; }
-  header.hre .logo img { height: 44px; width: auto; display: block; }
+  header.hre .logo {
+    justify-self: center; display: inline-flex; align-items: center;
+    gap: 10px; text-decoration: none;
+  }
+  header.hre .logo img { height: 32px; width: auto; display: block; }
+  header.hre .logo .wordmark {
+    font-family: alternate-gothic-atf, Oswald, Arial, sans-serif;
+    text-transform: uppercase; font-weight: 900; font-size: 42px;
+    line-height: 1; letter-spacing: -0.01em; color: var(--red);
+    white-space: nowrap;
+  }
   header.hre .cta { justify-self: end; }
   header.hre .cta a {
     display: inline-block; background: var(--red); color: var(--white);
@@ -117,7 +126,17 @@ export function GET() {
     display: flex; flex-wrap: wrap; gap: 40px; align-items: flex-start;
     justify-content: space-between;
   }
-  footer.hre .logo img { height: 56px; width: auto; display: block; }
+  footer.hre .logo {
+    display: inline-flex; align-items: center; gap: 10px;
+    text-decoration: none;
+  }
+  footer.hre .logo img { height: 34px; width: auto; display: block; }
+  footer.hre .logo .wordmark {
+    font-family: alternate-gothic-atf, Oswald, Arial, sans-serif;
+    text-transform: uppercase; font-weight: 900; font-size: 45px;
+    line-height: 1; letter-spacing: -0.01em; color: var(--red);
+    white-space: nowrap;
+  }
   footer.hre address {
     font-style: normal; font-size: 12px; letter-spacing: 0.05em;
     line-height: 1.7; margin-top: 16px;
@@ -236,7 +255,7 @@ export function GET() {
     </ul>
   </nav>
   <a class="logo" href="${SITE}" aria-label="Holiday River Expeditions home">
-    <img src="${SITE}/logo-horizontal-red.svg" alt="Holiday River Expeditions" width="240" height="96">
+    <img src="${SITE}/logo-icon-red.svg" alt="" width="119" height="200"><span class="wordmark">Holiday River Expeditions</span>
   </a>
   <div class="cta"><a href="${SITE}/open-seats">Open Seats</a></div>
 </header>
@@ -251,7 +270,7 @@ export function GET() {
   <div class="inner">
     <div>
       <a class="logo" href="${SITE}" aria-label="Holiday River Expeditions home">
-        <img src="${SITE}/logo-horizontal-red.svg" alt="Holiday River Expeditions" width="240" height="96">
+        <img src="${SITE}/logo-icon-red.svg" alt="" width="119" height="200"><span class="wordmark">Holiday River Expeditions</span>
       </a>
       <address>
         544 East 3900 South<br>

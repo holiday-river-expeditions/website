@@ -1,6 +1,7 @@
 import Image from 'next/image';
 import Link from 'next/link';
 import { ExternalLink } from '@/components/ui/ExternalLink';
+import { Logo } from '@/components/ui/Logo';
 import { NewsletterSignup } from '@/components/ui/NewsletterSignup';
 import { TopoDivider } from '@/components/ui/TopoDivider';
 import { getSiteSettings } from '@/lib/sanity';
@@ -95,13 +96,7 @@ export async function Footer() {
                 {/* Bottom row: logo + NPS badge */}
                 <div className='mt-16 flex items-end justify-between gap-8'>
                     <Link href='/' aria-label='Holiday River Expeditions home'>
-                        <Image
-                            src='/logo-horizontal-red.svg'
-                            alt='Holiday River Expeditions'
-                            width={240}
-                            height={96}
-                            className='h-16 w-auto md:h-20'
-                        />
+                        <Logo size='text-[34px] md:text-[42px]' />
                     </Link>
 
                     <Image

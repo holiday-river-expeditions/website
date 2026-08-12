@@ -1,6 +1,6 @@
-import Image from 'next/image';
 import Link from 'next/link';
 import { Button } from '@/components/ui/Button';
+import { Logo } from '@/components/ui/Logo';
 import { MiniCart } from '@/components/ui/MiniCart';
 import { DesktopNav } from './Nav';
 import { MobileNav } from './MobileNav';
@@ -22,14 +22,7 @@ export function Header() {
                     className='justify-self-center'
                     aria-label='Holiday River Expeditions home'
                 >
-                    <Image
-                        src='/logo-horizontal-red.svg'
-                        alt='Holiday River Expeditions'
-                        width={240}
-                        height={96}
-                        className='h-9 w-auto md:h-11'
-                        priority
-                    />
+                    <Logo size='text-[26px] md:text-[32px]' />
                 </Link>
 
                 {/* Right: hamburger + cart + BOOK NOW */}
