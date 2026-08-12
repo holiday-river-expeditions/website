@@ -1,5 +1,4 @@
 import { Section } from '@/components/ui/Section';
-import { TopoDivider } from '@/components/ui/TopoDivider';
 
 /**
  * Pull-quote band for one standout guest review — immediate social proof
@@ -16,7 +15,7 @@ export function FeaturedReview({
     source?: string | null;
 }) {
     return (
-        <Section background='sand' className='relative py-14 md:py-16'>
+        <Section background='sand' className='py-14 md:py-16'>
             <figure data-reveal className='mx-auto max-w-3xl text-center'>
                 <span
                     aria-hidden
@@ -35,9 +34,6 @@ export function FeaturedReview({
                     </figcaption>
                 )}
             </figure>
-            <div className='absolute inset-x-0 bottom-0'>
-                <TopoDivider variant='river' className='text-onyx/15' />
-            </div>
         </Section>
     );
 }
