@@ -58,7 +58,7 @@ export function TripCard({
                     style={{ backgroundImage: `url(${image})` }}
                 />
                 {ribbon && (
-                    <span className='absolute left-0 top-4 z-10 whitespace-nowrap bg-holiday-red px-3 py-1 font-alt-gothic text-[12px] font-medium uppercase tracking-[0.05em] text-holiday-white'>
+                    <span className='absolute left-0 top-4 z-10 whitespace-nowrap bg-holiday-red px-3 py-1 text-[13px] font-bold leading-tight text-holiday-white'>
                         {ribbon}
                     </span>
                 )}
@@ -66,12 +66,12 @@ export function TripCard({
             <div className='mt-4 flex items-start justify-between gap-4'>
                 <span className='flex flex-wrap gap-2'>
                     <span
-                        className={`inline-block ${tagColor} px-3 py-1 font-alt-gothic text-[12px] font-medium uppercase tracking-[0.05em]`}
+                        className={`inline-block ${tagColor} px-3 py-1 text-[13px] font-bold leading-tight`}
                     >
                         {category}
                     </span>
                     {difficultyLabel && (
-                        <span className='inline-block border border-onyx/40 px-3 py-1 font-alt-gothic text-[12px] font-medium uppercase tracking-[0.05em] text-onyx'>
+                        <span className='inline-block border border-onyx/40 px-3 py-1 text-[13px] font-bold leading-tight text-onyx'>
                             {difficultyLabel}
                         </span>
                     )}

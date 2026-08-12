@@ -89,7 +89,7 @@ export default async function TripPage({ params }: TripPageProps) {
                     <div className='absolute inset-0 bg-gradient-to-t from-onyx/70 via-onyx/10 to-transparent' />
                     <div className='relative z-10 w-full px-6 pb-10 md:px-12'>
                         {category && (
-                            <span className='inline-block bg-teal px-3 py-1 font-alt-gothic text-[12px] font-medium uppercase tracking-[0.05em] text-holiday-white'>
+                            <span className='inline-block bg-teal px-3 py-1 text-[13px] font-bold leading-tight text-holiday-white'>
                                 {category}
                             </span>
                         )}
