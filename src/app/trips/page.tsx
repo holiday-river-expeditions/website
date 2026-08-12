@@ -18,7 +18,7 @@ export default async function TripsPage() {
     return (
         <>
             {/* Page banner */}
-            <section className='px-4 pt-3 md:px-10 md:pt-4'>
+            <section>
                 <div className='flex items-end bg-evergreen px-6 py-10 md:px-12 md:py-14'>
                     <h1 className='font-alt-gothic text-h2 font-black uppercase leading-h2 text-holiday-white md:text-h1 md:leading-h1'>
                         Explore Our Trips

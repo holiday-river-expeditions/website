@@ -14,13 +14,13 @@ interface ActivityLandingProps {
  * hero + intro + trip-grid shape as the river detail page.
  */
 export function ActivityLanding({ activity }: ActivityLandingProps) {
-    const heroPhoto = imageUrl(activity.image, 2000, 900);
+    const heroPhoto = imageUrl(activity.image, 2560, 900);
     const trips = activity.trips ?? [];
 
     return (
         <>
             {/* Banner — inset like the homepage hero */}
-            <section className='px-4 pt-3 md:px-10 md:pt-4'>
+            <section>
                 <div className='relative flex h-[320px] items-end overflow-hidden bg-evergreen md:h-[440px]'>
                     {heroPhoto && (
                         <Image

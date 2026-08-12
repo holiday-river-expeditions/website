@@ -59,9 +59,9 @@ export default async function Home() {
         isVideo: card.isVideo ?? false,
     }));
 
-    // Banner-shaped crop (~2.6:1, matching the mock's 1359x523 hero) so the
-    // editor-set hotspot in Studio controls which part of the photo shows.
-    const heroImage = imageUrl(homepage.heroImage, 2000, 770);
+    // Wide banner crop for the full-bleed hero; the editor-set hotspot in
+    // Studio controls which part of the photo shows at every viewport.
+    const heroImage = imageUrl(homepage.heroImage, 2560, 860);
     const storyImageLeft = imageUrl(homepage.storyImageLeft, 700, 933);
     const storyImagePortrait = imageUrl(homepage.storyImagePortrait, 700, 933);
 

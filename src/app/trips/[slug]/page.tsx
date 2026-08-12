@@ -47,7 +47,7 @@ export default async function TripPage({ params }: TripPageProps) {
     if (!trip) notFound();
 
     const category = trip.categories?.[0]?.name ?? null;
-    const heroPhoto = imageUrl(trip.photos?.[0], 2000, 900);
+    const heroPhoto = imageUrl(trip.photos?.[0], 2560, 900);
     const galleryPhotos = (trip.photos ?? []).slice(1, 7);
     const difficulty = trip.difficulty
         ? difficultyLabels[trip.difficulty]
@@ -74,7 +74,7 @@ export default async function TripPage({ params }: TripPageProps) {
     return (
         <>
             {/* Banner — inset like the homepage hero */}
-            <section className='px-4 pt-3 md:px-10 md:pt-4'>
+            <section>
                 <div className='relative flex h-[320px] items-end overflow-hidden bg-evergreen md:h-[440px]'>
                     {heroPhoto && (
                         <Image

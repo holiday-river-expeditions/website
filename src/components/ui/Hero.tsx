@@ -16,13 +16,13 @@ export function Hero({
     cta,
 }: HeroProps) {
     return (
-        // Inset banner — image sits below the header with side margins (per mockup),
-        // not full-bleed. The seal straddles the banner's bottom-left edge, so the
-        // outer section must not clip.
-        <section className='px-4 pt-3 md:px-10 md:pt-4'>
+        // Full-bleed banner at restrained height (well under viewport, so the
+        // next section always peeks — no illusion of completeness). The seal
+        // straddles the banner's bottom-left edge, so the section must not clip.
+        <section>
             <div className='relative h-[420px] md:h-[523px]'>
-                {/* Banner image, clipped to the inset rectangle. The evergreen
-                    base keeps the white headline legible before a photo is set. */}
+                {/* Banner image. The evergreen base keeps the white headline
+                    legible before a photo is set. */}
                 <div className='absolute inset-0 overflow-hidden bg-evergreen'>
                     {backgroundImage && (
                         <Image

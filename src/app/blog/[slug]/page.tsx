@@ -42,13 +42,13 @@ export default async function PostPage({ params }: PostPageProps) {
     const post = await getPostBySlug(slug);
     if (!post) notFound();
 
-    const heroPhoto = imageUrl(post.mainImage, 2000, 900);
+    const heroPhoto = imageUrl(post.mainImage, 2560, 900);
     const category = post.category ? categoryLabels[post.category] : null;
 
     return (
         <>
             {/* Banner — inset like the homepage hero */}
-            <section className='px-4 pt-3 md:px-10 md:pt-4'>
+            <section>
                 <div className='relative flex h-[320px] items-end overflow-hidden bg-evergreen md:h-[440px]'>
                     {heroPhoto && (
                         <Image

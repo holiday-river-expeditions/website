@@ -100,12 +100,12 @@ function HeroBlockSection({
     block: Extract<PageBlock, { _type: 'heroBlock' }>;
     isFirst: boolean;
 }) {
-    const heroPhoto = imageUrl(block.backgroundImage, 2000, 900);
+    const heroPhoto = imageUrl(block.backgroundImage, 2560, 900);
     // The first hero is the page's h1; any later hero demotes to h2.
     const Heading = isFirst ? 'h1' : 'h2';
 
     return (
-        <section className='px-4 pt-3 md:px-10 md:pt-4'>
+        <section>
             <div className='relative flex h-[320px] items-end overflow-hidden bg-evergreen md:h-[440px]'>
                 {heroPhoto && (
                     <Image
