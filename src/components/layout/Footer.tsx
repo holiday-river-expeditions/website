@@ -3,7 +3,6 @@ import Link from 'next/link';
 import { ExternalLink } from '@/components/ui/ExternalLink';
 import { Logo } from '@/components/ui/Logo';
 import { NewsletterSignup } from '@/components/ui/NewsletterSignup';
-import { TopoDivider } from '@/components/ui/TopoDivider';
 import { getSiteSettings } from '@/lib/sanity';
 
 // Fallbacks if the Site Settings singleton hasn't been seeded/edited yet.
@@ -42,7 +41,6 @@ export async function Footer() {
 
     return (
         <footer className='bg-[#F3F0EB] text-onyx'>
-            <TopoDivider variant='contour' className='text-sand' />
             <div className='mx-auto max-w-7xl px-6 pb-16 pt-10'>
                 <div className='grid gap-12 lg:grid-cols-[1.2fr_repeat(3,1fr)]'>
                     {/* Left: newsletter */}

@@ -55,7 +55,7 @@ export default function ContactPage() {
             <Section background='white' className='pb-20 pt-8 md:pb-24'>
                 {/* Split panel: evergreen info card beside the form. */}
                 <div className='grid overflow-hidden lg:grid-cols-[1fr_1.2fr]'>
-                    <div className='bg-topo bg-evergreen p-8 md:p-10'>
+                    <div className='bg-canvas bg-evergreen p-8 md:p-10'>
                         <h2 className='font-alt-gothic text-[28px] font-black uppercase leading-[0.95] text-holiday-white'>
                             Find Us on
                             <br />

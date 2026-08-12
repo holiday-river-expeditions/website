@@ -154,7 +154,7 @@ function ContentBlockSection({
     return (
         <Section
             background={background}
-            className={`py-12 md:py-16 ${onDark ? 'bg-topo' : ''}`}
+            className={`py-12 md:py-16 ${onDark ? 'bg-canvas' : ''}`}
         >
             <div data-reveal className='mx-auto max-w-3xl'>
                 {block.heading && (

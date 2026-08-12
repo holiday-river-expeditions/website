@@ -9,7 +9,7 @@ interface SectionProps {
 
 const bgStyles: Record<SectionBackground, string> = {
     white: 'bg-holiday-white text-onyx',
-    sand: 'bg-sand text-onyx',
+    sand: 'bg-sand bg-canvas text-onyx',
     opal: 'bg-opal text-onyx',
     evergreen: 'bg-evergreen text-holiday-white',
     onyx: 'bg-onyx text-holiday-white',

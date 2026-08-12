@@ -27,7 +27,7 @@ test('renders nothing when the trip has no itinerary', () => {
     expect(container).toBeEmptyDOMElement();
 });
 
-test('falls back to the single-column band when the trip has no media', () => {
+test('falls back to the plain rapids band when the trip has no media', () => {
     const { container } = render(<ItinerarySection days={days} />);
 
     expect(
@@ -36,9 +36,10 @@ test('falls back to the single-column band when the trip has no media', () => {
     expect(screen.getByText('Put-in')).toBeInTheDocument();
     expect(container.querySelector('video')).toBeNull();
     expect(container.querySelector('img')).toBeNull();
+    expect(container.querySelector('.bg-canvas')).not.toBeNull();
 });
 
-test('shows the poster on its own when the trip has no video', () => {
+test('shows no imagery when there is a poster but no video', () => {
     const { container } = render(
         <ItinerarySection
             days={days}
@@ -46,11 +47,13 @@ test('shows the poster on its own when the trip has no video', () => {
         />,
     );
 
-    expect(screen.getByAltText('Rafts at dawn')).toBeInTheDocument();
+    // The poster is the video's first frame, not a standalone illustration —
+    // with no clip the band is the rapids texture alone.
     expect(container.querySelector('video')).toBeNull();
+    expect(container.querySelector('img')).toBeNull();
 });
 
-test('ignores a video with no poster, since the poster gates the panel', () => {
+test('ignores a video with no poster, which would load as a black band', () => {
     const { container } = render(
         <ItinerarySection
             days={days}
@@ -74,9 +77,12 @@ test('renders the ambient video without autoplaying or attaching a source', () =
         />,
     );
 
-    // The still renders underneath as the base layer, so there is always
-    // something to look at before (and instead of) playback.
-    expect(screen.getByAltText('Rafts at dawn')).toBeInTheDocument();
+    // The poster renders underneath as the base layer, so there is always
+    // something to look at before (and instead of) playback. It is decorative
+    // — the scrim and accordion carry the meaning — so alt is empty.
+    const poster_img = container.querySelector('img');
+    expect(poster_img).not.toBeNull();
+    expect(poster_img).toHaveAttribute('alt', '');
 
     const video = container.querySelector('video');
     expect(video).not.toBeNull();

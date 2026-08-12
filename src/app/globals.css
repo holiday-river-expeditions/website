@@ -109,25 +109,19 @@ summary {
     border-radius: 2px;
 }
 
-/* Topographic background texture — contour lines at whisper opacity, for
-   evergreen bands only (texture stays an accent per brand guidelines). */
-.bg-topo {
-    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='560' height='260' viewBox='0 0 560 260'%3E%3Cpath d='M0 52 C 70 22, 210 82, 280 52 C 350 22, 490 82, 560 52' stroke='%23fcfcfc' stroke-opacity='0.05' stroke-width='1.5' fill='none'/%3E%3Cpath d='M0 117 C 70 147, 210 87, 280 117 C 350 147, 490 87, 560 117' stroke='%23fcfcfc' stroke-opacity='0.04' stroke-width='1.5' fill='none'/%3E%3Cpath d='M0 182 C 70 152, 210 212, 280 182 C 350 152, 490 212, 560 182' stroke='%23fcfcfc' stroke-opacity='0.05' stroke-width='1.5' fill='none'/%3E%3Cpath d='M0 247 C 70 277, 210 217, 280 247 C 350 277, 490 217, 560 247' stroke='%23fcfcfc' stroke-opacity='0.04' stroke-width='1.5' fill='none'/%3E%3C/svg%3E");
-    background-size: 560px 260px;
-    background-repeat: repeat;
-}
+/* Material grain, not line art. The competitor set that uses texture at all
+   (Western River's parchment, AzRA's linen) uses a raster material; discrete
+   vector strokes at whisper opacity only ever read as ruled lines or as
+   scattered debris. feTurbulence gives a grain field with nothing for the eye
+   to catch on, and stitchTiles='stitch' makes it tile seamlessly.
 
-/* The river never stops: an almost-subliminal downstream drift of the topo
-   texture (one tile width per 90s). Motion-safe only. */
-@media (prefers-reduced-motion: no-preference) {
-    .bg-topo {
-        animation: topo-drift 90s linear infinite;
-    }
-    @keyframes topo-drift {
-        to {
-            background-position: 560px 0;
-        }
-    }
+   Deliberately NOT animated: drifting grain reads as TV static. It composes
+   with any background-color (it only sets background-image), so it works on
+   both the evergreen bands and the sand ones. */
+.bg-canvas {
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='300'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.45' numOctaves='5' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='300' height='300' filter='url(%23n)' opacity='0.08'/%3E%3C/svg%3E");
+    background-size: 300px 300px;
+    background-repeat: repeat;
 }
 
 /* ---------------------------------------------------------------------------
@@ -173,15 +167,5 @@ summary {
         [data-reveal-stagger][data-revealed]
         > :nth-child(n + 4) {
         transition-delay: 0.3s;
-    }
-
-    /* River divider draws itself on reveal (pathLength normalized to 1). */
-    html[data-reveal='on'] [data-reveal] .topo-river-path {
-        stroke-dasharray: 1;
-        stroke-dashoffset: 1;
-    }
-    html[data-reveal='on'] [data-reveal][data-revealed] .topo-river-path {
-        transition: stroke-dashoffset 1.8s ease-in-out 0.15s;
-        stroke-dashoffset: 0;
     }
 }

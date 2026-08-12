@@ -21,9 +21,9 @@ interface ItineraryMedia {
  * the deep purchase-derisking content from the current site, in the new
  * design language. First day starts open.
  *
- * When the trip has itinerary media the days sit beside a sticky panel
- * (ambient loop, or the poster on its own); trips with no media keep the
- * original single-column band.
+ * When the trip has a clip, it plays full-bleed behind the whole band under a
+ * scrim; otherwise the band is the canvas grain alone. No photo ever stands
+ * in for the footage.
  */
 export function ItinerarySection({
     days,
@@ -34,10 +34,11 @@ export function ItinerarySection({
 }) {
     if (days.length === 0) return null;
 
-    const posterUrl = imageUrl(media?.poster, 960, 1280);
-    // The poster doubles as the still fallback, so it gates the whole panel:
-    // no poster means no media column, whatever else is set.
-    const hasPanel = posterUrl !== '';
+    const posterUrl = imageUrl(media?.poster, 1920, 1280);
+    // A video with no poster is a black band while it loads, so the poster
+    // gates playback too. Without either, the canvas grain is the design —
+    // no photo stands in for the footage.
+    const videoUrl = posterUrl === '' ? null : (media?.videoUrl ?? null);
 
     const heading = (
         <>
@@ -86,36 +87,39 @@ export function ItinerarySection({
     );
 
     return (
-        <Section background='evergreen' className='bg-topo py-20 md:py-24'>
-            {hasPanel ? (
-                <div className='grid gap-10 lg:grid-cols-[minmax(0,0.9fr)_minmax(0,1.1fr)] lg:gap-16'>
-                    {/* self-start is load-bearing: a stretched grid item fills
-                        the row and sticky never engages. */}
-                    <div className='lg:sticky lg:top-16 lg:self-start'>
-                        <div className='relative aspect-[3/4] overflow-hidden bg-evergreen/60'>
-                            {/* The still is always the base layer: it is the
-                                poster frame, the reduced-motion fallback, and
-                                the no-video fallback all at once — and going
-                                through next/image gets webp negotiation and
-                                the editor's hotspot crop, which the <video>
-                                poster attribute would not. */}
-                            <Image
-                                src={posterUrl}
-                                alt={media?.alt ?? ''}
-                                fill
-                                className='object-cover'
-                                sizes='(max-width: 1024px) 100vw, 40vw'
-                            />
-                            {media?.videoUrl && (
-                                <AmbientVideo src={media.videoUrl} />
-                            )}
-                        </div>
-                    </div>
-                    <div>{heading}</div>
-                </div>
-            ) : (
-                <div className='mx-auto max-w-3xl'>{heading}</div>
+        <Section
+            background='evergreen'
+            fullBleed
+            className='relative overflow-hidden bg-canvas py-20 md:py-24'
+        >
+            {videoUrl && (
+                <>
+                    {/* Poster as the base layer, through next/image for webp
+                        negotiation and the editor's hotspot crop. It is what
+                        reduced-motion visitors see, so it must stand alone. */}
+                    <Image
+                        src={posterUrl}
+                        alt=''
+                        fill
+                        className='object-cover'
+                        sizes='100vw'
+                    />
+                    <AmbientVideo src={videoUrl} />
+                    {/* The accordion sits directly on the footage, so
+                        legibility cannot depend on the clip being dark. This
+                        scrim is what guarantees the text contrast — 65% is
+                        the point where the water still reads as water and the
+                        muted day labels are still legible over whitewater.
+                        Lighter than this and the opal day labels wash out;
+                        axe cannot catch that, because it measures contrast
+                        against the declared background, not video pixels. */}
+                    <div
+                        aria-hidden
+                        className='absolute inset-0 bg-evergreen/65'
+                    />
+                </>
             )}
+            <div className='relative mx-auto max-w-3xl'>{heading}</div>
         </Section>
     );
 }

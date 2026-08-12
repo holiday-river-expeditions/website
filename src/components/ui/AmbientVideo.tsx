@@ -20,7 +20,15 @@ export function AmbientVideo({ src }: { src: string }) {
     // Assume reduced motion until the media query says otherwise, so the first
     // client render after hydration never starts playback on its own.
     const [reduceMotion, setReduceMotion] = useState(true);
+    // Mirrors reduceMotion for the observer callbacks, which would otherwise
+    // close over a stale value.
+    const reduceMotionRef = useRef(true);
     const [inView, setInView] = useState(false);
+    // One-way latch: once the panel has been seen with motion allowed, the
+    // source stays attached. Binding `src` to a value that can flip would
+    // yank the attribute and unload the media, resetting playback and forcing
+    // a fresh download every time the panel scrolls out of view and back.
+    const [sourceAttached, setSourceAttached] = useState(false);
     const [userPaused, setUserPaused] = useState(false);
     const [isPlaying, setIsPlaying] = useState(false);
     const [hasPlayed, setHasPlayed] = useState(false);
@@ -28,7 +36,10 @@ export function AmbientVideo({ src }: { src: string }) {
     // Track the preference live — flipping it mid-session must stop the loop.
     useEffect(() => {
         const query = window.matchMedia('(prefers-reduced-motion: reduce)');
-        const sync = () => setReduceMotion(query.matches);
+        const sync = () => {
+            reduceMotionRef.current = query.matches;
+            setReduceMotion(query.matches);
+        };
         sync();
         query.addEventListener('change', sync);
         return () => query.removeEventListener('change', sync);
@@ -38,14 +49,21 @@ export function AmbientVideo({ src }: { src: string }) {
         const video = videoRef.current;
         if (!video) return;
 
+        // Latching here (rather than deriving from state) keeps the
+        // zero-bytes guarantee: reduced-motion visitors never trip the latch,
+        // so no source is ever attached and nothing downloads.
+        const enter = (visible: boolean) => {
+            setInView(visible);
+            if (visible && !reduceMotionRef.current) setSourceAttached(true);
+        };
+
         let observerFired = false;
         let observer: IntersectionObserver | undefined;
         if ('IntersectionObserver' in window) {
             observer = new IntersectionObserver(
                 (entries) => {
                     observerFired = true;
-                    for (const entry of entries)
-                        setInView(entry.isIntersecting);
+                    for (const entry of entries) enter(entry.isIntersecting);
                 },
                 { threshold: 0.2 },
             );
@@ -61,7 +79,7 @@ export function AmbientVideo({ src }: { src: string }) {
         const failsafe = setTimeout(() => {
             if (observerFired) return;
             const box = video.getBoundingClientRect();
-            setInView(box.top < window.innerHeight && box.bottom > 0);
+            enter(box.top < window.innerHeight && box.bottom > 0);
         }, 3000);
 
         return () => {
@@ -70,8 +88,7 @@ export function AmbientVideo({ src }: { src: string }) {
         };
     }, []);
 
-    const shouldLoad = inView && !reduceMotion;
-    const shouldPlay = shouldLoad && !userPaused;
+    const shouldPlay = sourceAttached && inView && !reduceMotion && !userPaused;
 
     useEffect(() => {
         const video = videoRef.current;
@@ -92,7 +109,7 @@ export function AmbientVideo({ src }: { src: string }) {
         <>
             <video
                 ref={videoRef}
-                src={shouldLoad ? src : undefined}
+                src={sourceAttached ? src : undefined}
                 muted
                 loop
                 playsInline
