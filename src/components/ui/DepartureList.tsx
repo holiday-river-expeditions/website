@@ -33,7 +33,7 @@ function SeatsBadge({ seats }: { seats: number | null }) {
     if (seats === null) return null;
     if (seats <= 0) {
         return (
-            <span className='inline-block bg-holiday-grey/30 px-3 py-1 font-alt-gothic text-[12px] font-medium uppercase tracking-[0.05em] text-onyx'>
+            <span className='inline-block bg-holiday-grey/30 px-3 py-1 text-[13px] font-bold leading-tight text-onyx'>
                 Full
             </span>
         );
@@ -41,7 +41,7 @@ function SeatsBadge({ seats }: { seats: number | null }) {
     const urgent = seats <= LOW_SEATS_THRESHOLD;
     return (
         <span
-            className={`inline-block px-3 py-1 font-alt-gothic text-[12px] font-medium uppercase tracking-[0.05em] text-holiday-white ${urgent ? 'bg-holiday-red' : 'bg-evergreen'}`}
+            className={`inline-block px-3 py-1 text-[13px] font-bold leading-tight text-holiday-white ${urgent ? 'bg-holiday-red' : 'bg-evergreen'}`}
         >
             {seats} {seats === 1 ? 'seat' : 'seats'} left
         </span>
@@ -66,7 +66,7 @@ function DepartureRow({
                     {formatDateRange(departure.start, departure.duration)}
                 </span>
                 {days && days > 1 && (
-                    <span className='ml-3 text-[13px] uppercase tracking-wider text-onyx/70'>
+                    <span className='ml-3 text-[13px] text-onyx/70'>
                         {days} days
                     </span>
                 )}

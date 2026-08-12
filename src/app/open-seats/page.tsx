@@ -158,7 +158,7 @@ export default async function OpenSeatsPage() {
                                             )}
                                         </h2>
                                         {next && (
-                                            <span className='inline-block bg-teal px-3 py-1.5 font-alt-gothic text-[13px] font-medium uppercase tracking-[0.05em] leading-none text-holiday-white'>
+                                            <span className='inline-block bg-teal px-3 py-1.5 text-[13px] font-bold leading-none text-holiday-white'>
                                                 Next:{' '}
                                                 {formatDateRange(
                                                     next.start,
