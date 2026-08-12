@@ -21,6 +21,9 @@
     /* Typography scale — font sizes */
     --text-h1: 64px;
     --text-h2: 44px;
+    /* The site's most-used section heading — sits between h2 and h3 because
+       44px overpowers a mid-page band. Was 16 hand-written text-[36px]. */
+    --text-section: 36px;
     --text-h3: 28px;
     --text-subheading: 22px;
     --text-paragraph: 18px;
@@ -30,6 +33,7 @@
     /* Typography scale — line heights */
     --text-h1--line-height: 0.92;
     --text-h2--line-height: 0.95;
+    --text-section--line-height: 0.9;
     --text-h3--line-height: 1;
     --text-subheading--line-height: 30px;
     --text-paragraph--line-height: 24px;

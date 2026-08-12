@@ -145,7 +145,7 @@ export default async function OpenSeatsPage() {
                             return (
                                 <div key={group.key} data-availability>
                                     <div className='flex flex-wrap items-center gap-x-5 gap-y-2'>
-                                        <h2 className='font-alt-gothic text-[36px] font-black uppercase leading-[0.9] text-onyx'>
+                                        <h2 className='font-alt-gothic text-section font-black uppercase text-onyx'>
                                             {group.href ? (
                                                 <Link
                                                     href={group.href}
@@ -158,7 +158,7 @@ export default async function OpenSeatsPage() {
                                             )}
                                         </h2>
                                         {next && (
-                                            <span className='inline-block bg-teal px-3 py-1.5 text-[13px] font-bold leading-none text-holiday-white'>
+                                            <span className='inline-block bg-teal px-3.5 py-1.5 text-[14px] font-bold leading-tight text-holiday-white'>
                                                 Next:{' '}
                                                 {formatDateRange(
                                                     next.start,

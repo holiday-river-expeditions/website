@@ -1,4 +1,5 @@
 import { BookingRow } from '@/components/ui/BookingRow';
+import { buttonClasses } from '@/components/ui/Button';
 import { ExternalLink } from '@/components/ui/ExternalLink';
 import type { ArcticDeparture } from '@/lib/arctic';
 import {
@@ -33,7 +34,7 @@ function SeatsBadge({ seats }: { seats: number | null }) {
     if (seats === null) return null;
     if (seats <= 0) {
         return (
-            <span className='inline-block bg-holiday-grey/30 px-3 py-1 text-[13px] font-bold leading-tight text-onyx'>
+            <span className='inline-block bg-holiday-grey/30 px-3.5 py-1.5 text-[14px] font-bold leading-tight text-onyx'>
                 Full
             </span>
         );
@@ -41,7 +42,7 @@ function SeatsBadge({ seats }: { seats: number | null }) {
     const urgent = seats <= LOW_SEATS_THRESHOLD;
     return (
         <span
-            className={`inline-block px-3 py-1 text-[13px] font-bold leading-tight text-holiday-white ${urgent ? 'bg-holiday-red' : 'bg-evergreen'}`}
+            className={`inline-block px-3.5 py-1.5 text-[14px] font-bold leading-tight text-holiday-white ${urgent ? 'bg-holiday-red' : 'bg-evergreen'}`}
         >
             {seats} {seats === 1 ? 'seat' : 'seats'} left
         </span>
@@ -108,14 +109,22 @@ function DepartureRow({
                         {bookable ? (
                             <ExternalLink
                                 href={departure.onlinebookingurl ?? '#'}
-                                className='rounded-full bg-holiday-red px-6 py-2 text-center font-alt-gothic text-[19px] font-medium uppercase leading-none tracking-wide text-holiday-white transition-colors hover:bg-holiday-red/90'
+                                // ExternalLink supplies its own inline-flex.
+                                className={buttonClasses({
+                                    variant: 'primary',
+                                    display: '',
+                                    className: 'text-center',
+                                })}
                             >
                                 Book
                             </ExternalLink>
                         ) : (
                             <a
                                 href='tel:+18012662087'
-                                className='inline-block rounded-full border-2 border-holiday-red px-6 py-2 text-center font-alt-gothic text-[19px] font-medium uppercase leading-none tracking-wide text-holiday-red transition-colors hover:bg-holiday-red hover:text-holiday-white'
+                                className={buttonClasses({
+                                    variant: 'outline',
+                                    className: 'text-center',
+                                })}
                             >
                                 Call to Book
                             </a>
@@ -202,7 +211,14 @@ export function DepartureList({
             ))}
             {collapsedGroups.length > 0 && (
                 <details data-departure-overflow className='group'>
-                    <summary className='inline-flex cursor-pointer list-none items-center gap-2 rounded-full border-2 border-holiday-red px-6 py-2 font-alt-gothic text-[19px] font-medium uppercase leading-none tracking-wide text-holiday-red transition-colors hover:bg-holiday-red hover:text-holiday-white group-open:hidden [&::-webkit-details-marker]:hidden'>
+                    <summary
+                        className={buttonClasses({
+                            variant: 'outline',
+                            display: 'inline-flex',
+                            className:
+                                'cursor-pointer list-none items-center gap-2 group-open:hidden [&::-webkit-details-marker]:hidden',
+                        })}
+                    >
                         Show all {departures.length} departures
                         <span aria-hidden>↓</span>
                     </summary>

@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useRef, useState } from 'react';
+import { buttonClasses } from '@/components/ui/Button';
 import {
     PartySizeSelector,
     type PricingLevelOption,
@@ -143,10 +144,15 @@ export function BookingRow({
               )
             : 0;
 
-    const primaryButton =
-        'rounded-full bg-holiday-red px-6 py-2 text-center font-alt-gothic text-[19px] font-medium uppercase leading-none tracking-wide text-holiday-white transition-colors hover:bg-holiday-red/90 disabled:opacity-40 disabled:hover:bg-holiday-red';
-    const outlineButton =
-        'rounded-full border-2 border-holiday-red px-6 py-2 text-center font-alt-gothic text-[19px] font-medium uppercase leading-none tracking-wide text-holiday-red transition-colors hover:bg-holiday-red hover:text-holiday-white';
+    const primaryButton = buttonClasses({
+        variant: 'primary',
+        className:
+            'text-center disabled:opacity-40 disabled:hover:bg-holiday-red',
+    });
+    const outlineButton = buttonClasses({
+        variant: 'outline',
+        className: 'text-center',
+    });
 
     return (
         <>

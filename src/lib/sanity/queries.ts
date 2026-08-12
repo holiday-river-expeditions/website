@@ -45,6 +45,11 @@ export const tripBySlugQuery = defineQuery(`
     season,
     featuredReview,
     itinerary,
+    "itineraryMedia": itineraryMedia{
+      "videoUrl": video.asset->url,
+      poster,
+      alt
+    },
     "faqs": faqs[]->{ _id, question, answer, category },
     "relatedTrips": select(
       count(relatedTrips) > 0 => relatedTrips[]->{

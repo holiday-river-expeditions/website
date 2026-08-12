@@ -96,7 +96,7 @@ export async function Footer() {
                 {/* Bottom row: logo + NPS badge */}
                 <div className='mt-16 flex items-end justify-between gap-8'>
                     <Link href='/' aria-label='Holiday River Expeditions home'>
-                        <Logo size='text-[34px] md:text-[42px]' />
+                        <Logo size='text-[52px] md:text-[64px]' />
                     </Link>
 
                     <Image

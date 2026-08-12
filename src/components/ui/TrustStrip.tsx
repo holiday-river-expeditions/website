@@ -17,7 +17,7 @@ export function TrustStrip({
     googleUrl?: string | null;
 }) {
     const linkStyle =
-        'font-alt-gothic text-[15px] font-semibold uppercase tracking-[0.05em] text-holiday-red transition-opacity hover:opacity-70';
+        'font-alt-gothic text-[15px] font-semibold uppercase tracking-[0.05em] text-onyx underline decoration-holiday-red decoration-2 underline-offset-4 transition-opacity hover:opacity-70';
 
     return (
         <Section background='opal' className='py-10 md:py-12'>

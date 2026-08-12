@@ -73,7 +73,7 @@ export default async function RiverPage({ params }: RiverPageProps) {
             {/* Trips on this river */}
             {trips.length > 0 && (
                 <Section background='white' className='pb-20 pt-0 md:pb-24'>
-                    <h2 className='font-alt-gothic text-[36px] font-black uppercase leading-[0.9] text-holiday-red'>
+                    <h2 className='font-alt-gothic text-section font-black uppercase text-holiday-red'>
                         Trips on the {river.name}
                     </h2>
                     <div

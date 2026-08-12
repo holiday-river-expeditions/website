@@ -188,7 +188,7 @@ export default async function Home() {
 
             {/* Learn & Get Inspired */}
             <Section background='white' className='py-20 md:py-24'>
-                <h2 className='font-alt-gothic text-[36px] font-black uppercase leading-[0.9] text-holiday-red'>
+                <h2 className='font-alt-gothic text-section font-black uppercase text-holiday-red'>
                     Learn &amp; Get Inspired
                 </h2>
                 <div className='mt-10 grid gap-6 sm:grid-cols-2 lg:grid-cols-4'>

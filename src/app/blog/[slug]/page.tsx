@@ -63,7 +63,7 @@ export default async function PostPage({ params }: PostPageProps) {
                     <div className='absolute inset-0 bg-gradient-to-t from-onyx/70 via-onyx/10 to-transparent' />
                     <div className='relative z-10 w-full px-6 pb-10 md:px-12'>
                         {category && (
-                            <span className='inline-block bg-teal px-3 py-1 text-[13px] font-bold leading-tight text-holiday-white'>
+                            <span className='inline-block bg-teal px-3.5 py-1.5 text-[14px] font-bold leading-tight text-holiday-white'>
                                 {category}
                             </span>
                         )}
@@ -82,7 +82,7 @@ export default async function PostPage({ params }: PostPageProps) {
             <Section background='white' className='py-12 md:py-16'>
                 <div className='mx-auto max-w-3xl'>
                     {post.body ? (
-                        <div className='space-y-4 text-body leading-body text-onyx [&_a]:text-holiday-red [&_a]:underline [&_h2]:font-alt-gothic [&_h2]:text-[36px] [&_h2]:font-black [&_h2]:uppercase [&_h2]:leading-[0.9] [&_h2]:text-holiday-red [&_h3]:font-alt-gothic [&_h3]:text-h3 [&_h3]:font-black [&_h3]:uppercase [&_h3]:leading-h3 [&_h3]:text-onyx [&_li]:ml-5 [&_ul]:list-disc'>
+                        <div className='space-y-4 text-body leading-body text-onyx [&_a]:text-holiday-red [&_a]:underline [&_h2]:font-alt-gothic [&_h2]:text-section [&_h2]:font-black [&_h2]:uppercase [&_h2]:leading-[0.9] [&_h2]:text-holiday-red [&_h3]:font-alt-gothic [&_h3]:text-h3 [&_h3]:font-black [&_h3]:uppercase [&_h3]:leading-h3 [&_h3]:text-onyx [&_li]:ml-5 [&_ul]:list-disc'>
                             <PortableText value={post.body} />
                         </div>
                     ) : (

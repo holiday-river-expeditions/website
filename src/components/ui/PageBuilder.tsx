@@ -159,7 +159,7 @@ function ContentBlockSection({
             <div data-reveal className='mx-auto max-w-3xl'>
                 {block.heading && (
                     <h2
-                        className={`font-alt-gothic text-[36px] font-black uppercase leading-[0.9] ${onDark ? 'text-holiday-white' : 'text-holiday-red'}`}
+                        className={`font-alt-gothic text-section font-black uppercase ${onDark ? 'text-holiday-white' : 'text-holiday-red'}`}
                     >
                         {block.heading}
                     </h2>

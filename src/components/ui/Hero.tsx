@@ -20,7 +20,7 @@ export function Hero({
         // next section always peeks — no illusion of completeness). The seal
         // straddles the banner's bottom-left edge, so the section must not clip.
         <section>
-            <div className='relative h-[420px] md:h-[523px]'>
+            <div className='relative h-[460px] md:h-[523px]'>
                 {/* Banner image. The evergreen base keeps the white headline
                     legible before a photo is set. */}
                 <div className='absolute inset-0 overflow-hidden bg-evergreen'>
@@ -39,8 +39,8 @@ export function Hero({
                 </div>
 
                 {/* Headline + CTA */}
-                <div className='relative z-10 flex h-full flex-col items-center justify-center px-6'>
-                    <h1 className='mx-auto max-w-5xl text-center font-alt-gothic text-h2 font-black uppercase leading-h2 text-holiday-white md:text-h1 md:leading-h1'>
+                <div className='relative z-10 flex h-full flex-col items-center justify-center px-6 pb-24 md:pb-0'>
+                    <h1 className='mx-auto max-w-5xl text-center font-alt-gothic text-[34px] font-black uppercase leading-[0.95] text-holiday-white sm:text-h2 sm:leading-h2 md:text-h1 md:leading-h1'>
                         {heading}
                     </h1>
                     {cta && (
@@ -59,7 +59,7 @@ export function Hero({
                     width={164}
                     height={164}
                     priority
-                    className='absolute bottom-0 left-6 z-20 h-28 w-28 translate-y-[15%] md:left-10 md:h-40 md:w-40'
+                    className='absolute bottom-0 left-6 z-20 h-32 w-32 translate-y-[15%] md:left-10 md:h-48 md:w-48'
                 />
             </div>
         </section>

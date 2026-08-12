@@ -1,5 +1,5 @@
 import type { Metadata } from 'next';
-import { Button } from '@/components/ui/Button';
+import { Button, buttonClasses } from '@/components/ui/Button';
 import { Section } from '@/components/ui/Section';
 
 export const metadata: Metadata = {
@@ -31,7 +31,10 @@ export default function BookPage() {
                     </Button>
                     <a
                         href='tel:+18012662087'
-                        className='inline-block rounded-full bg-holiday-red px-10 py-4 font-alt-gothic text-[24px] font-medium uppercase leading-none text-holiday-white transition-colors hover:bg-holiday-red/90'
+                        className={buttonClasses({
+                            variant: 'primary',
+                            size: 'xl',
+                        })}
                     >
                         Call 801-266-2087
                     </a>

@@ -40,7 +40,7 @@ export function ContentCard({
                 </div>
             )}
 
-            <h3 className='absolute bottom-5 left-5 right-5 font-alt-gothic text-[36px] font-black uppercase leading-[0.9] text-holiday-white drop-shadow-lg'>
+            <h3 className='absolute bottom-5 left-5 right-5 font-alt-gothic text-section font-black uppercase text-holiday-white drop-shadow-lg'>
                 {title}
             </h3>
         </Link>

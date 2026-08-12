@@ -89,7 +89,7 @@ export default async function TripPage({ params }: TripPageProps) {
                     <div className='absolute inset-0 bg-gradient-to-t from-onyx/70 via-onyx/10 to-transparent' />
                     <div className='relative z-10 w-full px-6 pb-10 md:px-12'>
                         {category && (
-                            <span className='inline-block bg-teal px-3 py-1 text-[13px] font-bold leading-tight text-holiday-white'>
+                            <span className='inline-block bg-teal px-3.5 py-1.5 text-[14px] font-bold leading-tight text-holiday-white'>
                                 {category}
                             </span>
                         )}
@@ -108,7 +108,7 @@ export default async function TripPage({ params }: TripPageProps) {
             {/* Fact bar */}
             <Section background='white' className='py-8 md:py-10'>
                 <div className='flex flex-wrap items-center justify-between gap-6 border-b border-holiday-grey/40 pb-8'>
-                    <dl className='flex flex-wrap gap-x-12 gap-y-4'>
+                    <dl className='grid w-full grid-cols-2 gap-x-6 gap-y-5 sm:flex sm:w-auto sm:flex-wrap sm:gap-x-12 sm:gap-y-4'>
                         {facts.map((fact) => (
                             <div key={fact.label}>
                                 <dt className='font-alt-gothic text-[12px] font-medium uppercase tracking-[0.05em] text-onyx/70'>
@@ -187,7 +187,10 @@ export default async function TripPage({ params }: TripPageProps) {
             <AvailabilitySection arcticTripId={trip.arcticTripId ?? null} />
 
             {/* Day-by-day itinerary */}
-            <ItinerarySection days={trip.itinerary ?? []} />
+            <ItinerarySection
+                days={trip.itinerary ?? []}
+                media={trip.itineraryMedia}
+            />
 
             {/* Photo gallery */}
             {galleryPhotos.length > 0 && (
@@ -221,7 +224,7 @@ export default async function TripPage({ params }: TripPageProps) {
                     className='pb-16 pt-12 md:pb-20 md:pt-16'
                 >
                     <div className='max-w-3xl'>
-                        <h2 className='font-alt-gothic text-[36px] font-black uppercase leading-[0.9] text-holiday-red'>
+                        <h2 className='font-alt-gothic text-section font-black uppercase text-holiday-red'>
                             Good to Know
                         </h2>
                         <div className='mt-6 divide-y divide-holiday-grey/40 border-y border-holiday-grey/40'>
@@ -249,13 +252,15 @@ export default async function TripPage({ params }: TripPageProps) {
             )}
 
             {/* Third-party review trust strip */}
-            {settings?.reviews?.ratingLabel && (
-                <TrustStrip
-                    ratingLabel={settings.reviews.ratingLabel}
-                    tripadvisorUrl={settings.reviews.tripadvisorUrl}
-                    googleUrl={settings.reviews.googleUrl}
-                />
-            )}
+            {settings?.reviews?.ratingLabel &&
+                (settings.reviews.tripadvisorUrl ||
+                    settings.reviews.googleUrl) && (
+                    <TrustStrip
+                        ratingLabel={settings.reviews.ratingLabel}
+                        tripadvisorUrl={settings.reviews.tripadvisorUrl}
+                        googleUrl={settings.reviews.googleUrl}
+                    />
+                )}
 
             {/* Cross-sell */}
             <RelatedTrips trips={trip.relatedTrips ?? []} />

@@ -24,7 +24,7 @@ export function RelatedTrips({ trips }: { trips: RelatedTrip[] }) {
         <Section background='white' className='py-16 md:py-20'>
             <h2
                 data-reveal
-                className='font-alt-gothic text-[36px] font-black uppercase leading-[0.9] text-holiday-red'
+                className='font-alt-gothic text-section font-black uppercase text-holiday-red'
             >
                 Keep Exploring
             </h2>

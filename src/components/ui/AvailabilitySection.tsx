@@ -55,11 +55,11 @@ export async function AvailabilitySection({
         <Section background='white' className='pb-20 pt-12 md:pb-24 md:pt-16'>
             <div data-availability className='max-w-4xl'>
                 <div className='flex flex-wrap items-center gap-x-6 gap-y-3'>
-                    <h2 className='font-alt-gothic text-[36px] font-black uppercase leading-[0.9] text-holiday-red'>
+                    <h2 className='font-alt-gothic text-section font-black uppercase text-holiday-red'>
                         Dates &amp; Availability
                     </h2>
                     {next && (
-                        <span className='inline-block bg-teal px-3 py-1.5 text-[13px] font-bold leading-none text-holiday-white'>
+                        <span className='inline-block bg-teal px-3.5 py-1.5 text-[14px] font-bold leading-tight text-holiday-white'>
                             Next available:{' '}
                             {formatDateRange(next.start, next.duration)}
                         </span>

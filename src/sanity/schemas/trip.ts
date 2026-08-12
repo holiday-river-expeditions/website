@@ -137,6 +137,40 @@ export const trip = defineType({
             ],
         }),
         defineField({
+            name: 'itineraryMedia',
+            title: 'Itinerary Media',
+            type: 'object',
+            description:
+                'Optional ambient clip shown beside the day-by-day itinerary. The poster is used on its own when no video is set, so it is always required.',
+            options: { collapsible: true, collapsed: true },
+            fields: [
+                defineField({
+                    name: 'video',
+                    title: 'Video Loop',
+                    type: 'file',
+                    options: { accept: 'video/mp4' },
+                    description:
+                        'Silent MP4, portrait 3:4, roughly 10–15s, under ~4MB. No audio track, no burned-in captions.',
+                }),
+                defineField({
+                    name: 'poster',
+                    title: 'Poster / Still',
+                    type: 'image',
+                    options: { hotspot: true },
+                    description:
+                        'Shown while the video loads, and on its own when no video is set.',
+                    validation: (rule) => rule.required(),
+                }),
+                defineField({
+                    name: 'alt',
+                    title: 'Alt Text',
+                    type: 'string',
+                    description: 'Describes the scene for screen readers.',
+                    validation: (rule) => rule.required(),
+                }),
+            ],
+        }),
+        defineField({
             name: 'faqs',
             title: 'Trip FAQs',
             type: 'array',

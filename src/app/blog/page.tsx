@@ -121,7 +121,7 @@ export default async function BlogPage() {
                                             )}
                                         </div>
                                         {category && (
-                                            <span className='mt-4 inline-block bg-teal px-3 py-1 text-[13px] font-bold leading-tight text-holiday-white'>
+                                            <span className='mt-4 inline-block bg-teal px-3.5 py-1.5 text-[14px] font-bold leading-tight text-holiday-white'>
                                                 {category}
                                             </span>
                                         )}

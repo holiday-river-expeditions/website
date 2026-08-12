@@ -14,7 +14,7 @@ export function MobileNav() {
                 onClick={() => setIsOpen(!isOpen)}
                 aria-expanded={isOpen}
                 aria-label={isOpen ? 'Close menu' : 'Open menu'}
-                className='flex h-10 w-10 items-center justify-center text-holiday-red'
+                className='flex h-10 w-10 items-center justify-center text-holiday-red lg:hidden'
             >
                 {isOpen ? (
                     <svg
@@ -49,7 +49,15 @@ export function MobileNav() {
             </button>
 
             {isOpen && (
-                <div className='absolute left-0 right-0 top-full z-50 border-t border-holiday-grey/30 bg-holiday-white lg:hidden'>
+                <button
+                    type='button'
+                    aria-label='Close menu'
+                    onClick={() => setIsOpen(false)}
+                    className='fixed inset-0 z-40 cursor-default bg-onyx/40 lg:hidden'
+                />
+            )}
+            {isOpen && (
+                <div className='absolute left-0 right-0 top-full z-50 border-t border-holiday-grey/30 bg-holiday-white shadow-xl lg:hidden'>
                     <nav className='flex flex-col px-6 py-4'>
                         {navItems.map((item) => (
                             <Link

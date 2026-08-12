@@ -84,7 +84,7 @@ export default async function FaqPage() {
                                     data-reveal
                                     className='scroll-mt-8'
                                 >
-                                    <h2 className='font-alt-gothic text-[36px] font-black uppercase leading-[0.9] text-onyx'>
+                                    <h2 className='font-alt-gothic text-section font-black uppercase text-onyx'>
                                         {group.label}
                                     </h2>
                                     <div className='mt-6 divide-y divide-holiday-grey/40 border-y border-holiday-grey/40'>

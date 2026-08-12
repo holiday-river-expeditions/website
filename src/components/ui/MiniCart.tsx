@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useRef, useState, useSyncExternalStore } from 'react';
+import { buttonClasses } from '@/components/ui/Button';
 
 /**
  * Header cart chip + popover. Renders nothing until a cart exists (count
@@ -187,7 +188,11 @@ export function MiniCart() {
                             {checkoutUrl && (
                                 <a
                                     href={checkoutUrl}
-                                    className='mt-3 block rounded-full bg-holiday-red px-6 py-2.5 text-center font-alt-gothic text-[17px] font-medium uppercase leading-none tracking-wide text-holiday-white transition-colors hover:bg-holiday-red/90'
+                                    className={buttonClasses({
+                                        variant: 'primary',
+                                        display: 'block',
+                                        className: 'mt-3 text-center',
+                                    })}
                                 >
                                     Continue to Secure Checkout
                                 </a>

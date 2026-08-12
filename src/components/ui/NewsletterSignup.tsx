@@ -27,7 +27,7 @@ export function NewsletterSignup() {
 
     return (
         <div className='max-w-md'>
-            <h2 className='font-alt-gothic text-[36px] font-medium uppercase leading-[0.9] text-holiday-red'>
+            <h2 className='font-alt-gothic text-section font-medium uppercase text-holiday-red'>
                 The River Is Calling.
                 <br />
                 It Told Us To Email You.
