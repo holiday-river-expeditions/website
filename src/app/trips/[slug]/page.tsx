@@ -3,8 +3,11 @@ import type { Metadata } from 'next';
 import Image from 'next/image';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
-import { AvailabilitySection } from '@/components/ui/AvailabilitySection';
-import { Button } from '@/components/ui/Button';
+import {
+    AVAILABILITY_ANCHOR,
+    AvailabilitySection,
+} from '@/components/ui/AvailabilitySection';
+import { Button, buttonClasses } from '@/components/ui/Button';
 import { FeaturedReview } from '@/components/ui/FeaturedReview';
 import { ItinerarySection } from '@/components/ui/ItinerarySection';
 import { RelatedTrips } from '@/components/ui/RelatedTrips';
@@ -129,9 +132,22 @@ export default async function TripPage({ params }: TripPageProps) {
                             </div>
                         ))}
                     </dl>
-                    <Button href='/book' size='lg'>
-                        Book Now
-                    </Button>
+                    <div className='flex flex-wrap items-center gap-3'>
+                        {/* Plain anchor, not Link: a same-page fragment needs
+                            native scrolling, not a router navigation. */}
+                        <a
+                            href={`#${AVAILABILITY_ANCHOR}`}
+                            className={buttonClasses({
+                                variant: 'outline',
+                                size: 'lg',
+                            })}
+                        >
+                            Dates &amp; Availability
+                        </a>
+                        <Button href='/book' size='lg'>
+                            Book Now
+                        </Button>
+                    </div>
                 </div>
 
                 {/* Description + highlights */}
@@ -184,7 +200,10 @@ export default async function TripPage({ params }: TripPageProps) {
             )}
 
             {/* Live availability from Arctic */}
-            <AvailabilitySection arcticTripId={trip.arcticTripId ?? null} />
+            <AvailabilitySection
+                arcticTripId={trip.arcticTripId ?? null}
+                specialtyDepartures={trip.specialtyDepartures}
+            />
 
             {/* Day-by-day itinerary */}
             <ItinerarySection

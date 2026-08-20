@@ -51,6 +51,23 @@ export function formatDateRange(
     return `${dayFormat.format(startDate)} – ${dayFormat.format(endDate)}`;
 }
 
+const longDayFormat = new Intl.DateTimeFormat('en-US', {
+    month: 'short',
+    day: 'numeric',
+    year: 'numeric',
+    timeZone: 'UTC',
+});
+
+/**
+ * "Sep 12, 2026" from a bare YYYY-MM-DD — for Sanity-authored dates that
+ * carry no Arctic duration. Returns the input unchanged when unparseable.
+ */
+export function formatDayLabel(date: string): string {
+    const parsed = new Date(`${date}T00:00:00Z`);
+    if (Number.isNaN(parsed.getTime())) return date;
+    return longDayFormat.format(parsed);
+}
+
 export interface DepartureMonthGroup {
     /** e.g. "August" */
     monthLabel: string;
@@ -169,6 +186,62 @@ export function detectVariants(
     }
 
     return variants.sort((a, b) => a.label.localeCompare(b.label));
+}
+
+export interface DepartureCallout {
+    /** Short badge text, e.g. "With The Pickpockets". */
+    label: string;
+    /** Optional detail line under the date. */
+    note?: string | null;
+    /** Parent page for the specialty family, when one exists. */
+    href?: string | null;
+}
+
+/**
+ * Specialty callouts keyed by Arctic departure start date (YYYY-MM-DD).
+ * Authored in Sanity as trip.specialtyDepartures.
+ */
+export type DepartureCalloutMap = ReadonlyMap<string, DepartureCallout>;
+
+/** One trip.specialtyDepartures entry, as projected by any of our queries. */
+export interface SpecialtyDepartureEntry {
+    startDate?: string | null;
+    label?: string | null;
+    note?: string | null;
+    specialtyType?: {
+        slug?: { current?: string | null } | null;
+    } | null;
+}
+
+/**
+ * Indexes specialty callouts by start date so DepartureList can look each
+ * row up in O(1).
+ *
+ * Sanity holds the join as a date rather than an Arctic departure id —
+ * editors know "Sept 12 is the bluegrass trip", they do not know id 4417,
+ * and ids are reissued each season (see the field description in
+ * schemas/trip.ts). The cost is that a date typo silently renders no
+ * callout, and that two departures starting the same day cannot be told
+ * apart: the first entry wins and later duplicates are ignored.
+ */
+export function buildCalloutMap(
+    entries: readonly SpecialtyDepartureEntry[] | null | undefined,
+): DepartureCalloutMap {
+    const map = new Map<string, DepartureCallout>();
+    for (const entry of entries ?? []) {
+        const startDate = entry.startDate?.trim();
+        const label = entry.label?.trim();
+        // Both are required in the Studio, but drafts and older documents
+        // can still arrive incomplete.
+        if (!startDate || !label || map.has(startDate)) continue;
+        const slug = entry.specialtyType?.slug?.current;
+        map.set(startDate, {
+            label,
+            note: entry.note ?? null,
+            href: slug ? `/specialty/${slug}` : null,
+        });
+    }
+    return map;
 }
 
 /**

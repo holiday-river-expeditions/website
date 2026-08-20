@@ -1,8 +1,11 @@
+import Link from 'next/link';
 import { BookingRow } from '@/components/ui/BookingRow';
 import { buttonClasses } from '@/components/ui/Button';
 import { ExternalLink } from '@/components/ui/ExternalLink';
 import type { ArcticDeparture } from '@/lib/arctic';
 import {
+    type DepartureCallout,
+    type DepartureCalloutMap,
     durationToDays,
     formatDateRange,
     groupDeparturesByMonth,
@@ -30,6 +33,28 @@ const LOW_SEATS_THRESHOLD = 4;
 /** Rows shown before the rest collapses behind "Show all". */
 const VISIBLE_ROWS = 8;
 
+/**
+ * Sand fill rather than red: within this list red already means "few seats
+ * left", and a second red badge meaning "this date is special" would read as
+ * urgency. Sand carries onyx text for AA contrast (same pairing as the biking
+ * tag on TripCard).
+ */
+function CalloutBadge({ callout }: { callout: DepartureCallout }) {
+    const className =
+        'inline-block bg-sand px-3.5 py-1.5 text-[14px] font-bold leading-tight text-onyx';
+    if (callout.href) {
+        return (
+            <Link
+                href={callout.href}
+                className={`${className} transition-opacity hover:opacity-70`}
+            >
+                {callout.label}
+            </Link>
+        );
+    }
+    return <span className={className}>{callout.label}</span>;
+}
+
 function SeatsBadge({ seats }: { seats: number | null }) {
     if (seats === null) return null;
     if (seats <= 0) {
@@ -52,9 +77,11 @@ function SeatsBadge({ seats }: { seats: number | null }) {
 function DepartureRow({
     departure,
     showTripName,
+    callout,
 }: {
     departure: ArcticDeparture;
     showTripName: boolean;
+    callout?: DepartureCallout;
 }) {
     const seats = departure.remainingopenings ?? null;
     const bookable = seats !== null && seats > 0 && departure.onlinebookingurl;
@@ -75,6 +102,16 @@ function DepartureRow({
             {showTripName && departure.name && (
                 <div className='mt-0.5 text-body leading-body text-onyx/80'>
                     {departure.name}
+                </div>
+            )}
+            {callout && (
+                <div className='mt-2'>
+                    <CalloutBadge callout={callout} />
+                    {callout.note && (
+                        <p className='mt-1.5 max-w-prose text-body leading-body text-onyx/80'>
+                            {callout.note}
+                        </p>
+                    )}
                 </div>
             )}
         </div>
@@ -152,9 +189,11 @@ function monthGroupLabel(group: MonthGroupData): string {
 function MonthGroup({
     group,
     showTripName,
+    callouts,
 }: {
     group: MonthGroupData;
     showTripName: boolean;
+    callouts?: DepartureCalloutMap;
 }) {
     return (
         <div>
@@ -167,6 +206,7 @@ function MonthGroup({
                         key={departure.id}
                         departure={departure}
                         showTripName={showTripName}
+                        callout={callouts?.get(departure.start)}
                     />
                 ))}
             </ul>
@@ -178,11 +218,14 @@ interface DepartureListProps {
     departures: ArcticDeparture[];
     /** Show the Arctic trip name per row (for pages mixing variants). */
     showTripName?: boolean;
+    /** Specialty callouts keyed by departure start date (YYYY-MM-DD). */
+    callouts?: DepartureCalloutMap;
 }
 
 export function DepartureList({
     departures,
     showTripName = false,
+    callouts,
 }: DepartureListProps) {
     const groups = groupDeparturesByMonth(departures);
 
@@ -207,6 +250,7 @@ export function DepartureList({
                     key={`${group.year}-${group.monthLabel}`}
                     group={group}
                     showTripName={showTripName}
+                    callouts={callouts}
                 />
             ))}
             {collapsedGroups.length > 0 && (
@@ -228,6 +272,7 @@ export function DepartureList({
                                 key={`${group.year}-${group.monthLabel}`}
                                 group={group}
                                 showTripName={showTripName}
+                                callouts={callouts}
                             />
                         ))}
                     </div>

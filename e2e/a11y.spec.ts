@@ -11,6 +11,8 @@ const pages = [
     { name: 'home', path: '/' },
     { name: 'trip listing', path: '/trips' },
     { name: 'trip detail', path: '/trips/cataract-canyon' },
+    { name: 'specialty hub', path: '/specialty' },
+    { name: 'specialty family', path: '/specialty/canyon-concerts' },
     { name: 'faq', path: '/faq' },
     { name: 'contact', path: '/contact' },
 ];
