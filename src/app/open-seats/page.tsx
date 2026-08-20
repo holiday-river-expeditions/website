@@ -8,7 +8,9 @@ import {
     getBookableTripTypes,
 } from '@/lib/arctic';
 import {
+    buildCalloutMap,
     cleanTypeName,
+    type DepartureCalloutMap,
     formatDateRange,
     nextAvailable,
 } from '@/lib/departures';
@@ -28,6 +30,8 @@ interface TripGroup {
     title: string;
     href: string | null;
     departures: ArcticDeparture[];
+    /** Specialty callouts for this trip, keyed by departure start date. */
+    callouts?: DepartureCalloutMap;
 }
 
 export default async function OpenSeatsPage() {
@@ -46,18 +50,21 @@ export default async function OpenSeatsPage() {
         // Arctic trip-type id → Sanity trip page, via the arcticTripId field.
         const sanityByTypeId = new Map<
             number,
-            { name: string; slug: string }
+            { name: string; slug: string; callouts: DepartureCalloutMap }
         >();
         for (const trip of sanityTrips) {
             if (!trip.arcticTripId || !trip.slug?.current || !trip.name) {
                 continue;
             }
+            // Built once per trip and shared across its trip-type ids.
+            const callouts = buildCalloutMap(trip.specialtyDepartures);
             for (const raw of trip.arcticTripId.split(',')) {
                 const id = Number(raw.trim());
                 if (Number.isInteger(id) && id > 0) {
                     sanityByTypeId.set(id, {
                         name: trip.name,
                         slug: trip.slug.current,
+                        callouts,
                     });
                 }
             }
@@ -89,6 +96,7 @@ export default async function OpenSeatsPage() {
                         ),
                     href: sanityTrip ? `/trips/${sanityTrip.slug}` : null,
                     departures: [],
+                    callouts: sanityTrip?.callouts,
                 };
                 byGroup.set(key, group);
             }
@@ -170,6 +178,7 @@ export default async function OpenSeatsPage() {
                                     <div className='mt-5'>
                                         <DepartureList
                                             departures={group.departures}
+                                            callouts={group.callouts}
                                             showTripName={group.departures.some(
                                                 (d) =>
                                                     d.triptypeid !==

@@ -3,9 +3,11 @@ import { DepartureVariantChips } from '@/components/ui/DepartureVariantChips';
 import { Section } from '@/components/ui/Section';
 import { getBookableTripTypes, getUpcomingDepartures } from '@/lib/arctic';
 import {
+    buildCalloutMap,
     detectVariants,
     formatDateRange,
     nextAvailable,
+    type SpecialtyDepartureEntry,
 } from '@/lib/departures';
 
 /**
@@ -30,12 +32,18 @@ function CallFallback({ message }: { message: string }) {
     );
 }
 
+/** Anchor target for the trip page's "Dates & Rates" jump button. */
+export const AVAILABILITY_ANCHOR = 'dates-and-rates';
+
 interface AvailabilitySectionProps {
     arcticTripId: string | null;
+    /** trip.specialtyDepartures — badges the dates they name. */
+    specialtyDepartures?: readonly SpecialtyDepartureEntry[] | null;
 }
 
 export async function AvailabilitySection({
     arcticTripId,
+    specialtyDepartures,
 }: AvailabilitySectionProps) {
     const departures = arcticTripId
         ? await getUpcomingDepartures(arcticTripId)
@@ -50,10 +58,15 @@ export async function AvailabilitySection({
         ? detectVariants(departures, tripTypes ?? undefined)
         : [];
     const next = departures ? nextAvailable(departures) : null;
+    const callouts = buildCalloutMap(specialtyDepartures);
 
     return (
         <Section background='white' className='pb-20 pt-12 md:pb-24 md:pt-16'>
-            <div data-availability className='max-w-4xl'>
+            <div
+                id={AVAILABILITY_ANCHOR}
+                data-availability
+                className='max-w-4xl scroll-mt-28'
+            >
                 <div className='flex flex-wrap items-center gap-x-6 gap-y-3'>
                     <h2 className='font-alt-gothic text-section font-black uppercase text-holiday-red'>
                         Dates &amp; Availability
@@ -79,6 +92,7 @@ export async function AvailabilitySection({
                         <DepartureList
                             departures={departures}
                             showTripName={variants.length > 1}
+                            callouts={callouts}
                         />
                     )}
                 </div>

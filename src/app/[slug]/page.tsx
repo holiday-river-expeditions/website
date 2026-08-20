@@ -19,6 +19,7 @@ const RESERVED_SLUGS = new Set([
     'open-seats',
     'rafting',
     'rivers',
+    'specialty',
     'store',
     'studio',
     'trip-dates',

@@ -11,12 +11,19 @@ export const allTripsQuery = defineQuery(`
     arcticTripId,
     tagline,
     subtitle,
-    ribbon,
+    "ribbon": coalesce(ribbon, specialtyTypes[0]->ribbonLabel),
     startingPrice,
     durationLabel,
     "river": river->{ name, slug },
     "activities": activities[]->{ name, slug },
     "categories": categories[]->{ name, slug },
+    "specialtyDepartures": specialtyDepartures[]{
+      _key,
+      startDate,
+      label,
+      note,
+      "specialtyType": specialtyType->{ name, slug }
+    },
     "mainImage": photos[0]
   }
 `);
@@ -35,7 +42,7 @@ export const tripBySlugQuery = defineQuery(`
     arcticTripId,
     tagline,
     subtitle,
-    ribbon,
+    "ribbon": coalesce(ribbon, specialtyTypes[0]->ribbonLabel),
     startingPrice,
     durationLabel,
     "river": river->{ _id, name, slug, description, image },
@@ -43,6 +50,14 @@ export const tripBySlugQuery = defineQuery(`
     "categories": categories[]->{ _id, name, slug },
     minAge,
     season,
+    "specialtyTypes": specialtyTypes[]->{ _id, name, slug, ribbonLabel },
+    "specialtyDepartures": specialtyDepartures[]{
+      _key,
+      startDate,
+      label,
+      note,
+      "specialtyType": specialtyType->{ name, slug }
+    },
     featuredReview,
     itinerary,
     "itineraryMedia": itineraryMedia{
@@ -53,7 +68,7 @@ export const tripBySlugQuery = defineQuery(`
     "faqs": faqs[]->{ _id, question, answer, category },
     "relatedTrips": select(
       count(relatedTrips) > 0 => relatedTrips[]->{
-        _id, name, slug, tagline, subtitle, ribbon, startingPrice,
+        _id, name, slug, tagline, subtitle, "ribbon": coalesce(ribbon, specialtyTypes[0]->ribbonLabel), startingPrice,
         durationLabel, difficulty,
         "category": categories[0]->name,
         "image": photos[0]
@@ -62,7 +77,7 @@ export const tripBySlugQuery = defineQuery(`
         (river._ref == ^.river._ref ||
          count(activities[@._ref in ^.^.activities[]._ref]) > 0)
       ] | order(name asc) [0...3] {
-        _id, name, slug, tagline, subtitle, ribbon, startingPrice,
+        _id, name, slug, tagline, subtitle, "ribbon": coalesce(ribbon, specialtyTypes[0]->ribbonLabel), startingPrice,
         durationLabel, difficulty,
         "category": categories[0]->name,
         "image": photos[0]
@@ -94,7 +109,7 @@ export const riverBySlugQuery = defineQuery(`
       slug,
       tagline,
       subtitle,
-      ribbon,
+      "ribbon": coalesce(ribbon, specialtyTypes[0]->ribbonLabel),
       startingPrice,
       durationLabel,
       difficulty,
@@ -127,12 +142,68 @@ export const activityBySlugQuery = defineQuery(`
       slug,
       tagline,
       subtitle,
-      ribbon,
+      "ribbon": coalesce(ribbon, specialtyTypes[0]->ribbonLabel),
       startingPrice,
       durationLabel,
       difficulty,
       "category": categories[0]->name,
       "image": photos[0]
+    }
+  }
+`);
+
+export const allSpecialtyTypesQuery = defineQuery(`
+  *[_type == "specialtyType"] | order(order asc, name asc) {
+    _id,
+    name,
+    slug,
+    tagline,
+    image,
+    ribbonLabel,
+    "trips": *[_type == "trip" && references(^._id)] | order(name asc) {
+      _id,
+      name,
+      slug,
+      tagline,
+      subtitle,
+      "ribbon": coalesce(ribbon, ^.ribbonLabel),
+      startingPrice,
+      durationLabel,
+      difficulty,
+      "category": categories[0]->name,
+      "image": photos[0]
+    }
+  }
+`);
+
+export const specialtyTypeBySlugQuery = defineQuery(`
+  *[_type == "specialtyType" && slug.current == $slug][0] {
+    _id,
+    name,
+    slug,
+    tagline,
+    description,
+    image,
+    ribbonLabel,
+    "trips": *[_type == "trip" && references(^._id)] | order(name asc) {
+      _id,
+      name,
+      slug,
+      tagline,
+      subtitle,
+      "ribbon": coalesce(ribbon, ^.ribbonLabel),
+      startingPrice,
+      durationLabel,
+      difficulty,
+      arcticTripId,
+      "category": categories[0]->name,
+      "image": photos[0],
+      "specialtyDepartures": specialtyDepartures[]{
+        _key,
+        startDate,
+        label,
+        note
+      }
     }
   }
 `);
@@ -203,7 +274,7 @@ export const homepageQuery = defineQuery(`
       slug,
       tagline,
       subtitle,
-      ribbon,
+      "ribbon": coalesce(ribbon, specialtyTypes[0]->ribbonLabel),
       startingPrice,
       durationLabel,
       difficulty,

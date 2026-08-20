@@ -9,6 +9,7 @@ import { page } from './page';
 import { post } from './post';
 import { river } from './river';
 import { siteSettings } from './site-settings';
+import { specialtyType } from './specialty-type';
 import { trip } from './trip';
 import { tripCategory } from './trip-category';
 
@@ -17,6 +18,7 @@ export const schemaTypes = [
     river,
     activity,
     tripCategory,
+    specialtyType,
 
     // Core documents
     trip,

@@ -224,6 +224,67 @@ export const trip = defineType({
                 'Arctic Reservations trip-type id for live availability and booking. Comma-separate multiple ids when one trip page covers several Arctic trip types (e.g. "37,38" for Cataract 5-day + 6-day).',
         }),
 
+        // --- Specialty trips ---
+        defineField({
+            name: 'specialtyTypes',
+            title: 'Specialty Types',
+            type: 'array',
+            description:
+                'Specialty families this trip belongs to (Canyon Concerts, Stargazing, ...). Flags the trip as specialty, lists it on /specialty, and supplies the card ribbon unless the Specialty Ribbon field below overrides it.',
+            of: [{ type: 'reference', to: [{ type: 'specialtyType' }] }],
+        }),
+        defineField({
+            name: 'specialtyDepartures',
+            title: 'Specialty Departures',
+            type: 'array',
+            description:
+                'Call out individual dates in Dates & Availability — the September date that is the bluegrass trip, the new-moon date that is the stargazing trip. Leave empty when every departure of this trip is the same.',
+            of: [
+                {
+                    type: 'object',
+                    name: 'specialtyDeparture',
+                    fields: [
+                        defineField({
+                            name: 'startDate',
+                            title: 'Departure Start Date',
+                            type: 'date',
+                            options: { dateFormat: 'YYYY-MM-DD' },
+                            description:
+                                'Must match the departure\u2019s start date in Arctic exactly. Matched by date rather than Arctic departure id because ids change year to year and are not visible to editors.',
+                            validation: (rule) => rule.required(),
+                        }),
+                        defineField({
+                            name: 'specialtyType',
+                            title: 'Specialty Type',
+                            type: 'reference',
+                            to: [{ type: 'specialtyType' }],
+                            description:
+                                'Links the callout to a parent page under /specialty.',
+                        }),
+                        defineField({
+                            name: 'label',
+                            title: 'Callout Label',
+                            type: 'string',
+                            description:
+                                'Short badge text on the departure row, e.g. "With The Pickpockets".',
+                            validation: (rule) => rule.required().max(48),
+                        }),
+                        defineField({
+                            name: 'note',
+                            title: 'Note',
+                            type: 'text',
+                            rows: 2,
+                            description:
+                                'Optional extra line shown under the date on this departure only.',
+                        }),
+                    ],
+                    preview: {
+                        select: { title: 'label', subtitle: 'startDate' },
+                    },
+                },
+            ],
+        }),
+
         // --- Trip-card display fields (homepage grid, listings) ---
         defineField({
             name: 'tagline',

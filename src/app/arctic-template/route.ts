@@ -28,6 +28,7 @@ const SITE = (
 const NAV = [
     { label: 'Rafting', href: `${SITE}/rafting` },
     { label: 'Biking', href: `${SITE}/biking` },
+    { label: 'Specialty', href: `${SITE}/specialty` },
     { label: 'About Us', href: `${SITE}/about` },
     { label: 'Blog', href: `${SITE}/blog` },
 ];

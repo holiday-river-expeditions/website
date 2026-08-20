@@ -1,10 +1,12 @@
 import { describe, expect, test } from 'vitest';
 import type { ArcticDeparture } from '@/lib/arctic';
 import {
+    buildCalloutMap,
     cleanTypeName,
     detectVariants,
     durationToDays,
     formatDateRange,
+    formatDayLabel,
     groupDeparturesByMonth,
     nextAvailable,
 } from './departures';
@@ -166,5 +168,81 @@ describe('cleanTypeName', () => {
         expect(cleanTypeName('Z- 2024 Westwater Canyon Rafting Trip')).toBe(
             'Westwater Canyon Rafting Trip',
         );
+    });
+});
+
+describe('formatDayLabel', () => {
+    test('formats a bare YYYY-MM-DD in UTC', () => {
+        expect(formatDayLabel('2026-09-12')).toBe('Sep 12, 2026');
+    });
+    test('does not slip a day in western timezones', () => {
+        // Parsed as UTC midnight, not local — a naive new Date(s) in Denver
+        // would render Dec 31.
+        expect(formatDayLabel('2027-01-01')).toBe('Jan 1, 2027');
+    });
+    test('returns the input unchanged when unparseable', () => {
+        expect(formatDayLabel('not-a-date')).toBe('not-a-date');
+        expect(formatDayLabel('')).toBe('');
+    });
+});
+
+describe('buildCalloutMap', () => {
+    test('indexes callouts by start date and links the parent page', () => {
+        const map = buildCalloutMap([
+            {
+                startDate: '2026-09-12',
+                label: 'With The Pickpockets',
+                note: 'Two sets on the beach.',
+                specialtyType: { slug: { current: 'canyon-concerts' } },
+            },
+        ]);
+        expect(map.get('2026-09-12')).toEqual({
+            label: 'With The Pickpockets',
+            note: 'Two sets on the beach.',
+            href: '/specialty/canyon-concerts',
+        });
+    });
+
+    test('omits href when no specialty type is referenced', () => {
+        const map = buildCalloutMap([
+            { startDate: '2026-09-12', label: 'New Moon' },
+        ]);
+        expect(map.get('2026-09-12')).toEqual({
+            label: 'New Moon',
+            note: null,
+            href: null,
+        });
+    });
+
+    test('skips entries missing a date or label', () => {
+        const map = buildCalloutMap([
+            { startDate: '2026-09-12' },
+            { label: 'Orphan label' },
+            { startDate: '   ', label: 'Blank date' },
+            { startDate: '2026-09-20', label: '   ' },
+        ]);
+        expect(map.size).toBe(0);
+    });
+
+    test('first entry wins when two share a start date', () => {
+        const map = buildCalloutMap([
+            { startDate: '2026-09-12', label: 'First' },
+            { startDate: '2026-09-12', label: 'Second' },
+        ]);
+        expect(map.size).toBe(1);
+        expect(map.get('2026-09-12')?.label).toBe('First');
+    });
+
+    test('trims whitespace around authored values', () => {
+        const map = buildCalloutMap([
+            { startDate: ' 2026-09-12 ', label: ' Stargazing ' },
+        ]);
+        expect(map.get('2026-09-12')?.label).toBe('Stargazing');
+    });
+
+    test('handles null and undefined input', () => {
+        expect(buildCalloutMap(null).size).toBe(0);
+        expect(buildCalloutMap(undefined).size).toBe(0);
+        expect(buildCalloutMap([]).size).toBe(0);
     });
 });

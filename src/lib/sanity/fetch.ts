@@ -5,12 +5,14 @@ import {
     allFaqsQuery,
     allPostsQuery,
     allRiversQuery,
+    allSpecialtyTypesQuery,
     allTripsQuery,
     homepageQuery,
     pageBySlugQuery,
     postBySlugQuery,
     riverBySlugQuery,
     siteSettingsQuery,
+    specialtyTypeBySlugQuery,
     tripBySlugQuery,
 } from './queries';
 
@@ -36,6 +38,14 @@ export async function getAllActivities() {
 
 export async function getActivityBySlug(slug: string) {
     return client.fetch(activityBySlugQuery, { slug });
+}
+
+export async function getAllSpecialtyTypes() {
+    return client.fetch(allSpecialtyTypesQuery);
+}
+
+export async function getSpecialtyTypeBySlug(slug: string) {
+    return client.fetch(specialtyTypeBySlugQuery, { slug });
 }
 
 export async function getAllFaqs() {
