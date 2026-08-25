@@ -7,8 +7,8 @@ import { afterEach, vi } from 'vitest';
 // file's second render finds duplicate matches from the first.
 afterEach(cleanup);
 
-// jsdom ships no matchMedia. Components that gate motion on it (RevealObserver,
-// AmbientVideo) would throw on mount; default to "no preference expressed".
+// jsdom ships no matchMedia. Components that gate motion on it
+// (RevealObserver) would throw on mount; default to "no preference expressed".
 if (!window.matchMedia) {
     window.matchMedia = vi.fn().mockImplementation((query: string) => ({
         matches: false,
