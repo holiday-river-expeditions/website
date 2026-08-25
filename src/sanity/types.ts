@@ -339,13 +339,6 @@ export type TripCategoryReference = {
     [internalGroqTypeReferenceTo]?: 'tripCategory';
 };
 
-export type SanityFileAssetReference = {
-    _ref: string;
-    _type: 'reference';
-    _weak?: boolean;
-    [internalGroqTypeReferenceTo]?: 'sanity.fileAsset';
-};
-
 export type FaqReference = {
     _ref: string;
     _type: 'reference';
@@ -415,21 +408,6 @@ export type Trip = {
         _type: 'itineraryDay';
         _key: string;
     }>;
-    itineraryMedia?: {
-        video?: {
-            asset?: SanityFileAssetReference;
-            media?: unknown;
-            _type: 'file';
-        };
-        poster?: {
-            asset?: SanityImageAssetReference;
-            media?: unknown;
-            hotspot?: SanityImageHotspot;
-            crop?: SanityImageCrop;
-            _type: 'image';
-        };
-        alt?: string;
-    };
     faqs?: Array<
         {
             _key: string;
@@ -673,7 +651,6 @@ export type AllSanitySchemaTypes =
     | Faq
     | ActivityReference
     | TripCategoryReference
-    | SanityFileAssetReference
     | FaqReference
     | SpecialtyTypeReference
     | Trip
@@ -742,7 +719,7 @@ export type AllTripsQueryResult = Array<{
 
 // Source: src/lib/sanity/queries.ts
 // Variable: tripBySlugQuery
-// Query: *[_type == "trip" && slug.current == $slug][0] {    _id,    name,    slug,    difficulty,    duration,    description,    highlights,    photos,    pricingNotes,    arcticTripId,    tagline,    subtitle,    "ribbon": coalesce(ribbon, specialtyTypes[0]->ribbonLabel),    startingPrice,    durationLabel,    "river": river->{ _id, name, slug, description, image },    "activities": activities[]->{ _id, name, slug },    "categories": categories[]->{ _id, name, slug },    minAge,    season,    "specialtyTypes": specialtyTypes[]->{ _id, name, slug, ribbonLabel },    "specialtyDepartures": specialtyDepartures[]{      _key,      startDate,      label,      note,      "specialtyType": specialtyType->{ name, slug }    },    featuredReview,    itinerary,    "itineraryMedia": itineraryMedia{      "videoUrl": video.asset->url,      poster,      alt    },    "faqs": faqs[]->{ _id, question, answer, category },    "relatedTrips": select(      count(relatedTrips) > 0 => relatedTrips[]->{        _id, name, slug, tagline, subtitle, "ribbon": coalesce(ribbon, specialtyTypes[0]->ribbonLabel), startingPrice,        durationLabel, difficulty,        "category": categories[0]->name,        "image": photos[0]      },      *[_type == "trip" && slug.current != $slug &&        (river._ref == ^.river._ref ||         count(activities[@._ref in ^.^.activities[]._ref]) > 0)      ] | order(name asc) [0...3] {        _id, name, slug, tagline, subtitle, "ribbon": coalesce(ribbon, specialtyTypes[0]->ribbonLabel), startingPrice,        durationLabel, difficulty,        "category": categories[0]->name,        "image": photos[0]      }    )  }
+// Query: *[_type == "trip" && slug.current == $slug][0] {    _id,    name,    slug,    difficulty,    duration,    description,    highlights,    photos,    pricingNotes,    arcticTripId,    tagline,    subtitle,    "ribbon": coalesce(ribbon, specialtyTypes[0]->ribbonLabel),    startingPrice,    durationLabel,    "river": river->{ _id, name, slug, description, image },    "activities": activities[]->{ _id, name, slug },    "categories": categories[]->{ _id, name, slug },    minAge,    season,    "specialtyTypes": specialtyTypes[]->{ _id, name, slug, ribbonLabel },    "specialtyDepartures": specialtyDepartures[]{      _key,      startDate,      label,      note,      "specialtyType": specialtyType->{ name, slug }    },    featuredReview,    itinerary,    "faqs": faqs[]->{ _id, question, answer, category },    "relatedTrips": select(      count(relatedTrips) > 0 => relatedTrips[]->{        _id, name, slug, tagline, subtitle, "ribbon": coalesce(ribbon, specialtyTypes[0]->ribbonLabel), startingPrice,        durationLabel, difficulty,        "category": categories[0]->name,        "image": photos[0]      },      *[_type == "trip" && slug.current != $slug &&        (river._ref == ^.river._ref ||         count(activities[@._ref in ^.^.activities[]._ref]) > 0)      ] | order(name asc) [0...3] {        _id, name, slug, tagline, subtitle, "ribbon": coalesce(ribbon, specialtyTypes[0]->ribbonLabel), startingPrice,        durationLabel, difficulty,        "category": categories[0]->name,        "image": photos[0]      }    )  }
 export type TripBySlugQueryResult = {
     _id: string;
     name: string | null;
@@ -839,17 +816,6 @@ export type TripBySlugQueryResult = {
         _type: 'itineraryDay';
         _key: string;
     }> | null;
-    itineraryMedia: {
-        videoUrl: string | null;
-        poster: {
-            asset?: SanityImageAssetReference;
-            media?: unknown;
-            hotspot?: SanityImageHotspot;
-            crop?: SanityImageCrop;
-            _type: 'image';
-        } | null;
-        alt: string | null;
-    } | null;
     faqs: Array<{
         _id: string;
         question: string | null;
@@ -1363,7 +1329,7 @@ import '@sanity/client';
 declare module '@sanity/client' {
     interface SanityQueries {
         '\n  *[_type == "trip"] | order(name asc) {\n    _id,\n    name,\n    slug,\n    difficulty,\n    duration,\n    pricingNotes,\n    arcticTripId,\n    tagline,\n    subtitle,\n    "ribbon": coalesce(ribbon, specialtyTypes[0]->ribbonLabel),\n    startingPrice,\n    durationLabel,\n    "river": river->{ name, slug },\n    "activities": activities[]->{ name, slug },\n    "categories": categories[]->{ name, slug },\n    "specialtyDepartures": specialtyDepartures[]{\n      _key,\n      startDate,\n      label,\n      note,\n      "specialtyType": specialtyType->{ name, slug }\n    },\n    "mainImage": photos[0]\n  }\n': AllTripsQueryResult;
-        '\n  *[_type == "trip" && slug.current == $slug][0] {\n    _id,\n    name,\n    slug,\n    difficulty,\n    duration,\n    description,\n    highlights,\n    photos,\n    pricingNotes,\n    arcticTripId,\n    tagline,\n    subtitle,\n    "ribbon": coalesce(ribbon, specialtyTypes[0]->ribbonLabel),\n    startingPrice,\n    durationLabel,\n    "river": river->{ _id, name, slug, description, image },\n    "activities": activities[]->{ _id, name, slug },\n    "categories": categories[]->{ _id, name, slug },\n    minAge,\n    season,\n    "specialtyTypes": specialtyTypes[]->{ _id, name, slug, ribbonLabel },\n    "specialtyDepartures": specialtyDepartures[]{\n      _key,\n      startDate,\n      label,\n      note,\n      "specialtyType": specialtyType->{ name, slug }\n    },\n    featuredReview,\n    itinerary,\n    "itineraryMedia": itineraryMedia{\n      "videoUrl": video.asset->url,\n      poster,\n      alt\n    },\n    "faqs": faqs[]->{ _id, question, answer, category },\n    "relatedTrips": select(\n      count(relatedTrips) > 0 => relatedTrips[]->{\n        _id, name, slug, tagline, subtitle, "ribbon": coalesce(ribbon, specialtyTypes[0]->ribbonLabel), startingPrice,\n        durationLabel, difficulty,\n        "category": categories[0]->name,\n        "image": photos[0]\n      },\n      *[_type == "trip" && slug.current != $slug &&\n        (river._ref == ^.river._ref ||\n         count(activities[@._ref in ^.^.activities[]._ref]) > 0)\n      ] | order(name asc) [0...3] {\n        _id, name, slug, tagline, subtitle, "ribbon": coalesce(ribbon, specialtyTypes[0]->ribbonLabel), startingPrice,\n        durationLabel, difficulty,\n        "category": categories[0]->name,\n        "image": photos[0]\n      }\n    )\n  }\n': TripBySlugQueryResult;
+        '\n  *[_type == "trip" && slug.current == $slug][0] {\n    _id,\n    name,\n    slug,\n    difficulty,\n    duration,\n    description,\n    highlights,\n    photos,\n    pricingNotes,\n    arcticTripId,\n    tagline,\n    subtitle,\n    "ribbon": coalesce(ribbon, specialtyTypes[0]->ribbonLabel),\n    startingPrice,\n    durationLabel,\n    "river": river->{ _id, name, slug, description, image },\n    "activities": activities[]->{ _id, name, slug },\n    "categories": categories[]->{ _id, name, slug },\n    minAge,\n    season,\n    "specialtyTypes": specialtyTypes[]->{ _id, name, slug, ribbonLabel },\n    "specialtyDepartures": specialtyDepartures[]{\n      _key,\n      startDate,\n      label,\n      note,\n      "specialtyType": specialtyType->{ name, slug }\n    },\n    featuredReview,\n    itinerary,\n    "faqs": faqs[]->{ _id, question, answer, category },\n    "relatedTrips": select(\n      count(relatedTrips) > 0 => relatedTrips[]->{\n        _id, name, slug, tagline, subtitle, "ribbon": coalesce(ribbon, specialtyTypes[0]->ribbonLabel), startingPrice,\n        durationLabel, difficulty,\n        "category": categories[0]->name,\n        "image": photos[0]\n      },\n      *[_type == "trip" && slug.current != $slug &&\n        (river._ref == ^.river._ref ||\n         count(activities[@._ref in ^.^.activities[]._ref]) > 0)\n      ] | order(name asc) [0...3] {\n        _id, name, slug, tagline, subtitle, "ribbon": coalesce(ribbon, specialtyTypes[0]->ribbonLabel), startingPrice,\n        durationLabel, difficulty,\n        "category": categories[0]->name,\n        "image": photos[0]\n      }\n    )\n  }\n': TripBySlugQueryResult;
         '\n  *[_type == "river"] | order(name asc) {\n    _id,\n    name,\n    slug,\n    description,\n    image\n  }\n': AllRiversQueryResult;
         '\n  *[_type == "river" && slug.current == $slug][0] {\n    _id,\n    name,\n    slug,\n    description,\n    image,\n    "trips": *[_type == "trip" && river._ref == ^._id] | order(name asc) {\n      _id,\n      name,\n      slug,\n      tagline,\n      subtitle,\n      "ribbon": coalesce(ribbon, specialtyTypes[0]->ribbonLabel),\n      startingPrice,\n      durationLabel,\n      difficulty,\n      "category": categories[0]->name,\n      "image": photos[0]\n    }\n  }\n': RiverBySlugQueryResult;
         '\n  *[_type == "activity"] | order(name asc) {\n    _id,\n    name,\n    slug,\n    description,\n    image\n  }\n': AllActivitiesQueryResult;

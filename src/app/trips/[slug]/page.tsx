@@ -206,10 +206,7 @@ export default async function TripPage({ params }: TripPageProps) {
             />
 
             {/* Day-by-day itinerary */}
-            <ItinerarySection
-                days={trip.itinerary ?? []}
-                media={trip.itineraryMedia}
-            />
+            <ItinerarySection days={trip.itinerary ?? []} />
 
             {/* Photo gallery */}
             {galleryPhotos.length > 0 && (
