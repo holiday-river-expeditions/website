@@ -5,6 +5,8 @@ interface SectionProps {
     className?: string;
     children: React.ReactNode;
     fullBleed?: boolean;
+    /** Anchor target (e.g. jump links on the specialty hub). */
+    id?: string;
 }
 
 const bgStyles: Record<SectionBackground, string> = {
@@ -20,9 +22,13 @@ export function Section({
     className = '',
     children,
     fullBleed = false,
+    id,
 }: SectionProps) {
     return (
-        <section className={`px-6 py-16 ${bgStyles[background]} ${className}`}>
+        <section
+            id={id}
+            className={`px-6 py-16 ${bgStyles[background]} ${className}`}
+        >
             {fullBleed ? (
                 children
             ) : (

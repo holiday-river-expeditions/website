@@ -238,7 +238,9 @@ export function buildCalloutMap(
         map.set(startDate, {
             label,
             note: entry.note ?? null,
-            href: slug ? `/specialty/${slug}` : null,
+            // Anchor into the family's section on the specialty hub — the
+            // per-family parent pages were removed (Aug 20 decision).
+            href: slug ? `/specialty#${slug}` : null,
         });
     }
     return map;

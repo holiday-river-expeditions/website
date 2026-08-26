@@ -997,50 +997,8 @@ export type ActivityBySlugQueryResult = {
 
 // Source: src/lib/sanity/queries.ts
 // Variable: allSpecialtyTypesQuery
-// Query: *[_type == "specialtyType"] | order(order asc, name asc) {    _id,    name,    slug,    tagline,    image,    ribbonLabel,    "trips": *[_type == "trip" && references(^._id)] | order(name asc) {      _id,      name,      slug,      tagline,      subtitle,      "ribbon": coalesce(ribbon, ^.ribbonLabel),      startingPrice,      durationLabel,      "river": river->{ name },      "category": categories[0]->name,      "image": photos[0]    }  }
+// Query: *[_type == "specialtyType"] | order(order asc, name asc) {    _id,    name,    slug,    tagline,    description,    image,    ribbonLabel,    "trips": *[_type == "trip" && references(^._id)] | order(name asc) {      _id,      name,      slug,      tagline,      subtitle,      "ribbon": coalesce(ribbon, ^.ribbonLabel),      startingPrice,      durationLabel,      "river": river->{ name },      "category": categories[0]->name,      "image": photos[0]    }  }
 export type AllSpecialtyTypesQueryResult = Array<{
-    _id: string;
-    name: string | null;
-    slug: Slug | null;
-    tagline: string | null;
-    image: {
-        asset?: SanityImageAssetReference;
-        media?: unknown;
-        hotspot?: SanityImageHotspot;
-        crop?: SanityImageCrop;
-        _type: 'image';
-    } | null;
-    ribbonLabel: string | null;
-    trips: Array<{
-        _id: string;
-        name: string | null;
-        slug: Slug | null;
-        tagline: string | null;
-        subtitle: string | null;
-        ribbon: string | null;
-        startingPrice: string | null;
-        durationLabel: string | null;
-        river: {
-            name: string | null;
-        } | null;
-        category: string | null;
-        image: {
-            asset?: SanityImageAssetReference;
-            media?: unknown;
-            hotspot?: SanityImageHotspot;
-            crop?: SanityImageCrop;
-            alt?: string;
-            caption?: string;
-            _type: 'image';
-            _key: string;
-        } | null;
-    }>;
-}>;
-
-// Source: src/lib/sanity/queries.ts
-// Variable: specialtyTypeBySlugQuery
-// Query: *[_type == "specialtyType" && slug.current == $slug][0] {    _id,    name,    slug,    tagline,    description,    image,    ribbonLabel,    "trips": *[_type == "trip" && references(^._id)] | order(name asc) {      _id,      name,      slug,      tagline,      subtitle,      "ribbon": coalesce(ribbon, ^.ribbonLabel),      startingPrice,      durationLabel,      "river": river->{ name },      arcticTripId,      "category": categories[0]->name,      "image": photos[0],      "specialtyDepartures": specialtyDepartures[]{        _key,        startDate,        label,        note      }    }  }
-export type SpecialtyTypeBySlugQueryResult = {
     _id: string;
     name: string | null;
     slug: Slug | null;
@@ -1084,7 +1042,6 @@ export type SpecialtyTypeBySlugQueryResult = {
         river: {
             name: string | null;
         } | null;
-        arcticTripId: string | null;
         category: string | null;
         image: {
             asset?: SanityImageAssetReference;
@@ -1096,14 +1053,8 @@ export type SpecialtyTypeBySlugQueryResult = {
             _type: 'image';
             _key: string;
         } | null;
-        specialtyDepartures: Array<{
-            _key: string;
-            startDate: string | null;
-            label: string | null;
-            note: string | null;
-        }> | null;
     }>;
-} | null;
+}>;
 
 // Source: src/lib/sanity/queries.ts
 // Variable: allFaqsQuery
@@ -1346,8 +1297,7 @@ declare module '@sanity/client' {
         '\n  *[_type == "river" && slug.current == $slug][0] {\n    _id,\n    name,\n    slug,\n    description,\n    image,\n    "trips": *[_type == "trip" && river._ref == ^._id] | order(name asc) {\n      _id,\n      name,\n      slug,\n      tagline,\n      subtitle,\n      "ribbon": coalesce(ribbon, specialtyTypes[0]->ribbonLabel),\n      startingPrice,\n      durationLabel,\n      "river": river->{ name },\n      "category": categories[0]->name,\n      "image": photos[0]\n    }\n  }\n': RiverBySlugQueryResult;
         '\n  *[_type == "activity"] | order(name asc) {\n    _id,\n    name,\n    slug,\n    description,\n    image\n  }\n': AllActivitiesQueryResult;
         '\n  *[_type == "activity" && slug.current == $slug][0] {\n    _id,\n    name,\n    slug,\n    description,\n    image,\n    "trips": *[_type == "trip" && references(^._id)] | order(name asc) {\n      _id,\n      name,\n      slug,\n      tagline,\n      subtitle,\n      "ribbon": coalesce(ribbon, specialtyTypes[0]->ribbonLabel),\n      startingPrice,\n      durationLabel,\n      "river": river->{ name },\n      "category": categories[0]->name,\n      "image": photos[0]\n    }\n  }\n': ActivityBySlugQueryResult;
-        '\n  *[_type == "specialtyType"] | order(order asc, name asc) {\n    _id,\n    name,\n    slug,\n    tagline,\n    image,\n    ribbonLabel,\n    "trips": *[_type == "trip" && references(^._id)] | order(name asc) {\n      _id,\n      name,\n      slug,\n      tagline,\n      subtitle,\n      "ribbon": coalesce(ribbon, ^.ribbonLabel),\n      startingPrice,\n      durationLabel,\n      "river": river->{ name },\n      "category": categories[0]->name,\n      "image": photos[0]\n    }\n  }\n': AllSpecialtyTypesQueryResult;
-        '\n  *[_type == "specialtyType" && slug.current == $slug][0] {\n    _id,\n    name,\n    slug,\n    tagline,\n    description,\n    image,\n    ribbonLabel,\n    "trips": *[_type == "trip" && references(^._id)] | order(name asc) {\n      _id,\n      name,\n      slug,\n      tagline,\n      subtitle,\n      "ribbon": coalesce(ribbon, ^.ribbonLabel),\n      startingPrice,\n      durationLabel,\n      "river": river->{ name },\n      arcticTripId,\n      "category": categories[0]->name,\n      "image": photos[0],\n      "specialtyDepartures": specialtyDepartures[]{\n        _key,\n        startDate,\n        label,\n        note\n      }\n    }\n  }\n': SpecialtyTypeBySlugQueryResult;
+        '\n  *[_type == "specialtyType"] | order(order asc, name asc) {\n    _id,\n    name,\n    slug,\n    tagline,\n    description,\n    image,\n    ribbonLabel,\n    "trips": *[_type == "trip" && references(^._id)] | order(name asc) {\n      _id,\n      name,\n      slug,\n      tagline,\n      subtitle,\n      "ribbon": coalesce(ribbon, ^.ribbonLabel),\n      startingPrice,\n      durationLabel,\n      "river": river->{ name },\n      "category": categories[0]->name,\n      "image": photos[0]\n    }\n  }\n': AllSpecialtyTypesQueryResult;
         '\n  *[_type == "faq"] | order(category asc, order asc) {\n    _id,\n    question,\n    answer,\n    category\n  }\n': AllFaqsQueryResult;
         '\n  *[_type == "siteSettings"][0] {\n    phone,\n    email,\n    address,\n    socialLinks,\n    reviews\n  }\n': SiteSettingsQueryResult;
         '\n  *[_type == "post"] | order(publishedAt desc) {\n    _id,\n    title,\n    slug,\n    excerpt,\n    mainImage,\n    publishedAt,\n    category\n  }\n': AllPostsQueryResult;

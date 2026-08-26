@@ -12,7 +12,6 @@ import {
     postBySlugQuery,
     riverBySlugQuery,
     siteSettingsQuery,
-    specialtyTypeBySlugQuery,
     tripBySlugQuery,
 } from './queries';
 
@@ -42,10 +41,6 @@ export async function getActivityBySlug(slug: string) {
 
 export async function getAllSpecialtyTypes() {
     return client.fetch(allSpecialtyTypesQuery);
-}
-
-export async function getSpecialtyTypeBySlug(slug: string) {
-    return client.fetch(specialtyTypeBySlugQuery, { slug });
 }
 
 export async function getAllFaqs() {
