@@ -64,7 +64,7 @@ export const tripBySlugQuery = defineQuery(`
     "relatedTrips": select(
       count(relatedTrips) > 0 => relatedTrips[]->{
         _id, name, slug, tagline, subtitle, "ribbon": coalesce(ribbon, specialtyTypes[0]->ribbonLabel), startingPrice,
-        durationLabel, difficulty,
+        durationLabel, "river": river->{ name },
         "category": categories[0]->name,
         "image": photos[0]
       },
@@ -73,7 +73,7 @@ export const tripBySlugQuery = defineQuery(`
          count(activities[@._ref in ^.^.activities[]._ref]) > 0)
       ] | order(name asc) [0...3] {
         _id, name, slug, tagline, subtitle, "ribbon": coalesce(ribbon, specialtyTypes[0]->ribbonLabel), startingPrice,
-        durationLabel, difficulty,
+        durationLabel, "river": river->{ name },
         "category": categories[0]->name,
         "image": photos[0]
       }
@@ -107,7 +107,7 @@ export const riverBySlugQuery = defineQuery(`
       "ribbon": coalesce(ribbon, specialtyTypes[0]->ribbonLabel),
       startingPrice,
       durationLabel,
-      difficulty,
+      "river": river->{ name },
       "category": categories[0]->name,
       "image": photos[0]
     }
@@ -140,7 +140,7 @@ export const activityBySlugQuery = defineQuery(`
       "ribbon": coalesce(ribbon, specialtyTypes[0]->ribbonLabel),
       startingPrice,
       durationLabel,
-      difficulty,
+      "river": river->{ name },
       "category": categories[0]->name,
       "image": photos[0]
     }
@@ -164,7 +164,7 @@ export const allSpecialtyTypesQuery = defineQuery(`
       "ribbon": coalesce(ribbon, ^.ribbonLabel),
       startingPrice,
       durationLabel,
-      difficulty,
+      "river": river->{ name },
       "category": categories[0]->name,
       "image": photos[0]
     }
@@ -189,7 +189,7 @@ export const specialtyTypeBySlugQuery = defineQuery(`
       "ribbon": coalesce(ribbon, ^.ribbonLabel),
       startingPrice,
       durationLabel,
-      difficulty,
+      "river": river->{ name },
       arcticTripId,
       "category": categories[0]->name,
       "image": photos[0],
@@ -272,7 +272,7 @@ export const homepageQuery = defineQuery(`
       "ribbon": coalesce(ribbon, specialtyTypes[0]->ribbonLabel),
       startingPrice,
       durationLabel,
-      difficulty,
+      "river": river->{ name },
       "category": categories[0]->name,
       "image": photos[0]
     },

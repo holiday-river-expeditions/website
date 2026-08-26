@@ -120,8 +120,8 @@ export default async function SpecialtyPage() {
                                             }
                                             ribbon={trip.ribbon ?? undefined}
                                             featured={Boolean(trip.ribbon)}
-                                            difficulty={
-                                                trip.difficulty ?? undefined
+                                            river={
+                                                trip.river?.name ?? undefined
                                             }
                                             href={
                                                 trip.slug?.current

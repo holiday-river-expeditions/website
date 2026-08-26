@@ -6,7 +6,7 @@ import { Hero } from '@/components/ui/Hero';
 import { RiverSelector } from '@/components/ui/RiverSelector';
 import { Section } from '@/components/ui/Section';
 import { TripCard, type TripCardProps } from '@/components/ui/TripCard';
-import { getHomepage, imageUrl } from '@/lib/sanity';
+import { getHomepage, getSiteSettings, imageUrl } from '@/lib/sanity';
 
 // Re-fetch from Sanity at most once a minute so content edits in /studio appear
 // on the live site without a redeploy. (Swap for webhook-based on-demand
@@ -14,7 +14,10 @@ import { getHomepage, imageUrl } from '@/lib/sanity';
 export const revalidate = 60;
 
 export default async function Home() {
-    const homepage = await getHomepage();
+    const [homepage, settings] = await Promise.all([
+        getHomepage(),
+        getSiteSettings(),
+    ]);
 
     if (!homepage) {
         return (
@@ -42,7 +45,7 @@ export default async function Home() {
             subtitle: trip.subtitle ?? undefined,
             ribbon: trip.ribbon ?? undefined,
             featured: Boolean(trip.ribbon),
-            difficulty: trip.difficulty ?? undefined,
+            river: trip.river?.name ?? undefined,
         }),
     );
 
@@ -85,6 +88,10 @@ export default async function Home() {
                 cta={{
                     text: homepage.heroCtaText ?? 'Find Your Trip',
                     href: homepage.heroCtaLink ?? '/trips',
+                }}
+                contact={{
+                    phone: settings?.phone ?? '801-266-2087',
+                    email: settings?.email ?? 'Info@HolidayExpeditions.com',
                 }}
             />
 

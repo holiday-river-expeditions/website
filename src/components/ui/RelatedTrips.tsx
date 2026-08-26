@@ -11,7 +11,7 @@ interface RelatedTrip {
     ribbon?: string | null;
     startingPrice?: string | null;
     durationLabel?: string | null;
-    difficulty?: string | null;
+    river?: { name?: string | null } | null;
     category?: string | null;
     image?: Parameters<typeof imageUrl>[0];
 }
@@ -44,7 +44,7 @@ export function RelatedTrips({ trips }: { trips: RelatedTrip[] }) {
                         subtitle={trip.subtitle ?? undefined}
                         ribbon={trip.ribbon ?? undefined}
                         featured={Boolean(trip.ribbon)}
-                        difficulty={trip.difficulty ?? undefined}
+                        river={trip.river?.name ?? undefined}
                         href={
                             trip.slug?.current
                                 ? `/trips/${trip.slug.current}`

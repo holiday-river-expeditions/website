@@ -92,7 +92,7 @@ export default async function RiverPage({ params }: RiverPageProps) {
                                 subtitle={trip.subtitle ?? undefined}
                                 ribbon={trip.ribbon ?? undefined}
                                 featured={Boolean(trip.ribbon)}
-                                difficulty={trip.difficulty ?? undefined}
+                                river={trip.river?.name ?? undefined}
                                 href={
                                     trip.slug?.current
                                         ? `/trips/${trip.slug.current}`

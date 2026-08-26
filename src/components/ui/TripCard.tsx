@@ -15,16 +15,12 @@ export interface TripCardProps {
     ribbon?: string;
     /** When true, frames the image in a red border (specialty/featured trips). */
     featured?: boolean;
-    /** Sanity difficulty value (easy/moderate/challenging/expert). */
-    difficulty?: string;
+    /** River/destination label, rendered verbatim (Sanity river docs are
+        named by section — "Cataract", "Westwater", "Maze" — so appending
+        "River" would fabricate wrong names). Replaces the old difficulty
+        chip per the Aug 20 decision. */
+    river?: string;
 }
-
-const difficultyLabels: Record<string, string> = {
-    easy: 'Easy',
-    moderate: 'Moderate',
-    challenging: 'Challenging',
-    expert: 'Expert',
-};
 
 export function TripCard({
     name,
@@ -37,14 +33,14 @@ export function TripCard({
     subtitle,
     ribbon,
     featured = false,
-    difficulty,
+    river,
 }: TripCardProps) {
     // Category tag is a solid fill: teal for rafting, sand for biking (per mockup).
     // Sand fill needs dark text for WCAG AA contrast; teal carries white.
     const tagColor = /bik/i.test(category)
         ? 'bg-sand text-onyx'
         : 'bg-teal text-holiday-white';
-    const difficultyLabel = difficulty ? difficultyLabels[difficulty] : null;
+    const riverLabel = river || null;
 
     return (
         <Link href={href} className='group block'>
@@ -70,9 +66,9 @@ export function TripCard({
                     >
                         {category}
                     </span>
-                    {difficultyLabel && (
+                    {riverLabel && (
                         <span className='inline-block border border-onyx/40 px-3.5 py-1.5 text-[14px] font-bold leading-tight text-onyx'>
-                            {difficultyLabel}
+                            {riverLabel}
                         </span>
                     )}
                 </span>

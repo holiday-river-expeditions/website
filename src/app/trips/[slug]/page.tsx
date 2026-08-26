@@ -7,7 +7,7 @@ import {
     AVAILABILITY_ANCHOR,
     AvailabilitySection,
 } from '@/components/ui/AvailabilitySection';
-import { Button, buttonClasses } from '@/components/ui/Button';
+import { buttonClasses } from '@/components/ui/Button';
 import { FeaturedReview } from '@/components/ui/FeaturedReview';
 import { ItinerarySection } from '@/components/ui/ItinerarySection';
 import { RelatedTrips } from '@/components/ui/RelatedTrips';
@@ -133,20 +133,19 @@ export default async function TripPage({ params }: TripPageProps) {
                         ))}
                     </dl>
                     <div className='flex flex-wrap items-center gap-3'>
-                        {/* Plain anchor, not Link: a same-page fragment needs
-                            native scrolling, not a router navigation. */}
+                        {/* Book Now jumps to Dates & Availability on this page
+                            (Aug 20 decision). Plain anchor, not Link: a
+                            same-page fragment needs native scrolling, not a
+                            router navigation. */}
                         <a
                             href={`#${AVAILABILITY_ANCHOR}`}
                             className={buttonClasses({
-                                variant: 'outline',
+                                variant: 'primary',
                                 size: 'lg',
                             })}
                         >
-                            Dates &amp; Availability
-                        </a>
-                        <Button href='/book' size='lg'>
                             Book Now
-                        </Button>
+                        </a>
                     </div>
                 </div>
 

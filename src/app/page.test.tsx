@@ -20,6 +20,7 @@ vi.mock('@/lib/sanity', () => ({
                 startingPrice: '$1,630',
                 durationLabel: '5/6 Days',
                 category: 'Whitewater Rafting',
+                river: { name: 'Cataract' },
                 image: null,
             },
         ],
@@ -31,6 +32,10 @@ vi.mock('@/lib/sanity', () => ({
         storyCtaLink: '/about',
         rivers: [],
         learnContent: [],
+    })),
+    getSiteSettings: vi.fn(async () => ({
+        phone: '801-266-2087',
+        email: 'Info@HolidayExpeditions.com',
     })),
     // Returns '' (no image uploaded) — components render their placeholders.
     imageUrl: () => '',
@@ -49,10 +54,21 @@ test('renders the home page with the hero headline and key sections', async () =
         }),
     ).toBeInTheDocument();
 
-    // Trip grid — a featured trip name
+    // Hero contact line (phone + email, per the Aug 20 decision)
+    expect(screen.getByRole('link', { name: '801-266-2087' })).toHaveAttribute(
+        'href',
+        'tel:+18012662087',
+    );
+    expect(
+        screen.getByRole('link', { name: 'Info@HolidayExpeditions.com' }),
+    ).toHaveAttribute('href', 'mailto:Info@HolidayExpeditions.com');
+
+    // Trip grid — a featured trip name, with the river chip in place of the
+    // old difficulty label
     expect(
         screen.getByRole('heading', { level: 3, name: /cataract canyon/i }),
     ).toBeInTheDocument();
+    expect(screen.getByText('Cataract')).toBeInTheDocument();
 
     // Rafting Since 1966 section
     expect(

@@ -34,7 +34,7 @@ export function Header() {
                 <div className='flex shrink-0 items-center justify-end gap-1.5 sm:gap-2 md:gap-3'>
                     <MobileNav />
                     <MiniCart />
-                    <Button href='/book' size='compact'>
+                    <Button href='/open-seats' size='compact'>
                         Book Now
                     </Button>
                 </div>

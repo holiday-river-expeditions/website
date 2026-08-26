@@ -7,6 +7,8 @@ interface HeroProps {
     /** Alt text for the banner photo; empty string = decorative. */
     imageAlt?: string;
     cta?: { text: string; href: string };
+    /** Phone/email shown under the CTA (Aug 20 decision: contact in the hero). */
+    contact?: { phone?: string; email?: string };
 }
 
 export function Hero({
@@ -14,6 +16,7 @@ export function Hero({
     backgroundImage,
     imageAlt = '',
     cta,
+    contact,
 }: HeroProps) {
     return (
         // Full-bleed banner at restrained height (well under viewport, so the
@@ -53,6 +56,29 @@ export function Hero({
                                 {cta.text}
                             </Button>
                         </div>
+                    )}
+                    {contact && (contact.phone || contact.email) && (
+                        <p className='mt-6 flex flex-wrap items-center justify-center gap-x-3 gap-y-1 text-[15px] font-bold leading-tight text-holiday-white md:text-[16px]'>
+                            {contact.phone && (
+                                <a
+                                    href={`tel:+1${contact.phone.replace(/\D/g, '')}`}
+                                    className='transition-opacity hover:opacity-70'
+                                >
+                                    {contact.phone}
+                                </a>
+                            )}
+                            {contact.phone && contact.email && (
+                                <span aria-hidden>·</span>
+                            )}
+                            {contact.email && (
+                                <a
+                                    href={`mailto:${contact.email}`}
+                                    className='transition-opacity hover:opacity-70'
+                                >
+                                    {contact.email}
+                                </a>
+                            )}
+                        </p>
                     )}
                 </div>
 
