@@ -10,6 +10,7 @@ export const revalidate = 60;
 // A `page` document with one of these slugs would be silently shadowed by
 // the static route, so 404 it explicitly to keep behavior predictable.
 const RESERVED_SLUGS = new Set([
+    'admin',
     'api',
     'biking',
     'blog',

@@ -61,13 +61,14 @@ test('hamburger does not overlap the logo at 375px', async ({ page }) => {
 
     // Scope to the banner — the footer carries the same logo lockup.
     const header = page.getByRole('banner');
-    // Measure the wordmark itself, not the <a>. The lockup's mark is an
-    // auto-width <Image> that contributes 0 to min-content, so the link can
-    // compress while the nowrap wordmark spills out beyond its box — the
+    // Measure the visible classic SVG lockup, not the <a>. The Logo also
+    // renders the hidden bold live-text variant (demo flag), so target the
+    // horizontal-lockup image rather than the lockup's inner spans — the
+    // link itself can compress while content spills beyond its box, so the
     // link's own bounding box would report a clean layout during an overlap.
     const wordmark = header
         .getByRole('link', { name: 'Holiday River Expeditions home' })
-        .locator('span span');
+        .locator('img[src*="logo-horizontal"]');
     const hamburger = header.getByRole('button', { name: 'Open menu' });
     const cta = header.getByRole('link', { name: 'Book Now' });
 
