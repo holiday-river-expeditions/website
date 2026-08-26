@@ -2,7 +2,9 @@ import type { Metadata } from 'next';
 import { PT_Sans, Oswald } from 'next/font/google';
 import { Header } from '@/components/layout/Header';
 import { RevealObserver } from '@/components/ui/RevealObserver';
+import { DemoFlagsPanel } from '@/components/ui/DemoFlagsPanel';
 import { Footer } from '@/components/layout/Footer';
+import { DEMO_INIT_SCRIPT } from '@/lib/demo-flags';
 import './globals.css';
 
 // Oswald serves as the fallback for the brand typeface, ATF Alternate Gothic,
@@ -58,8 +60,16 @@ export default function RootLayout({
     children: React.ReactNode;
 }>) {
     return (
-        <html lang='en'>
+        // suppressHydrationWarning: the demo-flags init script below stamps
+        // data-demo-* attributes on <html> before hydration (armed browsers
+        // only) — React must not treat them as a mismatch.
+        <html lang='en' suppressHydrationWarning>
             <head>
+                {/* Blocking on purpose: demo-flag attributes must land before
+                    first paint so armed browsers never flash the default. */}
+                <script
+                    dangerouslySetInnerHTML={{ __html: DEMO_INIT_SCRIPT }}
+                />
                 <link
                     rel='stylesheet'
                     href='https://use.typekit.net/guz5fen.css'
@@ -69,6 +79,7 @@ export default function RootLayout({
                 className={`${oswald.variable} ${ptSans.variable} antialiased`}
             >
                 <RevealObserver />
+                <DemoFlagsPanel />
                 <Header />
                 <main className='min-h-screen'>{children}</main>
                 <Footer />
