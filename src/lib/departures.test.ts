@@ -187,7 +187,7 @@ describe('formatDayLabel', () => {
 });
 
 describe('buildCalloutMap', () => {
-    test('indexes callouts by start date and links the parent page', () => {
+    test('indexes callouts by start date and links the hub section', () => {
         const map = buildCalloutMap([
             {
                 startDate: '2026-09-12',
@@ -199,7 +199,7 @@ describe('buildCalloutMap', () => {
         expect(map.get('2026-09-12')).toEqual({
             label: 'With The Pickpockets',
             note: 'Two sets on the beach.',
-            href: '/specialty/canyon-concerts',
+            href: '/specialty#canyon-concerts',
         });
     });
 

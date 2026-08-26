@@ -32,7 +32,7 @@ function rowFor(container: HTMLElement, dateLabel: string): HTMLElement {
 
 test('renders no callout when none is supplied', () => {
     const { container } = render(<DepartureList departures={[departure()]} />);
-    expect(container.querySelector('a[href^="/specialty/"]')).toBeNull();
+    expect(container.querySelector('a[href^="/specialty"]')).toBeNull();
 });
 
 test('badges only the departure whose start date is called out', () => {
@@ -57,7 +57,7 @@ test('badges only the departure whose start date is called out', () => {
     const link = within(called).getByRole('link', {
         name: 'With The Pickpockets',
     });
-    expect(link).toHaveAttribute('href', '/specialty/canyon-concerts');
+    expect(link).toHaveAttribute('href', '/specialty#canyon-concerts');
     expect(within(called).getByText('Two sets on the beach.')).toBeVisible();
 
     // The neighbouring departure stays untouched.
@@ -65,7 +65,7 @@ test('badges only the departure whose start date is called out', () => {
     expect(within(other).queryByText('With The Pickpockets')).toBeNull();
 });
 
-test('renders a plain badge when the callout has no parent page', () => {
+test('renders a plain badge when the callout has no linked family', () => {
     const callouts = buildCalloutMap([
         { startDate: '2026-09-12', label: 'New Moon' },
     ]);
@@ -74,7 +74,7 @@ test('renders a plain badge when the callout has no parent page', () => {
     );
 
     expect(screen.getByText('New Moon')).toBeVisible();
-    expect(container.querySelector('a[href^="/specialty/"]')).toBeNull();
+    expect(container.querySelector('a[href^="/specialty"]')).toBeNull();
 });
 
 test('a callout does not displace the seats badge', () => {

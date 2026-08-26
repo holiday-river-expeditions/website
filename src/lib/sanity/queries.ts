@@ -153,6 +153,7 @@ export const allSpecialtyTypesQuery = defineQuery(`
     name,
     slug,
     tagline,
+    description,
     image,
     ribbonLabel,
     "trips": *[_type == "trip" && references(^._id)] | order(name asc) {
@@ -167,38 +168,6 @@ export const allSpecialtyTypesQuery = defineQuery(`
       "river": river->{ name },
       "category": categories[0]->name,
       "image": photos[0]
-    }
-  }
-`);
-
-export const specialtyTypeBySlugQuery = defineQuery(`
-  *[_type == "specialtyType" && slug.current == $slug][0] {
-    _id,
-    name,
-    slug,
-    tagline,
-    description,
-    image,
-    ribbonLabel,
-    "trips": *[_type == "trip" && references(^._id)] | order(name asc) {
-      _id,
-      name,
-      slug,
-      tagline,
-      subtitle,
-      "ribbon": coalesce(ribbon, ^.ribbonLabel),
-      startingPrice,
-      durationLabel,
-      "river": river->{ name },
-      arcticTripId,
-      "category": categories[0]->name,
-      "image": photos[0],
-      "specialtyDepartures": specialtyDepartures[]{
-        _key,
-        startDate,
-        label,
-        note
-      }
     }
   }
 `);
