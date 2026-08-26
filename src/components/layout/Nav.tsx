@@ -6,6 +6,7 @@ const navItems = [
     { label: 'Specialty', href: '/specialty' },
     { label: 'About Us', href: '/about' },
     { label: 'Blog', href: '/blog' },
+    { label: 'Contact', href: '/contact' },
 ] as const;
 
 export { navItems };

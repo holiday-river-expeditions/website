@@ -1,5 +1,6 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
+import { Button } from '@/components/ui/Button';
 import { DepartureList } from '@/components/ui/DepartureList';
 import { Section } from '@/components/ui/Section';
 import {
@@ -121,6 +122,16 @@ export default async function OpenSeatsPage() {
                     reservation system. See one you like? Grab it. Rivers fill
                     up fast.
                 </p>
+                <p className='mt-3 max-w-2xl text-body leading-body text-onyx'>
+                    Rather book with a human? Call{' '}
+                    <a
+                        href='tel:+18012662087'
+                        className='font-bold text-holiday-red transition-opacity hover:opacity-70'
+                    >
+                        801-266-2087
+                    </a>
+                    , Monday&ndash;Friday, 8am&ndash;5pm Mountain Time.
+                </p>
             </Section>
 
             <Section background='white' className='pb-20 pt-8 md:pb-24'>
@@ -192,6 +203,25 @@ export default async function OpenSeatsPage() {
                         })}
                     </div>
                 )}
+            </Section>
+
+            {/* The Book Now CTA lands here now, so give browsers who don't
+                see their date a path into the full catalog. */}
+            <Section background='white' className='pb-20 md:pb-24'>
+                <div className='max-w-2xl border-t border-holiday-grey/30 pt-10'>
+                    <h2 className='font-alt-gothic text-section font-black uppercase text-onyx'>
+                        Not seeing your dates?
+                    </h2>
+                    <p className='mt-3 text-body leading-body text-onyx'>
+                        Browse every trip we run and find the one worth planning
+                        around.
+                    </p>
+                    <div className='mt-6'>
+                        <Button href='/trips' variant='outline' size='lg'>
+                            Explore All Trips
+                        </Button>
+                    </div>
+                </div>
             </Section>
         </>
     );
