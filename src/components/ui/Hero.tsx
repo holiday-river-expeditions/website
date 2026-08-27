@@ -7,6 +7,11 @@ interface HeroProps {
     /** Alt text for the banner photo; empty string = decorative. */
     imageAlt?: string;
     cta?: { text: string; href: string };
+    /** When set, the CTA points at /trip-finder instead while the
+        trip-finder demo flag is on (label unchanged). Both anchors ship in
+        the markup and CSS picks one, so the default experience is
+        untouched — same technique as the logo treatments. */
+    demoTripFinderCta?: boolean;
     /** Phone/email shown under the CTA (Aug 20 decision: contact in the hero). */
     contact?: { phone?: string; email?: string };
 }
@@ -16,6 +21,7 @@ export function Hero({
     backgroundImage,
     imageAlt = '',
     cta,
+    demoTripFinderCta = false,
     contact,
 }: HeroProps) {
     return (
@@ -51,11 +57,26 @@ export function Hero({
                         {heading}
                     </h1>
                     {cta && (
-                        <div className='mt-8'>
-                            <Button href={cta.href} size='lg'>
-                                {cta.text}
-                            </Button>
-                        </div>
+                        <>
+                            <div
+                                className={`mt-8 ${
+                                    demoTripFinderCta
+                                        ? '[[data-demo-trip-finder=on]_&]:hidden'
+                                        : ''
+                                }`}
+                            >
+                                <Button href={cta.href} size='lg'>
+                                    {cta.text}
+                                </Button>
+                            </div>
+                            {demoTripFinderCta && (
+                                <div className='mt-8 hidden [[data-demo-trip-finder=on]_&]:block'>
+                                    <Button href='/trip-finder' size='lg'>
+                                        {cta.text}
+                                    </Button>
+                                </div>
+                            )}
+                        </>
                     )}
                     {contact && (contact.phone || contact.email) && (
                         <p className='mt-6 flex flex-wrap items-center justify-center gap-x-3 gap-y-1 text-[15px] font-bold leading-tight text-holiday-white md:text-[16px]'>

@@ -328,6 +328,12 @@ export function monthOptions(
     });
 }
 
+/** Group key ("sanity:cataract-canyon" / "arctic:123") → DOM-safe anchor id,
+    used by /book's floating menu and deep links from the trip finder. */
+export function groupAnchor(key: string): string {
+    return `trip-${key.replace(/[^a-zA-Z0-9-]/g, '-')}`;
+}
+
 /** Departures whose start falls in the given month; null month = all. */
 export function filterByMonth<T extends { start?: string | null }>(
     departures: readonly T[],

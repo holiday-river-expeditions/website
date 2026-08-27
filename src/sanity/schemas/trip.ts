@@ -190,6 +190,126 @@ export const trip = defineType({
                 'Arctic Reservations trip-type id for live availability and booking. Comma-separate multiple ids when one trip page covers several Arctic trip types (e.g. "37,38" for Cataract 5-day + 6-day).',
         }),
 
+        // --- Trip Finder matching data ---
+        // Structured fields the /trip-finder wizard scores against. Display
+        // strings (season, startingPrice) stay untouched; these exist so
+        // matching never has to parse prose. All optional — the wizard
+        // treats missing data as unknown, not disqualifying.
+        defineField({
+            name: 'maxRapidClass',
+            title: 'Max Rapid Class',
+            type: 'number',
+            description:
+                'Biggest whitewater on the trip, as a rapid class. Leave empty for non-rafting trips. (Also the working example for the difficulty-vs-rapid-class question — see docs.)',
+            options: {
+                list: [
+                    { title: 'Class I — flat water', value: 1 },
+                    { title: 'Class II — ripples and splashes', value: 2 },
+                    { title: 'Class III — fun rapids', value: 3 },
+                    { title: 'Class IV — big whitewater', value: 4 },
+                    { title: 'Class V — expert', value: 5 },
+                ],
+                layout: 'radio',
+            },
+        }),
+        defineField({
+            name: 'seasonMonths',
+            title: 'Season (months)',
+            type: 'array',
+            of: [{ type: 'number' }],
+            description:
+                'Months this trip actually runs. Powers the wizard’s "when can you go" matching; the free-text Season field above stays for display.',
+            options: {
+                list: [
+                    { title: 'January', value: 1 },
+                    { title: 'February', value: 2 },
+                    { title: 'March', value: 3 },
+                    { title: 'April', value: 4 },
+                    { title: 'May', value: 5 },
+                    { title: 'June', value: 6 },
+                    { title: 'July', value: 7 },
+                    { title: 'August', value: 8 },
+                    { title: 'September', value: 9 },
+                    { title: 'October', value: 10 },
+                    { title: 'November', value: 11 },
+                    { title: 'December', value: 12 },
+                ],
+            },
+        }),
+        defineField({
+            name: 'minAgeOverrides',
+            title: 'Minimum Age Overrides',
+            type: 'array',
+            description:
+                'Months where the minimum age differs from the base Minimum Age — e.g. Cataract is 8, but 16 in May and June (spring high water).',
+            of: [
+                {
+                    type: 'object',
+                    name: 'minAgeOverride',
+                    fields: [
+                        defineField({
+                            name: 'months',
+                            title: 'Months',
+                            type: 'array',
+                            of: [{ type: 'number' }],
+                            options: {
+                                list: [
+                                    { title: 'January', value: 1 },
+                                    { title: 'February', value: 2 },
+                                    { title: 'March', value: 3 },
+                                    { title: 'April', value: 4 },
+                                    { title: 'May', value: 5 },
+                                    { title: 'June', value: 6 },
+                                    { title: 'July', value: 7 },
+                                    { title: 'August', value: 8 },
+                                    { title: 'September', value: 9 },
+                                    { title: 'October', value: 10 },
+                                    { title: 'November', value: 11 },
+                                    { title: 'December', value: 12 },
+                                ],
+                            },
+                            validation: (rule) => rule.required().min(1),
+                        }),
+                        defineField({
+                            name: 'minAge',
+                            title: 'Minimum Age in These Months',
+                            type: 'number',
+                            validation: (rule) =>
+                                rule.required().min(0).integer(),
+                        }),
+                        defineField({
+                            name: 'reason',
+                            title: 'Reason',
+                            type: 'string',
+                            description: 'e.g. "spring high water"',
+                        }),
+                    ],
+                    preview: {
+                        select: { title: 'reason', subtitle: 'minAge' },
+                    },
+                },
+            ],
+        }),
+        defineField({
+            name: 'craftTypes',
+            title: 'Craft Types',
+            type: 'array',
+            of: [{ type: 'string' }],
+            description:
+                'Boats available on this trip. Trips with a range let guests dial their own thrill level (oar boat = mellow, inflatable kayak = max splash).',
+            options: {
+                list: [
+                    { title: 'Oar raft', value: 'oar-raft' },
+                    { title: 'Paddle raft', value: 'paddle-raft' },
+                    {
+                        title: 'Inflatable kayak',
+                        value: 'inflatable-kayak',
+                    },
+                    { title: 'Stand-up paddleboard', value: 'sup' },
+                ],
+            },
+        }),
+
         // --- Specialty trips ---
         defineField({
             name: 'specialtyTypes',

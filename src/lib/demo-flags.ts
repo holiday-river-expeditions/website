@@ -69,6 +69,12 @@ export const DEMO_FLAGS = [
         description:
             'ON: the topographic trips-map prototype (USGS tiles, MapLibre) replaces the featured-trips grid on the homepage.',
     },
+    {
+        id: 'trip-finder',
+        label: 'Find Your Trip wizard',
+        description:
+            'ON: the homepage Find Your Trip section and a floating site-wide link to the /trip-finder wizard (sample questions pending Lauren).',
+    },
 ] as const satisfies readonly {
     id: string;
     label: string;

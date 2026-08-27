@@ -6,6 +6,7 @@ import { Hero } from '@/components/ui/Hero';
 import { RiverSelector } from '@/components/ui/RiverSelector';
 import { Section } from '@/components/ui/Section';
 import { TripCard, type TripCardProps } from '@/components/ui/TripCard';
+import { TripFinderEntry } from '@/components/ui/TripFinderEntry';
 import { TripsMapSection } from '@/components/ui/TripsMapSection';
 import { TRIP_MAP_COORDS, type TripMapMarker } from '@/lib/trip-map-data';
 import { getHomepage, getSiteSettings, imageUrl } from '@/lib/sanity';
@@ -109,6 +110,7 @@ export default async function Home() {
                     text: homepage.heroCtaText ?? 'Find Your Trip',
                     href: homepage.heroCtaLink ?? '/trips',
                 }}
+                demoTripFinderCta
                 contact={{
                     phone: settings?.phone ?? '801-266-2087',
                     email: settings?.email ?? 'Info@HolidayExpeditions.com',
@@ -132,6 +134,16 @@ export default async function Home() {
                         View All Trips
                     </Button>
                 </div>
+            </Section>
+
+            {/* Find Your Trip wizard entry (Aug 20 decision) — ships in the
+                markup but hidden until the trip-finder demo flag is armed,
+                same technique as the trips-map prototype above. */}
+            <Section
+                background='sand'
+                className='hidden py-16 md:py-20 [[data-demo-trip-finder=on]_&]:block'
+            >
+                <TripFinderEntry />
             </Section>
 
             {/* Rafting Since 1966 */}
