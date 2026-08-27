@@ -5,7 +5,12 @@
    for a fixed 56px medallion and fights the marker transform. */
 
 import { useEffect, useRef, useState } from 'react';
-import Map, { Marker, NavigationControl, Popup } from 'react-map-gl/maplibre';
+import Map, {
+    Marker,
+    NavigationControl,
+    Popup,
+    type MapRef,
+} from 'react-map-gl/maplibre';
 import 'maplibre-gl/dist/maplibre-gl.css';
 import type { TripMapMarker } from '@/lib/trip-map-data';
 
@@ -25,20 +30,60 @@ import type { TripMapMarker } from '@/lib/trip-map-data';
  * too, so the detail layer isn't pointer-only.
  */
 
-const USGS_TOPO_STYLE = {
-    version: 8 as const,
-    sources: {
-        usgs: {
+/** Builds a MapLibre raster style from one or more USGS National Map
+    services, layered in order — all public domain, no API key. */
+function usgsStyle(services: string[]) {
+    return {
+        version: 8 as const,
+        sources: Object.fromEntries(
+            services.map((service) => [
+                service,
+                {
+                    type: 'raster' as const,
+                    tiles: [
+                        `https://basemap.nationalmap.gov/arcgis/rest/services/${service}/MapServer/tile/{z}/{y}/{x}`,
+                    ],
+                    tileSize: 256,
+                    attribution: 'USGS The National Map',
+                },
+            ]),
+        ),
+        layers: services.map((service) => ({
+            id: service,
             type: 'raster' as const,
-            tiles: [
-                'https://basemap.nationalmap.gov/arcgis/rest/services/USGSTopo/MapServer/tile/{z}/{y}/{x}',
-            ],
-            tileSize: 256,
-            attribution: 'USGS The National Map',
-        },
+            source: service,
+        })),
+    };
+}
+
+/** Prototype style options for Darius/Holiday to compare live. Tint is
+    per-style: the warm duotone flatters line maps but muddies imagery. */
+const MAP_STYLES = {
+    topo: {
+        label: 'Topo',
+        style: usgsStyle(['USGSTopo']),
+        tint: '[&_canvas]:contrast-[1.02] [&_canvas]:sepia-[0.35] [&_canvas]:saturate-[0.65]',
     },
-    layers: [{ id: 'usgs', type: 'raster' as const, source: 'usgs' }],
-};
+    satellite: {
+        label: 'Satellite',
+        style: usgsStyle(['USGSImageryTopo']),
+        tint: '',
+    },
+    relief: {
+        label: 'Relief',
+        style: usgsStyle(['USGSShadedReliefOnly', 'USGSHydroCached']),
+        tint: '[&_canvas]:contrast-[1.05] [&_canvas]:sepia-[0.45] [&_canvas]:saturate-[0.9]',
+    },
+} as const;
+type MapStyleKey = keyof typeof MAP_STYLES;
+
+/** Scale presets: the whole operating region vs tight on the plateau
+    cluster where most trips sit. */
+const MAP_VIEWS = {
+    region: { label: 'Region', longitude: -110.1, latitude: 39.2, zoom: 6.3 },
+    plateau: { label: 'Plateau', longitude: -109.7, latitude: 38.9, zoom: 7.1 },
+} as const;
+type MapViewKey = keyof typeof MAP_VIEWS;
 
 /**
  * The map's border IS a full-width oar: shaft spanning edge to edge and
@@ -83,6 +128,20 @@ function markerChip(kind: TripMapMarker['kind']): string {
 
 export default function TripsMap({ markers }: { markers: TripMapMarker[] }) {
     const [active, setActive] = useState<TripMapMarker | null>(null);
+    // Prototype comparison controls: basemap style + scale preset,
+    // flippable live so Holiday can judge options side by side.
+    const [styleKey, setStyleKey] = useState<MapStyleKey>('topo');
+    const [viewKey, setViewKey] = useState<MapViewKey>('region');
+    const mapRef = useRef<MapRef>(null);
+    const flyTo = (key: MapViewKey) => {
+        setViewKey(key);
+        const view = MAP_VIEWS[key];
+        mapRef.current?.flyTo({
+            center: [view.longitude, view.latitude],
+            zoom: view.zoom,
+            duration: 1200,
+        });
+    };
     // Custom expand instead of the Fullscreen API control: a CSS takeover
     // always works (the API control silently no-ops in embedded/iframe
     // contexts), and an explicit labelled button beats an icon mystery.
@@ -137,20 +196,17 @@ export default function TripsMap({ markers }: { markers: TripMapMarker[] }) {
             <div
                 role='region'
                 aria-label='Map of Holiday River Expeditions trips and outposts across Utah and Colorado'
-                className={`overflow-hidden [&_canvas]:contrast-[1.02] [&_canvas]:sepia-[0.35] [&_canvas]:saturate-[0.65] ${
+                className={`overflow-hidden ${MAP_STYLES[styleKey].tint} ${
                     expanded
                         ? 'fixed inset-0 z-[90]'
                         : 'relative h-[70vh] max-h-[800px] min-h-[500px]'
                 }`}
             >
                 <Map
-                    initialViewState={{
-                        longitude: -110.1,
-                        latitude: 39.2,
-                        zoom: 6.3,
-                    }}
+                    ref={mapRef}
+                    initialViewState={MAP_VIEWS.region}
                     style={{ width: '100%', height: '100%' }}
-                    mapStyle={USGS_TOPO_STYLE}
+                    mapStyle={MAP_STYLES[styleKey].style}
                     cooperativeGestures
                     minZoom={5}
                     maxZoom={12}
@@ -255,6 +311,61 @@ export default function TripsMap({ markers }: { markers: TripMapMarker[] }) {
                     >
                         {expanded ? 'Collapse map' : 'Expand map'}
                     </button>
+
+                    {/* Prototype comparison controls (demo-only surface):
+                        basemap style and scale presets, live-flippable so
+                        Holiday judges options in place instead of from
+                        screenshots. */}
+                    <div className='absolute left-3 top-[120px] z-10 border border-holiday-grey/40 bg-holiday-white/95 px-3 py-2 shadow-md'>
+                        <fieldset>
+                            <legend className='font-alt-gothic text-[11px] font-semibold uppercase tracking-[0.08em] text-onyx/70'>
+                                Style
+                            </legend>
+                            <div className='mt-1 flex gap-1'>
+                                {(Object.keys(MAP_STYLES) as MapStyleKey[]).map(
+                                    (key) => (
+                                        <button
+                                            key={key}
+                                            type='button'
+                                            aria-pressed={styleKey === key}
+                                            onClick={() => setStyleKey(key)}
+                                            className={`px-2 py-1 font-alt-gothic text-[12px] font-semibold uppercase tracking-[0.04em] ${
+                                                styleKey === key
+                                                    ? 'bg-holiday-red text-holiday-white'
+                                                    : 'text-onyx hover:text-holiday-red'
+                                            }`}
+                                        >
+                                            {MAP_STYLES[key].label}
+                                        </button>
+                                    ),
+                                )}
+                            </div>
+                        </fieldset>
+                        <fieldset className='mt-2'>
+                            <legend className='font-alt-gothic text-[11px] font-semibold uppercase tracking-[0.08em] text-onyx/70'>
+                                Scale
+                            </legend>
+                            <div className='mt-1 flex gap-1'>
+                                {(Object.keys(MAP_VIEWS) as MapViewKey[]).map(
+                                    (key) => (
+                                        <button
+                                            key={key}
+                                            type='button'
+                                            aria-pressed={viewKey === key}
+                                            onClick={() => flyTo(key)}
+                                            className={`px-2 py-1 font-alt-gothic text-[12px] font-semibold uppercase tracking-[0.04em] ${
+                                                viewKey === key
+                                                    ? 'bg-holiday-red text-holiday-white'
+                                                    : 'text-onyx hover:text-holiday-red'
+                                            }`}
+                                        >
+                                            {MAP_VIEWS[key].label}
+                                        </button>
+                                    ),
+                                )}
+                            </div>
+                        </fieldset>
+                    </div>
 
                     {/* Legend: three marker kinds is past the point where the
                     chips alone orient a scanner. Kept tiny, inside the Map
