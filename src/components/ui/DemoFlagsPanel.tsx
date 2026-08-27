@@ -3,6 +3,7 @@
 import { useEffect, useState, useSyncExternalStore } from 'react';
 import {
     DEMO_FLAGS,
+    DEMO_FLAG_GROUPS,
     DEMO_STORAGE_KEY,
     DEMO_UPDATED_EVENT,
     demoAttribute,
@@ -22,6 +23,11 @@ import {
  * localStorage string, invalidated by the hre:demo-updated event
  * (same tab) and the native storage event (other tabs).
  */
+
+/** `group` is optional in the registry literal, so narrow through `in`. */
+function flagGroup(flag: (typeof DEMO_FLAGS)[number]): string | undefined {
+    return 'group' in flag ? flag.group : undefined;
+}
 
 function subscribe(callback: () => void) {
     window.addEventListener(DEMO_UPDATED_EVENT, callback);
@@ -88,8 +94,83 @@ export function DemoFlagsPanel() {
                             ✕
                         </button>
                     </div>
-                    <ul className='mt-3 space-y-3'>
-                        {DEMO_FLAGS.map((flag) => (
+                    {/* Grouped flags are mutually exclusive treatments —
+                        radios say so honestly (picking one clears the rest
+                        of its group). Ungrouped flags stay checkboxes. */}
+                    {Object.entries(DEMO_FLAG_GROUPS).map(([group, meta]) => {
+                        const members = DEMO_FLAGS.filter(
+                            (flag) => flagGroup(flag) === group,
+                        );
+                        const selected =
+                            members.find(
+                                (flag) => state.flags[flag.id] === true,
+                            )?.id ?? '';
+                        const choose = (id: string) =>
+                            writeState({
+                                ...state,
+                                flags: {
+                                    ...state.flags,
+                                    ...Object.fromEntries(
+                                        members.map((flag) => [
+                                            flag.id,
+                                            flag.id === id,
+                                        ]),
+                                    ),
+                                },
+                            });
+                        return (
+                            <fieldset key={group} className='mt-3'>
+                                <legend className='font-alt-gothic text-[13px] font-semibold uppercase tracking-[0.05em] text-onyx/70'>
+                                    {meta.label}
+                                </legend>
+                                <ul className='mt-2 space-y-2'>
+                                    <li>
+                                        <label className='flex cursor-pointer items-start gap-2'>
+                                            <input
+                                                type='radio'
+                                                name={`demo-${group}`}
+                                                checked={selected === ''}
+                                                onChange={() => choose('')}
+                                                className='mt-0.5 accent-holiday-red'
+                                            />
+                                            <span className='block text-[14px] leading-snug text-onyx'>
+                                                {meta.defaultLabel}
+                                            </span>
+                                        </label>
+                                    </li>
+                                    {members.map((flag) => (
+                                        <li key={flag.id}>
+                                            <label className='flex cursor-pointer items-start gap-2'>
+                                                <input
+                                                    type='radio'
+                                                    name={`demo-${group}`}
+                                                    checked={
+                                                        selected === flag.id
+                                                    }
+                                                    onChange={() =>
+                                                        choose(flag.id)
+                                                    }
+                                                    className='mt-0.5 accent-holiday-red'
+                                                />
+                                                <span>
+                                                    <span className='block text-[14px] leading-snug text-onyx'>
+                                                        {flag.label}
+                                                    </span>
+                                                    <span className='block text-[12px] leading-snug text-onyx/70'>
+                                                        {flag.description}
+                                                    </span>
+                                                </span>
+                                            </label>
+                                        </li>
+                                    ))}
+                                </ul>
+                            </fieldset>
+                        );
+                    })}
+                    <ul className='mt-3 space-y-3 border-t border-holiday-grey/30 pt-3'>
+                        {DEMO_FLAGS.filter(
+                            (flag) => flagGroup(flag) === undefined,
+                        ).map((flag) => (
                             <li key={flag.id}>
                                 <label className='flex cursor-pointer items-start gap-2'>
                                     <input

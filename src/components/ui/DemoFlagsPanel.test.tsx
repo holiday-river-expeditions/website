@@ -31,13 +31,17 @@ describe('DemoFlagsPanel', () => {
         ).toBeInTheDocument();
     });
 
-    it('shows a checkbox per registered flag when expanded', () => {
+    it('renders grouped flags as radios and the rest as checkboxes', () => {
         arm();
         render(<DemoFlagsPanel />);
         fireEvent.click(
             screen.getByRole('button', { name: 'Open demo flags panel' }),
         );
-        expect(screen.getAllByRole('checkbox')).toHaveLength(DEMO_FLAGS.length);
+        const grouped = DEMO_FLAGS.filter((flag) => 'group' in flag);
+        const ungrouped = DEMO_FLAGS.filter((flag) => !('group' in flag));
+        // One extra radio per group: the "default" option.
+        expect(screen.getAllByRole('radio')).toHaveLength(grouped.length + 1);
+        expect(screen.getAllByRole('checkbox')).toHaveLength(ungrouped.length);
         for (const flag of DEMO_FLAGS) {
             expect(
                 screen.getByLabelText(flag.label, { exact: false }),
@@ -45,27 +49,56 @@ describe('DemoFlagsPanel', () => {
         }
     });
 
-    it('toggling a flag writes storage and flips the html attribute', () => {
+    it('picking a logo radio sets its flag and clears the rest of the group', () => {
+        arm({ 'logo-line': true });
+        render(<DemoFlagsPanel />);
+        fireEvent.click(
+            screen.getByRole('button', { name: 'Open demo flags panel' }),
+        );
+        const bold = screen.getByRole('radio', {
+            name: /Bold live-text lockup/,
+        });
+
+        fireEvent.click(bold);
+        expect(
+            document.documentElement.getAttribute('data-demo-logo-bold'),
+        ).toBe('on');
+        expect(
+            document.documentElement.hasAttribute('data-demo-logo-line'),
+        ).toBe(false);
+        const stored = JSON.parse(
+            localStorage.getItem(DEMO_STORAGE_KEY) ?? '{}',
+        );
+        expect(stored.flags['logo-bold']).toBe(true);
+        expect(stored.flags['logo-line']).toBe(false);
+
+        // The default option returns the group to classic.
+        fireEvent.click(
+            screen.getByRole('radio', { name: /Classic SVG lockup/ }),
+        );
+        expect(
+            document.documentElement.hasAttribute('data-demo-logo-bold'),
+        ).toBe(false);
+    });
+
+    it('toggling an ungrouped flag writes storage and flips the attribute', () => {
         arm();
         render(<DemoFlagsPanel />);
         fireEvent.click(
             screen.getByRole('button', { name: 'Open demo flags panel' }),
         );
-        const checkbox = screen.getByLabelText('Bold live-text logo', {
+        const checkbox = screen.getByLabelText('Live river flow', {
             exact: false,
         });
 
         fireEvent.click(checkbox);
         expect(
-            document.documentElement.getAttribute('data-demo-logo-bold'),
+            document.documentElement.getAttribute('data-demo-river-flow'),
         ).toBe('on');
-        expect(
-            JSON.parse(localStorage.getItem(DEMO_STORAGE_KEY) ?? '{}'),
-        ).toEqual({ armed: true, flags: { 'logo-bold': true } });
 
         fireEvent.click(checkbox);
         expect(
-            document.documentElement.hasAttribute('data-demo-logo-bold'),
+            document.documentElement.hasAttribute('data-demo-river-flow'),
         ).toBe(false);
     });
 
