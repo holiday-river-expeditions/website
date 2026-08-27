@@ -75,10 +75,13 @@ export function Logo({
                     alt=''
                     width={119}
                     height={200}
-                    className='h-[1em] w-auto'
+                    className='h-[1.15em] w-auto'
                 />
+                {/* Weight tuned to sit near the official SVG logotype's
+                    stroke (the Adobe kit ships real 100–900 cuts), at a size
+                    a notch under cap-match. */}
                 <span
-                    className={`whitespace-nowrap font-alt-gothic text-[1.32em] font-black uppercase leading-none tracking-[-0.01em] ${color}`}
+                    className={`whitespace-nowrap font-alt-gothic text-[1.15em] font-medium uppercase leading-none tracking-[0.01em] ${color}`}
                 >
                     Holiday River Expeditions
                 </span>
