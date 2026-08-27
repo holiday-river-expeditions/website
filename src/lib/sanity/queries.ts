@@ -28,6 +28,33 @@ export const allTripsQuery = defineQuery(`
   }
 `);
 
+/** Trip-finder wizard: the TripCard projection plus the structured
+    matching fields. Kept separate from allTripsQuery so /book and the
+    listing grid don't pay for fields only the wizard reads. */
+export const tripFinderTripsQuery = defineQuery(`
+  *[_type == "trip"] | order(name asc) {
+    _id,
+    name,
+    slug,
+    tagline,
+    subtitle,
+    "ribbon": coalesce(ribbon, specialtyTypes[0]->ribbonLabel),
+    startingPrice,
+    durationLabel,
+    duration,
+    minAge,
+    "minAgeOverrides": minAgeOverrides[]{ months, minAge, reason },
+    maxRapidClass,
+    seasonMonths,
+    craftTypes,
+    arcticTripId,
+    "river": river->{ "name": coalesce(riverName, name), slug },
+    "activities": activities[]->{ name, slug },
+    "category": categories[0]->name,
+    "image": photos[0]
+  }
+`);
+
 export const tripBySlugQuery = defineQuery(`
   *[_type == "trip" && slug.current == $slug][0] {
     _id,

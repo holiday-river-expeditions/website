@@ -20,6 +20,7 @@ import {
     filterByMonth,
     formatDateRange,
     formatDayLabel,
+    groupAnchor,
     monthOptions,
     nextAvailable,
     parseMonthParam,
@@ -54,12 +55,6 @@ interface TripGroup {
     /** Present only for Sanity-mapped trips; unmapped Arctic types render
         name-only until they're authored (content phase). */
     summary?: TripSummary | null;
-}
-
-/** Group key ("sanity:cataract-canyon" / "arctic:123") → DOM-safe anchor id
-    for the floating menu. */
-function groupAnchor(key: string): string {
-    return `trip-${key.replace(/[^a-zA-Z0-9-]/g, '-')}`;
 }
 
 export default async function BookPage({

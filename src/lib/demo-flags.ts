@@ -82,6 +82,12 @@ export const DEMO_FLAGS = [
         description:
             'ON: the hero seal stamps into place on load — same artwork, one-time settle, motion-safe only.',
     },
+    {
+        id: 'trip-finder',
+        label: 'Find Your Trip wizard',
+        description:
+            'ON: the homepage Find Your Trip section and a floating site-wide link to the /trip-finder wizard (sample questions pending Lauren).',
+    },
 ] as const satisfies readonly {
     id: string;
     label: string;
