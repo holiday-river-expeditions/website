@@ -49,10 +49,17 @@ const USGS_TOPO_STYLE = {
  */
 function OarEdge({ position }: { position: 'top' | 'bottom' }) {
     return (
+        // Straddles the map edge exactly: the row's centerline (the shaft)
+        // sits ON the edge via the half-translate, half over the map and
+        // half over the page. Lives on the unclipped outer wrapper — inside
+        // the overflow-hidden map box the shaft could only ever float a few
+        // pixels inside the edge.
         <div
             aria-hidden
-            className={`pointer-events-none absolute inset-x-0 z-20 flex items-center ${
-                position === 'top' ? 'top-0' : 'bottom-0 -scale-x-100'
+            className={`pointer-events-none absolute inset-x-0 z-30 flex items-center ${
+                position === 'top'
+                    ? 'top-0 -translate-y-1/2'
+                    : 'bottom-0 translate-y-1/2 -scale-x-100'
             }`}
         >
             <img src='/oar-handle.svg' alt='' className='h-[13px] w-auto' />
@@ -118,7 +125,15 @@ export default function TripsMap({ markers }: { markers: TripMapMarker[] }) {
     }, []);
 
     return (
-        <div>
+        <div className='relative'>
+            {/* Hidden while expanded: the map box is fixed to the viewport
+                then, and the oars would be orphaned at the collapsed spot. */}
+            {!expanded && (
+                <>
+                    <OarEdge position='top' />
+                    <OarEdge position='bottom' />
+                </>
+            )}
             <div
                 role='region'
                 aria-label='Map of Holiday River Expeditions trips and outposts across Utah and Colorado'
@@ -279,8 +294,6 @@ export default function TripsMap({ markers }: { markers: TripMapMarker[] }) {
                         </ul>
                     </div>
                 </Map>
-                <OarEdge position='top' />
-                <OarEdge position='bottom' />
             </div>
         </div>
     );
