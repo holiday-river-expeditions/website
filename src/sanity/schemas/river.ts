@@ -12,6 +12,13 @@ export const river = defineType({
             validation: (rule) => rule.required(),
         }),
         defineField({
+            name: 'riverName',
+            title: 'River name (shown on trip cards)',
+            type: 'string',
+            description:
+                'The actual river, e.g. "Colorado River" — sections like Cataract and Westwater both run the Colorado. Trip cards fall back to the section name above when this is empty (biking areas like Maze and White Rim can leave it blank).',
+        }),
+        defineField({
             name: 'slug',
             title: 'Slug',
             type: 'slug',
