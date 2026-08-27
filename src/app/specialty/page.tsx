@@ -83,7 +83,7 @@ export default async function SpecialtyPage() {
                             // scroll. scroll-mt gives jump links breathing
                             // room at the top of the viewport.
                             background={index % 2 === 0 ? 'white' : 'sand'}
-                            className='scroll-mt-6 py-14 md:py-16'
+                            className='scroll-mt-6 [[data-demo-sticky-header=on]_&]:scroll-mt-28 py-14 md:py-16'
                         >
                             <h2 className='font-alt-gothic text-section font-black uppercase text-holiday-red'>
                                 {type.name}
