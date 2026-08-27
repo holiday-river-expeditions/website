@@ -46,12 +46,13 @@ export interface QuestionOption {
     value: string;
     label: string;
     sublabel?: string;
+    /** Sublabel variant shown when the visitor already chose biking —
+        e.g. month options describe trail season instead of water state. */
+    bikeSublabel?: string;
 }
 
 export interface TripFinderQuestion {
     id: QuestionId;
-    /** Progress slot 1–5. The `age` follow-up shares `who`'s slot. */
-    step: number;
     title: string;
     /** Optional reassurance/context line under the title. */
     subline?: string;
@@ -91,7 +92,6 @@ export const TRIP_FINDER_QUESTIONS: readonly TripFinderQuestion[] = [
     {
         id: 'who',
         shortLabel: 'Who',
-        step: 1,
         title: "Who's in the boat?",
         image: '/trip-finder/who-fiddle-raft.jpg',
         imageAlt:
@@ -114,7 +114,6 @@ export const TRIP_FINDER_QUESTIONS: readonly TripFinderQuestion[] = [
     {
         id: 'age',
         shortLabel: 'Youngest',
-        step: 1,
         title: 'How old is your youngest?',
         subline: "Every river has an age it loves — we'll match yours.",
         image: '/trip-finder/age-duckie-calm.jpg',
@@ -134,9 +133,36 @@ export const TRIP_FINDER_QUESTIONS: readonly TripFinderQuestion[] = [
         skipLabel: "Skip — we'll keep every river in play",
     },
     {
+        id: 'activity',
+        shortLabel: 'Trip type',
+        title: 'River, trail, or both?',
+        subline: 'Everything after this bends to your answer.',
+        image: '/trip-finder/activity-white-rim.jpg',
+        imageAlt:
+            'A mountain biker riding the White Rim road along the canyon edge',
+        ethos: 'Sixty seasons of canyon country.',
+        options: [
+            {
+                value: 'raft',
+                label: 'Rafting',
+                sublabel: 'Whitewater and quiet canyon floats',
+            },
+            {
+                value: 'bike',
+                label: 'Mountain biking',
+                sublabel: 'The White Rim, the Maze, the Swell',
+            },
+            {
+                value: 'both',
+                label: 'Raft & ride combo',
+                sublabel: 'Pedal the rim, then run the river',
+            },
+        ],
+        skipLabel: 'Surprise me — skip',
+    },
+    {
         id: 'month',
         shortLabel: 'When',
-        step: 2,
         title: 'When can you get away?',
         subline: 'Our season runs April through October.',
         image: '/trip-finder/month-golden-canyon.jpg',
@@ -150,32 +176,50 @@ export const TRIP_FINDER_QUESTIONS: readonly TripFinderQuestion[] = [
                 value: '4',
                 label: 'April',
                 sublabel: 'First trips, quiet canyons',
+                bikeSublabel: 'Prime desert riding',
             },
             {
                 value: '5',
                 label: 'May',
                 sublabel: 'Snowmelt — big, fast, cold',
+                bikeSublabel: 'Warm days, firm trails',
             },
-            { value: '6', label: 'June', sublabel: 'Peak flow' },
+            {
+                value: '6',
+                label: 'June',
+                sublabel: 'Peak flow',
+                bikeSublabel: 'Hot — early starts, big skies',
+            },
             {
                 value: '7',
                 label: 'July',
                 sublabel: 'Warm water, splash fights',
+                bikeSublabel: 'High-desert heat — for the committed',
             },
-            { value: '8', label: 'August', sublabel: 'Sunny and easygoing' },
+            {
+                value: '8',
+                label: 'August',
+                sublabel: 'Sunny and easygoing',
+                bikeSublabel: 'Monsoon skies, dramatic light',
+            },
             {
                 value: '9',
                 label: 'September',
                 sublabel: 'Golden cottonwoods, empty canyons',
+                bikeSublabel: 'Prime riding returns',
             },
-            { value: '10', label: 'October', sublabel: 'Crisp air, last runs' },
+            {
+                value: '10',
+                label: 'October',
+                sublabel: 'Crisp air, last runs',
+                bikeSublabel: 'Cool air, golden light',
+            },
         ],
         skipLabel: "I'm flexible — skip",
     },
     {
         id: 'days',
         shortLabel: 'Days',
-        step: 3,
         title: 'How many days do you have?',
         image: '/trip-finder/days-beach-camp.jpg',
         imageAlt:
@@ -203,7 +247,6 @@ export const TRIP_FINDER_QUESTIONS: readonly TripFinderQuestion[] = [
     {
         id: 'thrill',
         shortLabel: 'Whitewater',
-        step: 4,
         title: 'How much whitewater do you want?',
         image: '/trip-finder/thrill-eddy-rapid.jpg',
         imageAlt:
@@ -228,25 +271,7 @@ export const TRIP_FINDER_QUESTIONS: readonly TripFinderQuestion[] = [
         ],
         skipLabel: "Guides' call — show me everything",
     },
-    {
-        id: 'activity',
-        shortLabel: 'Activity',
-        step: 5,
-        title: 'Rafts, bikes, or both?',
-        image: '/trip-finder/activity-white-rim.jpg',
-        imageAlt:
-            'A mountain biker riding the White Rim road along the canyon edge',
-        ethos: 'Sixty seasons of canyon country.',
-        options: [
-            { value: 'raft', label: 'Rafting' },
-            { value: 'bike', label: 'Mountain biking' },
-            { value: 'both', label: 'A bit of both' },
-        ],
-        skipLabel: 'Surprise me — skip',
-    },
 ];
-
-export const TOTAL_STEPS = 5;
 
 /** Human label for an answer, for the results screen's edit chips. */
 export function answerLabel(id: QuestionId, value: string | number): string {
@@ -309,15 +334,44 @@ export function parseTripFinderParams(params: RawParams): TripFinderAnswers {
 const QUESTION_ORDER: readonly QuestionId[] = [
     'who',
     'age',
+    'activity',
     'month',
     'days',
     'thrill',
-    'activity',
 ];
 
-/** The age follow-up only applies to family trips. */
+/** Top-level progress steps; the age follow-up shares `who`'s slot. */
+const TOP_LEVEL_STEPS: readonly QuestionId[] = [
+    'who',
+    'activity',
+    'month',
+    'days',
+    'thrill',
+];
+
+/** The age follow-up only applies to family trips, and the whitewater
+    question only when the trip involves a raft — a biker never gets
+    asked how much whitewater they want. */
 function isApplicable(id: QuestionId, answers: TripFinderAnswers): boolean {
-    return id !== 'age' || answers.who === 'kids';
+    if (id === 'age') return answers.who === 'kids';
+    if (id === 'thrill') return answers.activity !== 'bike';
+    return true;
+}
+
+/** Top-level steps applicable to this visitor's path (4 for bikers). */
+function applicableSteps(answers: TripFinderAnswers): QuestionId[] {
+    return TOP_LEVEL_STEPS.filter((id) => isApplicable(id, answers));
+}
+
+/** Honest mile-marker position: which applicable step a question is, and
+    how many there are on this path. The age follow-up reports who's slot. */
+export function stepInfo(
+    answers: TripFinderAnswers,
+    id: QuestionId,
+): { number: number; total: number } {
+    const steps = applicableSteps(answers);
+    const slot = id === 'age' ? 'who' : id;
+    return { number: steps.indexOf(slot) + 1, total: steps.length };
 }
 
 /** First unanswered applicable question, or 'results' once none remain. */
@@ -378,18 +432,15 @@ export function lastAnsweredQuestion(
  * current step renders as in-progress, never pre-filled.
  */
 export function completedStepCount(answers: TripFinderAnswers): number {
-    let completed = 0;
-    if (
-        answers.who !== null &&
-        (answers.who !== 'kids' || answers.age !== null)
-    ) {
-        completed += 1;
-    }
-    if (answers.month !== null) completed += 1;
-    if (answers.days !== null) completed += 1;
-    if (answers.thrill !== null) completed += 1;
-    if (answers.activity !== null) completed += 1;
-    return completed;
+    return applicableSteps(answers).filter((id) => {
+        if (id === 'who') {
+            return (
+                answers.who !== null &&
+                (answers.who !== 'kids' || answers.age !== null)
+            );
+        }
+        return answers[id] !== null;
+    }).length;
 }
 
 /** Questions answered with a real preference (skips carry no signal). */
@@ -557,7 +608,7 @@ function scoreDays(
         unknown: false,
         reason:
             score >= 0.75
-                ? `${trip.durationLabel ?? `${duration} days`} on the water — fits your time`
+                ? `${trip.durationLabel ?? `${duration} days`} out there — fits your time`
                 : undefined,
     };
 }

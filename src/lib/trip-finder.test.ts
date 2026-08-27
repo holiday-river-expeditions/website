@@ -9,8 +9,7 @@ import {
     parseTripFinderParams,
     resolveMonthValue,
     scoreTrips,
-    TOTAL_STEPS,
-    TRIP_FINDER_QUESTIONS,
+    stepInfo,
     type TripFinderAnswers,
     type TripFinderTrip,
 } from './trip-finder';
@@ -54,13 +53,21 @@ function answers(
     };
 }
 
-describe('TRIP_FINDER_QUESTIONS', () => {
-    test('covers five progress steps with age sharing the who slot', () => {
-        const steps = TRIP_FINDER_QUESTIONS.map((q) => q.step);
-        expect(Math.max(...steps)).toBe(TOTAL_STEPS);
-        const who = TRIP_FINDER_QUESTIONS.find((q) => q.id === 'who');
-        const age = TRIP_FINDER_QUESTIONS.find((q) => q.id === 'age');
-        expect(who?.step).toBe(age?.step);
+describe('stepInfo', () => {
+    test('age shares the who slot; rafters walk five miles', () => {
+        expect(stepInfo(answers(), 'who')).toEqual({ number: 1, total: 5 });
+        expect(stepInfo(answers({ who: 'kids' }), 'age').number).toBe(1);
+        expect(stepInfo(answers(), 'thrill')).toEqual({
+            number: 5,
+            total: 5,
+        });
+    });
+
+    test('bikers walk four miles — no whitewater question on a trail', () => {
+        const biker = answers({ activity: 'bike' });
+        expect(stepInfo(biker, 'month')).toEqual({ number: 3, total: 4 });
+        // thrill is off the path entirely
+        expect(stepInfo(biker, 'thrill').number).toBe(0);
     });
 });
 
@@ -100,14 +107,29 @@ describe('parseTripFinderParams', () => {
 });
 
 describe('currentStep', () => {
-    test('walks questions in order', () => {
+    test('walks questions in order, activity right after who', () => {
         expect(currentStep(answers())).toBe('who');
         expect(currentStep(answers({ who: 'kids' }))).toBe('age');
-        expect(currentStep(answers({ who: 'kids', age: '5-7' }))).toBe('month');
+        expect(currentStep(answers({ who: 'kids', age: '5-7' }))).toBe(
+            'activity',
+        );
     });
 
     test('adults skip the age follow-up', () => {
-        expect(currentStep(answers({ who: 'adults' }))).toBe('month');
+        expect(currentStep(answers({ who: 'adults' }))).toBe('activity');
+    });
+
+    test('bikers reach results without ever seeing the thrill question', () => {
+        expect(
+            currentStep(
+                answers({
+                    who: 'adults',
+                    activity: 'bike',
+                    month: 9,
+                    days: 'classic',
+                }),
+            ),
+        ).toBe('results');
     });
 
     test('all answered or skipped reaches results', () => {

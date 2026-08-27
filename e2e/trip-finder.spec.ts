@@ -68,13 +68,15 @@ test('armed browser walks the wizard from homepage to results', async ({
     // "Rafting" also exist in the nav.
     const main = page.getByRole('main');
     await main.getByRole('link', { name: /8–12/ }).click();
+    // Activity comes right after the who step so everything downstream
+    // can adapt (bikers never see the whitewater question).
+    await main.getByRole('link', { name: /^Rafting/ }).click();
     await main.getByRole('link', { name: /^July/ }).click();
     await main.getByRole('link', { name: /the classic/i }).click();
     await main.getByRole('link', { name: /some splash/i }).click();
-    await main.getByRole('link', { name: /^Rafting$/ }).click();
 
     await page.waitForURL(
-        '/trip-finder?who=kids&age=8-12&month=7&days=classic&thrill=splash&activity=raft',
+        '/trip-finder?who=kids&age=8-12&activity=raft&month=7&days=classic&thrill=splash',
     );
     await expect(
         page.getByRole('heading', { level: 1, name: /is calling/i }),

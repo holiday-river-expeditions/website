@@ -6,7 +6,7 @@ import {
     completedStepCount,
     currentStep,
     lastAnsweredQuestion,
-    TOTAL_STEPS,
+    stepInfo,
     TRIP_FINDER_QUESTIONS,
     type QuestionId,
     type TripFinderAnswers,
@@ -24,23 +24,36 @@ import {
  * photograph.
  */
 
-/** Marker coordinates along RIVER_PATH, put-in to take-out. */
+/** Marker coordinates along RIVER_PATH, put-in to take-out — one set per
+    path length (rafters get five miles, bikers four: no whitewater
+    question on a trail trip). */
 const RIVER_PATH = 'M2 14 C 18 4, 30 22, 46 12 S 76 4, 92 14 S 112 20, 118 10';
-const RIVER_MARKS: [number, number][] = [
-    [2, 14],
-    [31, 15],
-    [60, 9],
-    [89, 13],
-    [118, 10],
-];
+const RIVER_MARKS: Record<number, [number, number][]> = {
+    5: [
+        [2, 14],
+        [31, 15],
+        [60, 9],
+        [89, 13],
+        [118, 10],
+    ],
+    4: [
+        [2, 14],
+        [42, 13],
+        [81, 11],
+        [118, 10],
+    ],
+};
 
 function RiverProgress({
     completed,
     current,
+    total,
 }: {
     completed: number;
     current: number;
+    total: number;
 }) {
+    const marks = RIVER_MARKS[total] ?? RIVER_MARKS[5];
     return (
         <svg viewBox='-2 0 124 24' className='w-40 md:w-48' aria-hidden='true'>
             <path
@@ -59,9 +72,9 @@ function RiverProgress({
                 strokeLinecap='round'
                 pathLength={1}
                 strokeDasharray={1}
-                strokeDashoffset={1 - completed / TOTAL_STEPS}
+                strokeDashoffset={1 - completed / total}
             />
-            {RIVER_MARKS.map(([x, y], i) => {
+            {marks.map(([x, y], i) => {
                 const step = i + 1;
                 if (step === current) {
                     // Current position: the boat — a white ring still open.
@@ -100,8 +113,9 @@ export function TripFinderWizard({ answers }: { answers: TripFinderAnswers }) {
     if (!question) return null;
 
     const completed = completedStepCount(answers);
+    const { number: mile, total } = stepInfo(answers, question.id);
     const isFollowUp = question.id === 'age';
-    const isFinal = question.step === TOTAL_STEPS;
+    const isFinal = mile === total;
 
     const back = lastAnsweredQuestion(answers);
     const backHref =
@@ -157,10 +171,11 @@ export function TripFinderWizard({ answers }: { answers: TripFinderAnswers }) {
                     <div className='flex items-center gap-3'>
                         <RiverProgress
                             completed={completed}
-                            current={question.step}
+                            current={mile}
+                            total={total}
                         />
                         <p className='text-[15px] font-bold leading-tight text-holiday-white'>
-                            Mile {question.step} of {TOTAL_STEPS}
+                            Mile {mile} of {total}
                             {isFollowUp && (
                                 <span className='font-normal text-holiday-white/80'>
                                     {' '}
@@ -169,7 +184,7 @@ export function TripFinderWizard({ answers }: { answers: TripFinderAnswers }) {
                             )}
                             <span className='sr-only'>
                                 {' '}
-                                (question {question.step} of {TOTAL_STEPS})
+                                (question {mile} of {total})
                             </span>
                         </p>
                     </div>
@@ -262,9 +277,15 @@ export function TripFinderWizard({ answers }: { answers: TripFinderAnswers }) {
                                     <span className='block font-alt-gothic text-subheading font-bold uppercase leading-tight text-onyx transition-colors group-hover:text-holiday-white group-focus-visible:text-holiday-white group-active:text-holiday-white'>
                                         {option.label}
                                     </span>
-                                    {option.sublabel && (
+                                    {(answers.activity === 'bike'
+                                        ? (option.bikeSublabel ??
+                                          option.sublabel)
+                                        : option.sublabel) && (
                                         <span className='mt-0.5 block text-[14px] leading-snug text-onyx/75 transition-colors group-hover:text-holiday-white/90 group-focus-visible:text-holiday-white/90 group-active:text-holiday-white/90'>
-                                            {option.sublabel}
+                                            {answers.activity === 'bike'
+                                                ? (option.bikeSublabel ??
+                                                  option.sublabel)
+                                                : option.sublabel}
                                         </span>
                                     )}
                                 </Link>

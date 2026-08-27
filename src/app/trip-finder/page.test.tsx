@@ -199,7 +199,7 @@ test('full answers render a best match with reasons and a /book deep link', asyn
     // Editable answer chips drop exactly one param.
     expect(screen.getByRole('link', { name: /when: july/i })).toHaveAttribute(
         'href',
-        '/trip-finder?who=kids&age=8-12&days=classic&thrill=splash&activity=raft',
+        '/trip-finder?who=kids&age=8-12&activity=raft&days=classic&thrill=splash',
     );
 });
 

@@ -274,6 +274,26 @@ export function TripFinderResults({
                                         {caveat}
                                     </p>
                                 ))}
+                                {/* "Both" means the raft & ride combos —
+                                    until those trips are authored on the
+                                    site, be straight about it and hand off
+                                    to a human, guide-style. */}
+                                {answers.activity === 'both' &&
+                                    (best.trip.activities?.length ?? 0) < 2 && (
+                                        <p className='mt-3 border-l-4 border-teal pl-3 text-body leading-body text-holiday-white/90'>
+                                            After the true raft &amp; ride combo
+                                            — pedal the White Rim, then run
+                                            Cataract? Those trips aren&rsquo;t
+                                            bookable online yet. Call{' '}
+                                            <a
+                                                href='tel:+18012662087'
+                                                className='font-bold underline underline-offset-4 transition-opacity hover:opacity-70'
+                                            >
+                                                801-266-2087
+                                            </a>{' '}
+                                            and we&rsquo;ll build yours.
+                                        </p>
+                                    )}
                             </div>
 
                             <div className='mt-6 flex flex-wrap items-center gap-x-6 gap-y-3 motion-safe:animate-finder-rise motion-safe:[animation-delay:1.35s]'>
