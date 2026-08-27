@@ -40,12 +40,68 @@ const USGS_TOPO_STYLE = {
     layers: [{ id: 'usgs', type: 'raster' as const, source: 'usgs' }],
 };
 
-function OarBorder({ className = '' }: { className?: string }) {
+/* Small river-wave squiggle flanking the oars — whisper-scale accent,
+   never competing with the map content. */
+function Waves({ className = '' }: { className?: string }) {
     return (
-        <div aria-hidden className={`flex items-center px-2 py-2 ${className}`}>
-            <img src='/oar-handle.svg' alt='' className='h-[12px] w-auto' />
-            <span className='mx-[-1px] h-[8px] flex-1 bg-holiday-red' />
-            <img src='/oar-paddle.svg' alt='' className='h-[22px] w-auto' />
+        <svg
+            aria-hidden
+            viewBox='0 0 32 8'
+            width={32}
+            height={8}
+            className={className}
+        >
+            <path
+                d='M1 5 Q5 1 9 5 T17 5 T25 5 T31 5'
+                fill='none'
+                stroke='currentColor'
+                strokeWidth='1.6'
+                strokeLinecap='round'
+            />
+        </svg>
+    );
+}
+
+/**
+ * The map's actual border: a brand-red edge line with a small centered
+ * oar floating over it, wave accents flanking. Centered (not corner-
+ * anchored) because every corner already carries UI — legend top-left,
+ * zoom/expand top-right, attribution bottom-right — and decoration must
+ * read deliberate, not collide with controls. pointer-events-none
+ * throughout: pure ornament, zero interaction cost.
+ */
+function OarEdge({ position }: { position: 'top' | 'bottom' }) {
+    return (
+        <div
+            aria-hidden
+            className={`pointer-events-none absolute inset-x-0 z-20 ${
+                position === 'top' ? 'top-0' : 'bottom-0'
+            }`}
+        >
+            <div className='h-[3px] w-full bg-holiday-red' />
+            <div
+                className={`absolute left-1/2 flex -translate-x-1/2 items-center gap-3 text-holiday-red ${
+                    position === 'top'
+                        ? 'top-[3px]'
+                        : 'bottom-[3px] -scale-x-100'
+                }`}
+            >
+                <Waves className='opacity-70' />
+                <span className='flex items-center drop-shadow-sm'>
+                    <img
+                        src='/oar-handle.svg'
+                        alt=''
+                        className='h-[9px] w-auto'
+                    />
+                    <span className='mx-[-1px] h-[5px] w-16 bg-holiday-red' />
+                    <img
+                        src='/oar-paddle.svg'
+                        alt=''
+                        className='h-[15px] w-auto'
+                    />
+                </span>
+                <Waves className='opacity-70' />
+            </div>
         </div>
     );
 }
@@ -107,10 +163,6 @@ export default function TripsMap({ markers }: { markers: TripMapMarker[] }) {
 
     return (
         <div>
-            {/* Oar borders frame the map from OUTSIDE its edges (Darius's
-                correction) — composed from the old theme's own
-                handle/paddle SVGs; the bottom oar is mirrored. */}
-            <OarBorder />
             <div
                 role='region'
                 aria-label='Map of Holiday River Expeditions trips and outposts across Utah and Colorado'
@@ -271,8 +323,9 @@ export default function TripsMap({ markers }: { markers: TripMapMarker[] }) {
                         </ul>
                     </div>
                 </Map>
+                <OarEdge position='top' />
+                <OarEdge position='bottom' />
             </div>
-            <OarBorder className='-scale-x-100' />
         </div>
     );
 }
