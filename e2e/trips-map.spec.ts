@@ -1,24 +1,15 @@
 import { expect, test } from '@playwright/test';
 
 /**
- * Homepage trips-map prototype behind the trips-map demo flag: default
- * visitors keep the river-selector carousel (below the Dee story) and
- * never load MapLibre; flagged browsers get the map in its place — the
- * featured-trips grid stays either way. Hover/focus on a marker opens a
- * context card that must remain reachable (WCAG 1.4.13). Skips when the
- * environment has no WebGL.
+ * The homepage trips map (public since 2026-08-27, replacing the river
+ * carousel below the Dee story): lazy-mounts on approach, Relief style
+ * by default with Style/Scale/Fly-to controls, marker context cards
+ * reachable per WCAG 1.4.13. Skips when the environment has no WebGL.
  */
 
-test('trips-map flag swaps the river carousel for the map', async ({
+test('homepage trips map renders with controls and reachable cards', async ({
     page,
 }) => {
-    // Default visitor: carousel present, no map region in the DOM.
-    await page.goto('/');
-    await expect(page.getByTestId('river-selector-wrap')).toBeVisible();
-    await expect(
-        page.getByRole('region', { name: /Map of Holiday River/ }),
-    ).toHaveCount(0);
-
     const hasWebgl = await page.evaluate(
         () => !!document.createElement('canvas').getContext('webgl2'),
     );
@@ -26,29 +17,29 @@ test('trips-map flag swaps the river carousel for the map', async ({
         test.skip(true, 'No WebGL in this environment');
     }
 
-    // Arm + enable the flag the same way the init script reads it.
-    await page.addInitScript(() => {
-        localStorage.setItem(
-            'hre_demo',
-            JSON.stringify({ armed: true, flags: { 'trips-map': true } }),
-        );
-    });
     await page.goto('/');
-
+    // Lazy-mounted: scroll the section into range and the map appears.
+    await page
+        .locator(
+            'img[alt="Dee Holladay, founder of Holiday River Expeditions"]',
+        )
+        .scrollIntoViewIfNeeded()
+        .catch(() => page.mouse.wheel(0, 2000));
     const map = page.getByRole('region', { name: /Map of Holiday River/ });
+    await map.scrollIntoViewIfNeeded();
     await expect(map).toBeVisible();
-    // Featured-trips grid STAYS (Darius: only the carousel is replaced).
-    await expect(page.locator('[data-reveal-stagger]').first()).toBeVisible();
-    await expect(page.getByTestId('river-selector-wrap')).toBeHidden();
 
-    // Outposts and rivers render as real links; the legend orients kinds.
-    await expect(
-        map.getByRole('link', { name: /Green River Outpost/ }),
-    ).toBeVisible();
-    await expect(map.getByText('Rafting', { exact: true })).toBeVisible();
+    // Relief is the default style; the controls are public.
+    await expect(map.getByRole('button', { name: 'Relief' })).toHaveAttribute(
+        'aria-pressed',
+        'true',
+    );
+    await expect(map.getByLabel(/Fly to/)).toBeVisible();
 
-    // Hover context card stays open long enough to reach and use its link
-    // (Yampa sits clear of the confluence cluster).
+    // Verified outposts render alongside river medallions.
+    await expect(map.getByRole('link', { name: /Vernal HQ/ })).toBeVisible();
+
+    // Hover context card stays open long enough to reach and use its link.
     const yampa = map.getByRole('link', { name: /^Yampa$/ });
     await yampa.scrollIntoViewIfNeeded();
     await yampa.hover();
@@ -67,5 +58,5 @@ test('trips-map flag swaps the river carousel for the map', async ({
 
     // Let tiles paint, then capture proof for review.
     await page.waitForTimeout(2500);
-    await map.screenshot({ path: 'test-results/trips-map-proto.png' });
+    await map.screenshot({ path: 'test-results/trips-map-public.png' });
 });

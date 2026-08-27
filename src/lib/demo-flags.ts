@@ -71,12 +71,6 @@ export const DEMO_FLAGS = [
             'ON: the CFS reading + 7-day sparkline on trip and river pages, from USGS gauges.',
     },
     {
-        id: 'trips-map',
-        label: 'Homepage trips map',
-        description:
-            'ON: the topographic trips-map prototype (USGS tiles, MapLibre) replaces the river carousel below the Dee story.',
-    },
-    {
         id: 'badge-live',
         label: 'Animated anniversary badge',
         description:

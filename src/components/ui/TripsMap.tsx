@@ -15,9 +15,9 @@ import 'maplibre-gl/dist/maplibre-gl.css';
 import type { TripMapMarker } from '@/lib/trip-map-data';
 
 /**
- * Homepage trips-map prototype (Aug 20 decision) behind the trips-map
- * demo flag — it replaces the river-selector carousel below the Dee
- * story. Loaded only via next/dynamic in TripsMapSection so real
+ * The homepage trips map (Aug 20 decision) — replaced the river-selector
+ * carousel below the Dee story; graduated from the trips-map demo flag
+ * 2026-08-27. Loaded only via next/dynamic in TripsMapSection so real
  * visitors never download MapLibre (~200 KB).
  *
  * Art direction per Darius (and bikeraft.com's plateau-map anchor):
