@@ -198,8 +198,10 @@ export function TripFinderWizard({ answers }: { answers: TripFinderAnswers }) {
                 )}
             </header>
 
-            {/* Question + options, pinned low for thumb reach */}
-            <div className='relative mx-auto flex w-full max-w-5xl flex-1 flex-col justify-end px-6 pb-4 pt-10 md:px-10'>
+            {/* Question + options, centered in the free space between the
+                header and the ethos footer — bottom-pinning read as a
+                neck-craner, especially on tall screens. */}
+            <div className='relative mx-auto flex w-full max-w-5xl flex-1 flex-col justify-center px-6 py-8 md:px-10'>
                 <h1 className='font-alt-gothic text-h3 font-black uppercase leading-none text-holiday-white [text-shadow:0_2px_18px_rgba(10,51,45,0.55)] sm:text-h2 sm:leading-h2 md:text-h1 md:leading-h1 motion-safe:animate-finder-rise'>
                     {question.title}
                 </h1>
@@ -239,11 +241,14 @@ export function TripFinderWizard({ answers }: { answers: TripFinderAnswers }) {
                 >
                     {question.options.map((option) => (
                         <li key={option.value}>
+                            {/* h-full + grid stretch keeps every card in a
+                                row the same height even when one sublabel
+                                wraps; content centers in the extra space. */}
                             <Link
                                 href={`/trip-finder?${answersToParams(answers, {
                                     [question.id]: option.value,
                                 })}`}
-                                className='water-fill group block min-h-[64px] bg-holiday-white/95 px-4 py-3.5 transition-transform active:scale-[0.98] md:px-5 md:py-4'
+                                className='water-fill group flex h-full min-h-[64px] flex-col justify-center bg-holiday-white/95 px-4 py-3.5 transition-transform active:scale-[0.98] md:px-5 md:py-4'
                             >
                                 <span className='block font-alt-gothic text-subheading font-bold uppercase leading-tight text-onyx transition-colors group-hover:text-holiday-white group-focus-visible:text-holiday-white group-active:text-holiday-white'>
                                     {option.label}

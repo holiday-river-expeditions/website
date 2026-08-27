@@ -47,7 +47,7 @@ export function TripFinderEntry() {
                             <Link
                                 key={option.value}
                                 href={`/trip-finder?${question.id}=${option.value}`}
-                                className='water-fill group block min-h-[64px] bg-holiday-white/95 px-5 py-4 text-left transition-transform active:scale-[0.98]'
+                                className='water-fill group flex min-h-[64px] flex-col justify-center bg-holiday-white/95 px-5 py-4 text-left transition-transform active:scale-[0.98]'
                             >
                                 <span className='block font-alt-gothic text-subheading font-bold uppercase leading-tight text-onyx transition-colors group-hover:text-holiday-white group-focus-visible:text-holiday-white'>
                                     {option.label}
