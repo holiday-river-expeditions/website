@@ -45,7 +45,7 @@ export const tripBySlugQuery = defineQuery(`
     "ribbon": coalesce(ribbon, specialtyTypes[0]->ribbonLabel),
     startingPrice,
     durationLabel,
-    "river": river->{ _id, name, slug, description, image },
+    "river": river->{ _id, name, slug, description, image, usgsSiteId, flowLinkUrl },
     "activities": activities[]->{ _id, name, slug },
     "categories": categories[]->{ _id, name, slug },
     minAge,
@@ -98,6 +98,8 @@ export const riverBySlugQuery = defineQuery(`
     slug,
     description,
     image,
+    usgsSiteId,
+    flowLinkUrl,
     "trips": *[_type == "trip" && river._ref == ^._id] | order(name asc) {
       _id,
       name,

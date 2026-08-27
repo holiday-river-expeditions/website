@@ -37,6 +37,18 @@ test('month chips filter the departures list', async ({ page }) => {
         .allTextContents();
     expect(new Set(headings.map((h) => h.trim())).size).toBeLessThanOrEqual(1);
 
+    // The jumper only offers groups present under the active filter, so a
+    // jump always lands (regression: it listed absent groups before).
+    const select = page.getByRole('combobox', { name: 'Jump to trip' });
+    if ((await select.count()) > 0) {
+        const value = await select
+            .locator('option')
+            .nth(1)
+            .getAttribute('value');
+        await select.selectOption(value!);
+        await expect(page.locator(`#${value}`)).toBeInViewport();
+    }
+
     // "All dates" clears the filter.
     await page
         .getByRole('navigation', { name: 'Filter departures' })
