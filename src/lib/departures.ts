@@ -259,3 +259,82 @@ export function cleanTypeName(name: string, orname?: string | null): string {
         .replace(/\s{2,}/g, ' ')
         .trim();
 }
+
+/**
+ * Month filtering for the Open Seats filter bar. Months are compared as
+ * "YYYY-MM" prefixes of Arctic's start strings — no Date parsing, no
+ * timezone to get wrong.
+ */
+
+export interface MonthOption {
+    /** "YYYY-MM" filter value, safe for a query param. */
+    value: string;
+    /** Short display label, e.g. "Sep" or "May '27". */
+    label: string;
+}
+
+const MONTH_VALUE = /^\d{4}-\d{2}$/;
+
+const shortMonths = [
+    'Jan',
+    'Feb',
+    'Mar',
+    'Apr',
+    'May',
+    'Jun',
+    'Jul',
+    'Aug',
+    'Sep',
+    'Oct',
+    'Nov',
+    'Dec',
+];
+
+export function departureMonth(
+    start: string | null | undefined,
+): string | null {
+    const value = start?.slice(0, 7) ?? '';
+    return MONTH_VALUE.test(value) ? value : null;
+}
+
+/** Validates a ?month= query value; anything unexpected means "no filter". */
+export function parseMonthParam(
+    raw: string | string[] | undefined,
+): string | null {
+    return typeof raw === 'string' && MONTH_VALUE.test(raw) ? raw : null;
+}
+
+/** Distinct months across all departures, ascending. The year is shown
+    only when it differs from the first month's year, keeping chips short. */
+export function monthOptions(
+    departures: readonly ArcticDeparture[],
+): MonthOption[] {
+    const values = [
+        ...new Set(
+            departures
+                .map((departure) => departureMonth(departure.start))
+                .filter((value): value is string => value !== null),
+        ),
+    ].sort();
+    const firstYear = values[0]?.slice(0, 4);
+    return values.map((value) => {
+        const monthIndex = Number(value.slice(5, 7)) - 1;
+        const year = value.slice(0, 4);
+        const label = shortMonths[monthIndex] ?? value;
+        return {
+            value,
+            label: year === firstYear ? label : `${label} '${year.slice(2)}`,
+        };
+    });
+}
+
+/** Departures whose start falls in the given month; null month = all. */
+export function filterByMonth<T extends { start?: string | null }>(
+    departures: readonly T[],
+    month: string | null,
+): T[] {
+    if (!month) return [...departures];
+    return departures.filter(
+        (departure) => departureMonth(departure.start) === month,
+    );
+}

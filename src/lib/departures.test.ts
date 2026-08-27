@@ -3,12 +3,16 @@ import type { ArcticDeparture } from '@/lib/arctic';
 import {
     buildCalloutMap,
     cleanTypeName,
+    departureMonth,
     detectVariants,
     durationToDays,
+    filterByMonth,
     formatDateRange,
     formatDayLabel,
     groupDeparturesByMonth,
+    monthOptions,
     nextAvailable,
+    parseMonthParam,
 } from './departures';
 
 function departure(overrides: Partial<ArcticDeparture>): ArcticDeparture {
@@ -244,5 +248,46 @@ describe('buildCalloutMap', () => {
         expect(buildCalloutMap(null).size).toBe(0);
         expect(buildCalloutMap(undefined).size).toBe(0);
         expect(buildCalloutMap([]).size).toBe(0);
+    });
+});
+
+describe('month filtering', () => {
+    test('departureMonth extracts YYYY-MM and rejects garbage', () => {
+        expect(departureMonth('2026-09-12')).toBe('2026-09');
+        expect(departureMonth('garbage')).toBeNull();
+        expect(departureMonth(null)).toBeNull();
+        expect(departureMonth(undefined)).toBeNull();
+    });
+
+    test('parseMonthParam accepts only a single YYYY-MM value', () => {
+        expect(parseMonthParam('2026-09')).toBe('2026-09');
+        expect(parseMonthParam('2026-9')).toBeNull();
+        expect(parseMonthParam(['2026-09', '2026-10'])).toBeNull();
+        expect(parseMonthParam(undefined)).toBeNull();
+        expect(parseMonthParam('drop table')).toBeNull();
+    });
+
+    test('monthOptions dedupes, sorts, and shows the year only when it changes', () => {
+        const options = monthOptions([
+            departure({ start: '2027-05-03' }),
+            departure({ start: '2026-09-12' }),
+            departure({ start: '2026-09-19' }),
+            departure({ start: '2026-10-02' }),
+        ]);
+        expect(options).toEqual([
+            { value: '2026-09', label: 'Sep' },
+            { value: '2026-10', label: 'Oct' },
+            { value: '2027-05', label: "May '27" },
+        ]);
+    });
+
+    test('filterByMonth keeps matching departures; null month keeps all', () => {
+        const list = [
+            departure({ start: '2026-09-12' }),
+            departure({ start: '2026-10-02' }),
+        ];
+        expect(filterByMonth(list, '2026-09')).toHaveLength(1);
+        expect(filterByMonth(list, null)).toHaveLength(2);
+        expect(filterByMonth(list, '2025-01')).toHaveLength(0);
     });
 });
