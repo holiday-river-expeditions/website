@@ -35,7 +35,13 @@ export const DEMO_FLAGS = [
         id: 'logo-secondary',
         label: 'Official secondary lockup',
         description:
-            "ON: the brand package's Secondary Horizontal lockup — bigger mark, squarer proportions, delivered by Holiday's designer but never used on the site. Wins over the other logo flags.",
+            "ON: the brand package's Secondary Horizontal lockup — bigger mark, squarer proportions, delivered by Holiday's designer but never used on the site.",
+    },
+    {
+        id: 'logo-fresh',
+        label: 'Fresh hierarchy lockup',
+        description:
+            'ON: new exploration — HOLIDAY dominant with RIVER EXPEDITIONS as a letterspaced line beneath. Wins over every other logo flag.',
     },
 ] as const satisfies readonly {
     id: string;

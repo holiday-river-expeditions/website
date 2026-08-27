@@ -1,9 +1,9 @@
 import Image from 'next/image';
 
 /**
- * Logo lockup. Four treatments are rendered server-side and CSS picks one
+ * Logo lockup. Five treatments are rendered server-side and CSS picks one
  * via the per-browser demo flags (see src/lib/demo-flags.ts). Precedence:
- * secondary > line > bold > classic.
+ * fresh > secondary > line > bold > classic.
  *
  *  - Classic (default): the original horizontal SVG brand lockup —
  *    /logo-horizontal-red.svg — per the Aug 2026 decision to return to
@@ -14,6 +14,8 @@ import Image from 'next/image';
  *    wordmark on one line at medium weight.
  *  - Secondary (html[data-demo-logo-secondary='on']): the brand package's
  *    official Secondary Horizontal lockup SVG.
+ *  - Fresh (html[data-demo-logo-fresh='on']): hierarchy exploration —
+ *    HOLIDAY dominant, RIVER EXPEDITIONS letterspaced beneath.
  *
  * Everything scales off the container font-size (the `size` classes), so
  * one number tunes the whole lockup. Hidden treatments are display:none
@@ -46,11 +48,11 @@ export function Logo({
                 alt=''
                 width={2000}
                 height={798}
-                className='h-[1em] w-auto [[data-demo-logo-bold=on]_&]:hidden [[data-demo-logo-line=on]_&]:hidden [[data-demo-logo-secondary=on]_&]:hidden'
+                className='h-[1em] w-auto [[data-demo-logo-bold=on]_&]:hidden [[data-demo-logo-line=on]_&]:hidden [[data-demo-logo-secondary=on]_&]:hidden [[data-demo-logo-fresh=on]_&]:hidden'
             />
             <span
                 data-logo='stack'
-                className='hidden items-center gap-[0.28em] [[data-demo-logo-bold=on]:not([data-demo-logo-line=on]):not([data-demo-logo-secondary=on])_&]:inline-flex'
+                className='hidden items-center gap-[0.28em] [[data-demo-logo-bold=on]:not([data-demo-logo-line=on]):not([data-demo-logo-secondary=on]):not([data-demo-logo-fresh=on])_&]:inline-flex'
             >
                 <Image
                     src='/logo-icon-red.svg'
@@ -71,7 +73,7 @@ export function Logo({
                 line dwarfs the header row and crowds the nav columns. */}
             <span
                 data-logo='line'
-                className='hidden items-center gap-[0.28em] text-[0.72em] [[data-demo-logo-line=on]:not([data-demo-logo-secondary=on])_&]:inline-flex'
+                className='hidden items-center gap-[0.28em] text-[0.72em] [[data-demo-logo-line=on]:not([data-demo-logo-secondary=on]):not([data-demo-logo-fresh=on])_&]:inline-flex'
             >
                 <Image
                     src='/logo-icon-red.svg'
@@ -98,8 +100,35 @@ export function Logo({
                 alt=''
                 width={2001}
                 height={1193}
-                className='hidden h-[1.25em] w-auto [[data-demo-logo-secondary=on]_&]:block'
+                className='hidden h-[1.25em] w-auto [[data-demo-logo-secondary=on]:not([data-demo-logo-fresh=on])_&]:block'
             />
+            {/* Fresh hierarchy exploration: the brand name carries the
+                lockup, the descriptor rides beneath as a letterspaced line
+                stretched to the name's width. */}
+            <span
+                data-logo='fresh'
+                className='hidden items-center gap-[0.3em] [[data-demo-logo-fresh=on]_&]:inline-flex'
+            >
+                <Image
+                    src='/logo-icon-red.svg'
+                    alt=''
+                    width={119}
+                    height={200}
+                    className='h-[1.05em] w-auto'
+                />
+                <span className='flex flex-col'>
+                    <span
+                        className={`whitespace-nowrap font-alt-gothic text-[0.78em] font-black uppercase leading-none tracking-[0.02em] ${color}`}
+                    >
+                        Holiday
+                    </span>
+                    <span
+                        className={`mt-[0.09em] whitespace-nowrap font-alt-gothic text-[0.265em] font-medium uppercase leading-none tracking-[0.34em] ${color}`}
+                    >
+                        River Expeditions
+                    </span>
+                </span>
+            </span>
         </span>
     );
 }
