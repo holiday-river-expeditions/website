@@ -136,7 +136,9 @@ export function TripFinderResults({
             {best && (
                 // Subtracts the site header's approximate height so the
                 // choreographed reveal plays inside the first viewport.
-                <div className='relative flex min-h-[calc(100svh-84px)] flex-col justify-end overflow-hidden md:min-h-[calc(100svh-96px)]'>
+                // Reveal content centers in the hero rather than pinning to
+                // the bottom — same neck-craner fix as the wizard screens.
+                <div className='relative flex min-h-[calc(100svh-84px)] flex-col justify-center overflow-hidden md:min-h-[calc(100svh-96px)]'>
                     {/* Backdrop layer: photo + scrim; positioned content
                         below stacks above it. */}
                     <div className='absolute inset-0 bg-evergreen'>
@@ -164,15 +166,12 @@ export function TripFinderResults({
                             className='absolute inset-0 bg-gradient-to-t from-evergreen via-evergreen/45 to-evergreen/15'
                         />
                     </div>
-                    {/* Canyon walls part to reveal the river. Invisible when
+                    {/* A wall of whitewater drains off the hero, foam edge
+                        sweeping down as the match emerges. Invisible when
                         reduced motion keeps the animation from running. */}
                     <div
                         aria-hidden='true'
-                        className='finder-curtain-l absolute inset-y-0 left-0 z-10 w-1/2 bg-evergreen opacity-0'
-                    />
-                    <div
-                        aria-hidden='true'
-                        className='finder-curtain-r absolute inset-y-0 right-0 z-10 w-1/2 bg-evergreen opacity-0'
+                        className='finder-wave pointer-events-none absolute inset-x-0 bottom-0 top-[-24px] z-10 opacity-0'
                     />
 
                     {/* The 60-years seal stamps in last. */}
@@ -184,7 +183,7 @@ export function TripFinderResults({
                         className='absolute right-6 top-6 h-24 w-24 md:right-10 md:top-10 md:h-36 md:w-36 motion-safe:animate-finder-stamp motion-safe:[animation-delay:1.5s]'
                     />
 
-                    <div className='relative mx-auto w-full max-w-5xl px-6 pb-10 pt-40 md:px-10'>
+                    <div className='relative mx-auto w-full max-w-5xl px-6 py-28 md:px-10'>
                         <p className='font-alt-gothic text-subheading font-bold uppercase tracking-wide text-opal motion-safe:animate-finder-rise motion-safe:[animation-delay:0.35s]'>
                             {confident
                                 ? 'Five answers. Sixty years of trips. One match.'

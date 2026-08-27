@@ -123,51 +123,85 @@
     }
 }
 
-/* Canyon-wall curtains on the results reveal: two evergreen panels slide
-   apart off the hero. Base state is invisible; the animation's `both` fill
-   makes them opaque only while it runs, so reduced-motion users (where the
-   media query never applies the animation) simply never see the panels. */
-@keyframes finder-curtain {
+/* Whitewater reveal on the results hero: a wall of water — teal wave face
+   over evergreen deep water, foam-capped — drains down and off the screen,
+   its crest sweeping across the photo as the match emerges. Base state is
+   invisible; the animation's `both` fill makes it opaque only while it
+   runs, so reduced-motion users (where the media query never applies the
+   animation) simply never see the panel. */
+.finder-wave {
+    background-image:
+        url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 240 20'%3E%3Cpath d='M0 20 V11 Q 30 2 60 11 T 120 11 T 180 11 T 240 11 V20 Z' fill='%233f786b'/%3E%3Cpath d='M0 11 Q 30 2 60 11 T 120 11 T 180 11 T 240 11' fill='none' stroke='%23fcfcfc' stroke-width='3.5' stroke-linecap='round'/%3E%3C/svg%3E"),
+        linear-gradient(#3f786b, #0a332d);
+    background-repeat: repeat-x, no-repeat;
+    background-position:
+        0 0,
+        0 19px;
+    background-size:
+        240px 20px,
+        100% calc(100% - 19px);
+}
+
+@keyframes finder-wave {
     from {
         opacity: 1;
-        transform: none;
+        transform: translateY(0);
     }
     to {
         opacity: 1;
-        transform: translateX(var(--curtain-to));
+        transform: translateY(calc(100% + 24px));
     }
 }
 
 @media (prefers-reduced-motion: no-preference) {
-    .finder-curtain-l,
-    .finder-curtain-r {
-        animation: finder-curtain 0.9s cubic-bezier(0.7, 0, 0.3, 1) 0.15s both;
-    }
-    .finder-curtain-l {
-        --curtain-to: -101%;
-    }
-    .finder-curtain-r {
-        --curtain-to: 101%;
+    .finder-wave {
+        animation: finder-wave 1.05s cubic-bezier(0.65, 0, 0.35, 1) 0.1s both;
     }
 }
 
-/* Option-card hover: a teal waterline rises from the bottom of the card.
-   Pair with `group` + `group-hover:text-holiday-white transition-colors`
-   on the card's text so the label surfaces above the water. */
+/* Option-card hover: a whitewater wave surges up the card — a ::before
+   water body whose top edge is a foam-capped teal crest (inline SVG),
+   moved by transform (GPU-smooth; animating background-size fought the
+   cards' transition-transform utility and stuttered). The crest sweeps
+   through during the rise and ends fully flooded. Pair with `group` +
+   `group-hover:text-holiday-white transition-colors` on the card's text
+   so the label surfaces above the water. Reduced motion: no transition,
+   the state just switches. */
 .water-fill {
-    background-image: linear-gradient(#3f786b, #3f786b);
-    background-repeat: no-repeat;
-    background-size: 100% 0;
-    background-position: bottom;
+    position: relative;
+    overflow: hidden;
 }
-.water-fill:hover,
-.water-fill:focus-visible,
-.water-fill:active {
-    background-size: 100% 100%;
+.water-fill > * {
+    position: relative;
+    z-index: 1;
+}
+.water-fill::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    height: calc(100% + 14px);
+    background-image:
+        url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 120 14'%3E%3Cpath d='M0 14 V8 Q 15 2 30 8 T 60 8 T 90 8 T 120 8 V14 Z' fill='%233f786b'/%3E%3Cpath d='M0 8 Q 15 2 30 8 T 60 8 T 90 8 T 120 8' fill='none' stroke='%23fcfcfc' stroke-width='2.5' stroke-linecap='round'/%3E%3C/svg%3E"),
+        linear-gradient(#3f786b, #3f786b);
+    background-repeat: repeat-x, no-repeat;
+    background-position:
+        0 0,
+        0 13px;
+    background-size:
+        120px 14px,
+        100% calc(100% - 13px);
+    transform: translateY(calc(100% + 1px));
+}
+.water-fill:hover::before,
+.water-fill:focus-visible::before,
+.water-fill:active::before {
+    transform: translateY(0);
 }
 @media (prefers-reduced-motion: no-preference) {
-    .water-fill {
-        transition: background-size 0.3s ease-out;
+    .water-fill::before {
+        transition: transform 0.5s cubic-bezier(0.3, 0.9, 0.35, 1);
     }
 }
 
