@@ -201,67 +201,77 @@ export function TripFinderWizard({ answers }: { answers: TripFinderAnswers }) {
             {/* Question + options, centered in the free space between the
                 header and the ethos footer — bottom-pinning read as a
                 neck-craner, especially on tall screens. */}
-            <div className='relative mx-auto flex w-full max-w-5xl flex-1 flex-col justify-center px-6 py-8 md:px-10'>
-                <h1 className='font-alt-gothic text-h3 font-black uppercase leading-none text-holiday-white [text-shadow:0_2px_18px_rgba(10,51,45,0.55)] sm:text-h2 sm:leading-h2 md:text-h1 md:leading-h1 motion-safe:animate-finder-rise'>
-                    {question.title}
-                </h1>
-                {(question.subline || isFinal) && (
-                    <p className='mt-2 text-paragraph font-bold leading-paragraph text-opal motion-safe:animate-finder-rise motion-safe:[animation-delay:0.08s]'>
-                        {question.subline ?? "Last one — takeout's in sight."}
-                    </p>
-                )}
-
-                {/* Back + Skip live above the options so they are inside the
-                    first viewport on every screen, including 7-option month. */}
-                <div className='mt-3 flex items-center gap-6 text-body leading-body motion-safe:animate-finder-rise motion-safe:[animation-delay:0.12s]'>
-                    {backHref && (
-                        <Link
-                            href={backHref}
-                            className='flex min-h-11 items-center font-bold text-holiday-white/85 transition-opacity hover:opacity-70'
-                        >
-                            &larr; Back
-                        </Link>
+            <div className='relative mx-auto flex w-full max-w-5xl flex-1 flex-col justify-center px-4 py-8 md:px-10'>
+                {/* Teal glass panel: guarantees text contrast wherever the
+                    centered block lands on the photo — bright sky, white
+                    water, anywhere. Blur makes it read as depth, not a
+                    slapped-on box. */}
+                <div className='bg-[#16443c]/75 p-5 backdrop-blur-sm md:p-7'>
+                    <h1 className='font-alt-gothic text-h3 font-black uppercase leading-none text-holiday-white sm:text-h2 sm:leading-h2 md:text-h1 md:leading-h1 motion-safe:animate-finder-rise'>
+                        {question.title}
+                    </h1>
+                    {(question.subline || isFinal) && (
+                        <p className='mt-2 text-paragraph font-bold leading-paragraph text-opal motion-safe:animate-finder-rise motion-safe:[animation-delay:0.08s]'>
+                            {question.subline ??
+                                "Last one — takeout's in sight."}
+                        </p>
                     )}
-                    <Link
-                        href={`/trip-finder?${answersToParams(answers, {
-                            [question.id]: 'skip',
-                        })}`}
-                        className='flex min-h-11 items-center font-bold text-holiday-white underline decoration-opal decoration-2 underline-offset-4 transition-opacity hover:opacity-70'
-                    >
-                        {question.skipLabel}
-                    </Link>
-                </div>
 
-                <ul
-                    className={`mt-4 grid gap-3 motion-safe:animate-finder-rise motion-safe:[animation-delay:0.16s] ${
-                        question.options.length > 4
-                            ? 'grid-cols-2 lg:grid-cols-4'
-                            : 'sm:grid-cols-2 lg:grid-cols-3'
-                    }`}
-                >
-                    {question.options.map((option) => (
-                        <li key={option.value}>
-                            {/* h-full + grid stretch keeps every card in a
+                    {/* Back + Skip live above the options so they are inside the
+                    first viewport on every screen, including 7-option month. */}
+                    <div className='mt-3 flex items-center gap-6 text-body leading-body motion-safe:animate-finder-rise motion-safe:[animation-delay:0.12s]'>
+                        {backHref && (
+                            <Link
+                                href={backHref}
+                                className='flex min-h-11 items-center font-bold text-holiday-white/85 transition-opacity hover:opacity-70'
+                            >
+                                &larr; Back
+                            </Link>
+                        )}
+                        <Link
+                            href={`/trip-finder?${answersToParams(answers, {
+                                [question.id]: 'skip',
+                            })}`}
+                            className='flex min-h-11 items-center font-bold text-holiday-white underline decoration-opal decoration-2 underline-offset-4 transition-opacity hover:opacity-70'
+                        >
+                            {question.skipLabel}
+                        </Link>
+                    </div>
+
+                    <ul
+                        className={`mt-4 grid gap-3 motion-safe:animate-finder-rise motion-safe:[animation-delay:0.16s] ${
+                            question.options.length > 4
+                                ? 'grid-cols-2 lg:grid-cols-4'
+                                : 'sm:grid-cols-2 lg:grid-cols-3'
+                        }`}
+                    >
+                        {question.options.map((option) => (
+                            <li key={option.value}>
+                                {/* h-full + grid stretch keeps every card in a
                                 row the same height even when one sublabel
                                 wraps; content centers in the extra space. */}
-                            <Link
-                                href={`/trip-finder?${answersToParams(answers, {
-                                    [question.id]: option.value,
-                                })}`}
-                                className='water-fill group flex h-full min-h-[64px] flex-col justify-center bg-holiday-white/95 px-4 py-3.5 transition-transform active:scale-[0.98] md:px-5 md:py-4'
-                            >
-                                <span className='block font-alt-gothic text-subheading font-bold uppercase leading-tight text-onyx transition-colors group-hover:text-holiday-white group-focus-visible:text-holiday-white group-active:text-holiday-white'>
-                                    {option.label}
-                                </span>
-                                {option.sublabel && (
-                                    <span className='mt-0.5 block text-[14px] leading-snug text-onyx/75 transition-colors group-hover:text-holiday-white/90 group-focus-visible:text-holiday-white/90 group-active:text-holiday-white/90'>
-                                        {option.sublabel}
+                                <Link
+                                    href={`/trip-finder?${answersToParams(
+                                        answers,
+                                        {
+                                            [question.id]: option.value,
+                                        },
+                                    )}`}
+                                    className='water-fill group flex h-full min-h-[64px] flex-col justify-center bg-holiday-white/95 px-4 py-3.5 transition-transform active:scale-[0.98] md:px-5 md:py-4'
+                                >
+                                    <span className='block font-alt-gothic text-subheading font-bold uppercase leading-tight text-onyx transition-colors group-hover:text-holiday-white group-focus-visible:text-holiday-white group-active:text-holiday-white'>
+                                        {option.label}
                                     </span>
-                                )}
-                            </Link>
-                        </li>
-                    ))}
-                </ul>
+                                    {option.sublabel && (
+                                        <span className='mt-0.5 block text-[14px] leading-snug text-onyx/75 transition-colors group-hover:text-holiday-white/90 group-focus-visible:text-holiday-white/90 group-active:text-holiday-white/90'>
+                                            {option.sublabel}
+                                        </span>
+                                    )}
+                                </Link>
+                            </li>
+                        ))}
+                    </ul>
+                </div>
             </div>
 
             {/* Ethos footer */}

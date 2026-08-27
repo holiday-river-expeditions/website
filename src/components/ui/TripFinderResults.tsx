@@ -183,127 +183,132 @@ export function TripFinderResults({
                         className='absolute right-6 top-6 h-24 w-24 md:right-10 md:top-10 md:h-36 md:w-36 motion-safe:animate-finder-stamp motion-safe:[animation-delay:1.5s]'
                     />
 
-                    <div className='relative mx-auto w-full max-w-5xl px-6 py-28 md:px-10'>
-                        <p className='font-alt-gothic text-subheading font-bold uppercase tracking-wide text-opal motion-safe:animate-finder-rise motion-safe:[animation-delay:0.35s]'>
-                            {confident
-                                ? 'Five answers. Sixty years of trips. One match.'
-                                : 'Find Your Trip'}
-                        </p>
-                        <h1 className='mt-2 font-alt-gothic text-h2 font-black uppercase leading-h2 text-holiday-white [text-shadow:0_2px_20px_rgba(10,51,45,0.6)] md:text-h1 md:leading-h1 motion-safe:animate-finder-rise motion-safe:[animation-delay:0.6s]'>
-                            {confident
-                                ? riverName
-                                    ? `The ${riverName} is calling`
-                                    : 'Your river is calling'
-                                : 'Close — this is what guides are for'}
-                        </h1>
-                        {!confident && (
-                            <p className='mt-3 max-w-2xl text-paragraph leading-paragraph text-holiday-white motion-safe:animate-finder-rise motion-safe:[animation-delay:0.7s]'>
-                                Tell us one or two more things and the match
-                                gets sharper — or skip the quiz entirely:{' '}
-                                {CALL_LINE}
+                    <div className='relative mx-auto w-full max-w-5xl px-4 py-24 md:px-10'>
+                        {/* Teal glass panel: the reveal reads over any photo
+                            — bright sky, white water — without dimming the
+                            whole hero. */}
+                        <div className='max-w-3xl bg-[#16443c]/75 p-6 backdrop-blur-sm md:p-9'>
+                            <p className='font-alt-gothic text-subheading font-bold uppercase tracking-wide text-opal motion-safe:animate-finder-rise motion-safe:[animation-delay:0.35s]'>
+                                {confident
+                                    ? 'Five answers. Sixty years of trips. One match.'
+                                    : 'Find Your Trip'}
                             </p>
-                        )}
-
-                        <div className='mt-5 motion-safe:animate-finder-rise motion-safe:[animation-delay:0.85s]'>
-                            {confident && (
-                                <span className='inline-block bg-holiday-red px-3.5 py-1.5 text-[14px] font-bold uppercase leading-tight text-holiday-white'>
-                                    Best Match
-                                </span>
-                            )}
-                            <h2 className='mt-2 font-alt-gothic text-section font-black uppercase text-holiday-white'>
-                                {best.trip.name}
-                                {best.trip.subtitle && (
-                                    <span className='block text-subheading leading-tight text-opal'>
-                                        {best.trip.subtitle}
-                                    </span>
-                                )}
-                            </h2>
-                            <p className='mt-1 text-body font-bold leading-body text-holiday-white/85'>
-                                {[
-                                    best.trip.river?.name,
-                                    best.trip.durationLabel ??
-                                        (best.trip.duration
-                                            ? `${best.trip.duration} Days`
-                                            : null),
-                                    best.trip.startingPrice
-                                        ? `Starts at ${best.trip.startingPrice}`
-                                        : null,
-                                ]
-                                    .filter(Boolean)
-                                    .join(' · ')}
-                            </p>
-                        </div>
-
-                        <div className='mt-5 max-w-2xl'>
-                            <h3 className='sr-only'>Why it fits</h3>
-                            {best.reasons.length > 0 ? (
-                                <ul className='space-y-1.5'>
-                                    {best.reasons.map((reason, i) => (
-                                        <li
-                                            key={reason}
-                                            className='flex gap-3 text-paragraph leading-paragraph text-holiday-white motion-safe:animate-finder-rise'
-                                            style={{
-                                                animationDelay: `${1.05 + i * 0.15}s`,
-                                            }}
-                                        >
-                                            <span
-                                                aria-hidden='true'
-                                                className='font-bold text-opal'
-                                            >
-                                                &#10003;
-                                            </span>
-                                            {reason}
-                                        </li>
-                                    ))}
-                                </ul>
-                            ) : (
-                                <p className='text-paragraph leading-paragraph text-holiday-white motion-safe:animate-finder-rise motion-safe:[animation-delay:1.05s]'>
-                                    A great all-around pick from what you told
-                                    us so far.
-                                </p>
-                            )}
-                            {best.caveats.map((caveat) => (
-                                <p
-                                    key={caveat}
-                                    className='mt-3 border-l-4 border-sand pl-3 text-body leading-body text-holiday-white/90'
-                                >
-                                    {caveat}
-                                </p>
-                            ))}
-                        </div>
-
-                        <div className='mt-6 flex flex-wrap items-center gap-x-6 gap-y-3 motion-safe:animate-finder-rise motion-safe:[animation-delay:1.35s]'>
-                            {bestAvailability ? (
-                                <>
-                                    <AvailabilityLine
-                                        availability={bestAvailability}
-                                        tone='light'
-                                    />
-                                    <Button
-                                        href={bestAvailability.bookHref}
-                                        size='lg'
-                                    >
-                                        See Dates &amp; Book
-                                    </Button>
-                                </>
-                            ) : (
-                                <p className='text-body leading-body text-holiday-white'>
-                                    {arcticDown
-                                        ? 'Live availability is napping. '
-                                        : 'No open online dates right now. '}
+                            <h1 className='mt-2 font-alt-gothic text-h2 font-black uppercase leading-h2 text-holiday-white md:text-h1 md:leading-h1 motion-safe:animate-finder-rise motion-safe:[animation-delay:0.6s]'>
+                                {confident
+                                    ? riverName
+                                        ? `The ${riverName} is calling`
+                                        : 'Your river is calling'
+                                    : 'Close — this is what guides are for'}
+                            </h1>
+                            {!confident && (
+                                <p className='mt-3 max-w-2xl text-paragraph leading-paragraph text-holiday-white motion-safe:animate-finder-rise motion-safe:[animation-delay:0.7s]'>
+                                    Tell us one or two more things and the match
+                                    gets sharper — or skip the quiz entirely:{' '}
                                     {CALL_LINE}
                                 </p>
                             )}
-                            <Link
-                                href={`/trips/${bestSlug ?? ''}`}
-                                className={buttonClasses({
-                                    variant: 'outline',
-                                    className:
-                                        'border-holiday-white text-holiday-white hover:bg-holiday-white hover:text-evergreen',
-                                })}
-                            >
-                                Trip Details
-                            </Link>
+
+                            <div className='mt-5 motion-safe:animate-finder-rise motion-safe:[animation-delay:0.85s]'>
+                                {confident && (
+                                    <span className='inline-block bg-holiday-red px-3.5 py-1.5 text-[14px] font-bold uppercase leading-tight text-holiday-white'>
+                                        Best Match
+                                    </span>
+                                )}
+                                <h2 className='mt-2 font-alt-gothic text-section font-black uppercase text-holiday-white'>
+                                    {best.trip.name}
+                                    {best.trip.subtitle && (
+                                        <span className='block text-subheading leading-tight text-opal'>
+                                            {best.trip.subtitle}
+                                        </span>
+                                    )}
+                                </h2>
+                                <p className='mt-1 text-body font-bold leading-body text-holiday-white/85'>
+                                    {[
+                                        best.trip.river?.name,
+                                        best.trip.durationLabel ??
+                                            (best.trip.duration
+                                                ? `${best.trip.duration} Days`
+                                                : null),
+                                        best.trip.startingPrice
+                                            ? `Starts at ${best.trip.startingPrice}`
+                                            : null,
+                                    ]
+                                        .filter(Boolean)
+                                        .join(' · ')}
+                                </p>
+                            </div>
+
+                            <div className='mt-5 max-w-2xl'>
+                                <h3 className='sr-only'>Why it fits</h3>
+                                {best.reasons.length > 0 ? (
+                                    <ul className='space-y-1.5'>
+                                        {best.reasons.map((reason, i) => (
+                                            <li
+                                                key={reason}
+                                                className='flex gap-3 text-paragraph leading-paragraph text-holiday-white motion-safe:animate-finder-rise'
+                                                style={{
+                                                    animationDelay: `${1.05 + i * 0.15}s`,
+                                                }}
+                                            >
+                                                <span
+                                                    aria-hidden='true'
+                                                    className='font-bold text-opal'
+                                                >
+                                                    &#10003;
+                                                </span>
+                                                {reason}
+                                            </li>
+                                        ))}
+                                    </ul>
+                                ) : (
+                                    <p className='text-paragraph leading-paragraph text-holiday-white motion-safe:animate-finder-rise motion-safe:[animation-delay:1.05s]'>
+                                        A great all-around pick from what you
+                                        told us so far.
+                                    </p>
+                                )}
+                                {best.caveats.map((caveat) => (
+                                    <p
+                                        key={caveat}
+                                        className='mt-3 border-l-4 border-sand pl-3 text-body leading-body text-holiday-white/90'
+                                    >
+                                        {caveat}
+                                    </p>
+                                ))}
+                            </div>
+
+                            <div className='mt-6 flex flex-wrap items-center gap-x-6 gap-y-3 motion-safe:animate-finder-rise motion-safe:[animation-delay:1.35s]'>
+                                {bestAvailability ? (
+                                    <>
+                                        <AvailabilityLine
+                                            availability={bestAvailability}
+                                            tone='light'
+                                        />
+                                        <Button
+                                            href={bestAvailability.bookHref}
+                                            size='lg'
+                                        >
+                                            See Dates &amp; Book
+                                        </Button>
+                                    </>
+                                ) : (
+                                    <p className='text-body leading-body text-holiday-white'>
+                                        {arcticDown
+                                            ? 'Live availability is napping. '
+                                            : 'No open online dates right now. '}
+                                        {CALL_LINE}
+                                    </p>
+                                )}
+                                <Link
+                                    href={`/trips/${bestSlug ?? ''}`}
+                                    className={buttonClasses({
+                                        variant: 'outline',
+                                        className:
+                                            'border-holiday-white text-holiday-white hover:bg-holiday-white hover:text-evergreen',
+                                    })}
+                                >
+                                    Trip Details
+                                </Link>
+                            </div>
                         </div>
                     </div>
                 </div>
