@@ -14,7 +14,7 @@ const pages = [
     { name: 'specialty hub', path: '/specialty' },
     { name: 'faq', path: '/faq' },
     { name: 'contact', path: '/contact' },
-    { name: 'open seats', path: '/open-seats' },
+    { name: 'book', path: '/book' },
 ];
 
 for (const { name, path } of pages) {

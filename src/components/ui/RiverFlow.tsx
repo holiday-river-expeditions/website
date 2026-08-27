@@ -55,14 +55,17 @@ function Sparkline({ series }: { series: readonly FlowPoint[] }) {
     if (!points) return null;
     const trend = flowTrend(series);
     return (
-        <>
+        // The caption labels the data directly (Darius's note: an
+        // unlabeled line doesn't say it covers 7 days) — never rely on
+        // the reader inferring the window.
+        <span className='flex shrink-0 flex-col items-center'>
             <svg
                 aria-hidden
                 viewBox={`0 0 ${SPARK_W} ${SPARK_H}`}
                 width={SPARK_W}
                 height={SPARK_H}
-                className='shrink-0'
             >
+                <title>Daily average flow over the past 7 days</title>
                 <polyline
                     points={points}
                     fill='none'
@@ -76,8 +79,11 @@ function Sparkline({ series }: { series: readonly FlowPoint[] }) {
                     className='motion-safe:animate-spark-draw'
                 />
             </svg>
+            <span className='text-[12px] font-normal normal-case leading-none tracking-normal text-onyx/75'>
+                past 7 days
+            </span>
             {trend && <span className='sr-only'>7-day trend: {trend}</span>}
-        </>
+        </span>
     );
 }
 
@@ -106,8 +112,11 @@ export async function RiverFlow({
     if (variant === 'fact') {
         return (
             <div>
+                {/* "Now" is load-bearing: the dates below are future trips,
+                    and this reading is today's conditions, not a forecast
+                    for those dates. */}
                 <dt className='font-alt-gothic text-[12px] font-medium uppercase tracking-[0.05em] text-onyx/70'>
-                    River Flow
+                    River Flow Now
                 </dt>
                 <dd className='mt-1 flex items-center gap-2.5 font-alt-gothic text-h3 font-semibold uppercase leading-h3 text-holiday-red'>
                     <ExternalLink

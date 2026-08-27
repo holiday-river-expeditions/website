@@ -17,7 +17,7 @@ const defaults = {
 };
 
 const resourceLinks = [
-    { label: 'Trip Dates', href: '/open-seats' },
+    { label: 'Trip Dates', href: '/book' },
     { label: 'F.A.Q.', href: '/faq' },
     { label: 'Trip Insurance', href: '/trip-insurance' },
     {
