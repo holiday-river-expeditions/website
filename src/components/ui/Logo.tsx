@@ -1,16 +1,19 @@
 import Image from 'next/image';
 
 /**
- * Logo lockup. Three treatments are rendered server-side and CSS picks one
- * via the per-browser demo flags (see src/lib/demo-flags.ts):
+ * Logo lockup. Four treatments are rendered server-side and CSS picks one
+ * via the per-browser demo flags (see src/lib/demo-flags.ts). Precedence:
+ * secondary > line > bold > classic.
  *
  *  - Classic (default): the original horizontal SVG brand lockup —
  *    /logo-horizontal-red.svg — per the Aug 2026 decision to return to
  *    the delivered logotype.
  *  - Bold stack (html[data-demo-logo-bold='on']): boat mark + stacked
  *    HOLIDAY RIVER / EXPEDITIONS wordmark in Alternate Gothic.
- *  - Single line (html[data-demo-logo-line='on'], wins over the stack):
- *    boat mark + the wordmark on one line, caps at mark height.
+ *  - Single line (html[data-demo-logo-line='on']): boat mark + the
+ *    wordmark on one line at medium weight.
+ *  - Secondary (html[data-demo-logo-secondary='on']): the brand package's
+ *    official Secondary Horizontal lockup SVG.
  *
  * Everything scales off the container font-size (the `size` classes), so
  * one number tunes the whole lockup. Hidden treatments are display:none
@@ -43,11 +46,11 @@ export function Logo({
                 alt=''
                 width={2000}
                 height={798}
-                className='h-[1em] w-auto [[data-demo-logo-bold=on]_&]:hidden [[data-demo-logo-line=on]_&]:hidden'
+                className='h-[1em] w-auto [[data-demo-logo-bold=on]_&]:hidden [[data-demo-logo-line=on]_&]:hidden [[data-demo-logo-secondary=on]_&]:hidden'
             />
             <span
                 data-logo='stack'
-                className='hidden items-center gap-[0.28em] [[data-demo-logo-bold=on]:not([data-demo-logo-line=on])_&]:inline-flex'
+                className='hidden items-center gap-[0.28em] [[data-demo-logo-bold=on]:not([data-demo-logo-line=on]):not([data-demo-logo-secondary=on])_&]:inline-flex'
             >
                 <Image
                     src='/logo-icon-red.svg'
@@ -68,7 +71,7 @@ export function Logo({
                 line dwarfs the header row and crowds the nav columns. */}
             <span
                 data-logo='line'
-                className='hidden items-center gap-[0.28em] text-[0.72em] [[data-demo-logo-line=on]_&]:inline-flex'
+                className='hidden items-center gap-[0.28em] text-[0.72em] [[data-demo-logo-line=on]:not([data-demo-logo-secondary=on])_&]:inline-flex'
             >
                 <Image
                     src='/logo-icon-red.svg'
@@ -86,6 +89,17 @@ export function Logo({
                     Holiday River Expeditions
                 </span>
             </span>
+            {/* The brand package's Secondary Horizontal lockup — bigger mark,
+                squarer proportions. Slightly over 1em so its compact width
+                still carries presence in the header. */}
+            <Image
+                data-logo='secondary'
+                src='/logo-secondary-red.svg'
+                alt=''
+                width={2001}
+                height={1193}
+                className='hidden h-[1.25em] w-auto [[data-demo-logo-secondary=on]_&]:block'
+            />
         </span>
     );
 }

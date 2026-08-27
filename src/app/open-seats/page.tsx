@@ -3,6 +3,7 @@ import Link from 'next/link';
 import { Button } from '@/components/ui/Button';
 import { DepartureList } from '@/components/ui/DepartureList';
 import { Section } from '@/components/ui/Section';
+import { SectionNav } from '@/components/ui/SectionNav';
 import {
     type ArcticDeparture,
     getAllUpcomingDepartures,
@@ -33,6 +34,12 @@ interface TripGroup {
     departures: ArcticDeparture[];
     /** Specialty callouts for this trip, keyed by departure start date. */
     callouts?: DepartureCalloutMap;
+}
+
+/** Group key ("sanity:cataract-canyon" / "arctic:123") → DOM-safe anchor id
+    for the floating menu. */
+function groupAnchor(key: string): string {
+    return `trip-${key.replace(/[^a-zA-Z0-9-]/g, '-')}`;
 }
 
 export default async function OpenSeatsPage() {
@@ -162,7 +169,12 @@ export default async function OpenSeatsPage() {
                         {groups.map((group) => {
                             const next = nextAvailable(group.departures);
                             return (
-                                <div key={group.key} data-availability>
+                                <div
+                                    key={group.key}
+                                    id={groupAnchor(group.key)}
+                                    className='scroll-mt-6'
+                                    data-availability
+                                >
                                     <div className='flex flex-wrap items-center gap-x-5 gap-y-2'>
                                         <h2 className='font-alt-gothic text-section font-black uppercase text-onyx'>
                                             {group.href ? (
@@ -204,6 +216,18 @@ export default async function OpenSeatsPage() {
                     </div>
                 )}
             </Section>
+
+            {/* Floating menu, driven by whatever Arctic returned: one stop
+                per trip group with open departures. */}
+            {groups !== null && groups.length > 1 && (
+                <SectionNav
+                    ariaLabel='Trips with availability'
+                    items={groups.map((group) => ({
+                        id: groupAnchor(group.key),
+                        label: group.title,
+                    }))}
+                />
+            )}
 
             {/* The Book Now CTA lands here now, so give browsers who don't
                 see their date a path into the full catalog. */}

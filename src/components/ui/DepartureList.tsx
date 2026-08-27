@@ -87,8 +87,11 @@ function DepartureRow({
     const bookable = seats !== null && seats > 0 && departure.onlinebookingurl;
     const days = durationToDays(departure.duration);
 
+    // key: this element crosses the RSC boundary as BookingRow's dateSlot
+    // prop; serialization drops the static-children flag, so React treats
+    // the client fragment's children as a dynamic list and wants keys.
     const dateCell = (
-        <div>
+        <div key='date-cell'>
             <div>
                 <span className='font-alt-gothic text-h3 font-semibold uppercase leading-h3 text-onyx'>
                     {formatDateRange(departure.start, departure.duration)}
@@ -136,7 +139,7 @@ function DepartureRow({
                         departure.duration,
                     )}
                     dateSlot={dateCell}
-                    badgeSlot={<SeatsBadge seats={seats} />}
+                    badgeSlot={<SeatsBadge key='badge' seats={seats} />}
                 />
             ) : (
                 <>
