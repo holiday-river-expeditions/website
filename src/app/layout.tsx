@@ -63,7 +63,11 @@ export default function RootLayout({
         // suppressHydrationWarning: the demo-flags init script below stamps
         // data-demo-* attributes on <html> before hydration (armed browsers
         // only) — React must not treat them as a mismatch.
-        <html lang='en' suppressHydrationWarning>
+        <html
+            lang='en'
+            suppressHydrationWarning
+            className='motion-safe:scroll-smooth'
+        >
             <head>
                 {/* Blocking on purpose: demo-flag attributes must land before
                     first paint so armed browsers never flash the default. */}

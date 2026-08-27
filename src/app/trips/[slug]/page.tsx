@@ -12,6 +12,7 @@ import { FeaturedReview } from '@/components/ui/FeaturedReview';
 import { ItinerarySection } from '@/components/ui/ItinerarySection';
 import { RelatedTrips } from '@/components/ui/RelatedTrips';
 import { Section } from '@/components/ui/Section';
+import { SectionNav } from '@/components/ui/SectionNav';
 import { TrustStrip } from '@/components/ui/TrustStrip';
 import { getSiteSettings, getTripBySlug, imageUrl } from '@/lib/sanity';
 
@@ -109,7 +110,11 @@ export default async function TripPage({ params }: TripPageProps) {
             </section>
 
             {/* Fact bar */}
-            <Section background='white' className='py-8 md:py-10'>
+            <Section
+                id='trip-details'
+                background='white'
+                className='scroll-mt-6 py-8 md:py-10'
+            >
                 <div className='flex flex-wrap items-center justify-between gap-6 border-b border-holiday-grey/40 pb-8'>
                     <dl className='grid w-full grid-cols-2 gap-x-6 gap-y-5 sm:flex sm:w-auto sm:flex-wrap sm:gap-x-12 sm:gap-y-4'>
                         {facts.map((fact) => (
@@ -235,8 +240,9 @@ export default async function TripPage({ params }: TripPageProps) {
             {/* Trip-specific FAQs */}
             {trip.faqs && trip.faqs.length > 0 && (
                 <Section
+                    id='faqs'
                     background='white'
-                    className='pb-16 pt-12 md:pb-20 md:pt-16'
+                    className='scroll-mt-6 pb-16 pt-12 md:pb-20 md:pt-16'
                 >
                     <div className='max-w-3xl'>
                         <h2 className='font-alt-gothic text-section font-black uppercase text-holiday-red'>
@@ -279,6 +285,19 @@ export default async function TripPage({ params }: TripPageProps) {
 
             {/* Cross-sell */}
             <RelatedTrips trips={trip.relatedTrips ?? []} />
+
+            {/* Floating section menu (Aug 20 decision). Reviews and related
+                trips stay on the page but out of the menu. */}
+            <SectionNav
+                ariaLabel='Trip sections'
+                items={[
+                    { id: 'trip-details', label: 'Trip Details' },
+                    ...(trip.faqs && trip.faqs.length > 0
+                        ? [{ id: 'faqs', label: 'FAQs' }]
+                        : []),
+                    { id: AVAILABILITY_ANCHOR, label: 'Rates & Dates' },
+                ]}
+            />
         </>
     );
 }
