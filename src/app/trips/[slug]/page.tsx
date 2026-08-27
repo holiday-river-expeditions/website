@@ -11,6 +11,7 @@ import { buttonClasses } from '@/components/ui/Button';
 import { FeaturedReview } from '@/components/ui/FeaturedReview';
 import { ItinerarySection } from '@/components/ui/ItinerarySection';
 import { RelatedTrips } from '@/components/ui/RelatedTrips';
+import { RiverFlow } from '@/components/ui/RiverFlow';
 import { Section } from '@/components/ui/Section';
 import { SectionNav } from '@/components/ui/SectionNav';
 import { TrustStrip } from '@/components/ui/TrustStrip';
@@ -136,6 +137,13 @@ export default async function TripPage({ params }: TripPageProps) {
                                 </dd>
                             </div>
                         ))}
+                        {/* Live CFS from USGS; renders nothing without a
+                            configured gauge or reading. */}
+                        <RiverFlow
+                            variant='fact'
+                            siteIds={trip.river?.usgsSiteId}
+                            href={trip.river?.flowLinkUrl}
+                        />
                     </dl>
                     <div className='flex flex-wrap items-center gap-3'>
                         {/* Book Now jumps to Dates & Availability on this page

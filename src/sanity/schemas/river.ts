@@ -26,6 +26,25 @@ export const river = defineType({
             validation: (rule) => rule.required(),
         }),
         defineField({
+            name: 'usgsSiteId',
+            title: 'USGS gauge site number(s)',
+            type: 'string',
+            description:
+                'Source for the live flow (CFS) chip. Comma-separate to sum gauges — Cataract adds Colorado near Cisco + Green at Green River, UT. Leave empty to hide the chip (biking areas).',
+            validation: (rule) =>
+                rule.regex(/^\s*\d{8,15}(\s*,\s*\d{8,15})*\s*$/, {
+                    name: 'USGS site number list',
+                    invert: false,
+                }),
+        }),
+        defineField({
+            name: 'flowLinkUrl',
+            title: 'Flow graph link',
+            type: 'url',
+            description:
+                'Where the flow chip links — e.g. the CBRFC forecast graph Holiday shares in pre-trip emails. Defaults to the USGS gauge page when empty.',
+        }),
+        defineField({
             name: 'description',
             title: 'Description',
             type: 'text',

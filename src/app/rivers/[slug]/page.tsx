@@ -2,6 +2,7 @@ import type { Metadata } from 'next';
 import Image from 'next/image';
 import { notFound } from 'next/navigation';
 import { Button } from '@/components/ui/Button';
+import { RiverFlow } from '@/components/ui/RiverFlow';
 import { Section } from '@/components/ui/Section';
 import { TripCard } from '@/components/ui/TripCard';
 import { getRiverBySlug, imageUrl } from '@/lib/sanity';
@@ -68,6 +69,14 @@ export default async function RiverPage({ params }: RiverPageProps) {
                         River description coming soon. Add it in the Studio.
                     </p>
                 )}
+                {/* Live CFS from USGS; renders nothing without a gauge. */}
+                <div className='mt-4'>
+                    <RiverFlow
+                        variant='inline'
+                        siteIds={river.usgsSiteId}
+                        href={river.flowLinkUrl}
+                    />
+                </div>
             </Section>
 
             {/* Trips on this river */}

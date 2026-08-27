@@ -146,11 +146,23 @@ export default async function OpenSeatsPage({
               }),
           )
         : [];
+    const visibleGroups =
+        groups === null || activeMonth === null
+            ? groups
+            : groups
+                  .map((group) => ({
+                      ...group,
+                      departures: filterByMonth(group.departures, activeMonth),
+                  }))
+                  .filter((group) => group.departures.length > 0);
+
+    // The jumper offers only groups actually on the page — under a month
+    // filter, absent groups have no anchor to jump to.
     const titleCounts = new Map<string, number>();
-    for (const group of groups ?? []) {
+    for (const group of visibleGroups ?? []) {
         titleCounts.set(group.title, (titleCounts.get(group.title) ?? 0) + 1);
     }
-    const jumpTrips: FilterBarTrip[] = (groups ?? []).map((group) => {
+    const jumpTrips: FilterBarTrip[] = (visibleGroups ?? []).map((group) => {
         const next = nextAvailable(group.departures);
         // Unmapped Arctic types can share a display name; the next date
         // tells them apart in the jumper.
@@ -163,16 +175,6 @@ export default async function OpenSeatsPage({
                     : group.title,
         };
     });
-
-    const visibleGroups =
-        groups === null || activeMonth === null
-            ? groups
-            : groups
-                  .map((group) => ({
-                      ...group,
-                      departures: filterByMonth(group.departures, activeMonth),
-                  }))
-                  .filter((group) => group.departures.length > 0);
 
     return (
         <>
