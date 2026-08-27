@@ -92,12 +92,17 @@ test('mobile drawer opens below the header at 375px', async ({ page }) => {
     await page.goto('/');
 
     const header = page.locator('header');
-    await page.getByRole('button', { name: 'Open menu' }).click();
 
     // DesktopNav is display:none below lg, so the only nav link in the
-    // accessibility tree is the drawer's.
+    // accessibility tree is the drawer's. Clicking can land before React
+    // hydration attaches the handler on cold CI runs (the button exists
+    // but does nothing), so retry the click until the drawer answers —
+    // this spec flaked twice on main CI exactly that way.
     const drawerLink = header.getByRole('link', { name: 'Rafting' });
-    await expect(drawerLink).toBeVisible();
+    await expect(async () => {
+        await page.getByRole('button', { name: 'Open menu' }).click();
+        await expect(drawerLink).toBeVisible({ timeout: 1000 });
+    }).toPass({ timeout: 15000 });
 
     const headerBox = await header.boundingBox();
     const linkBox = await drawerLink.boundingBox();
