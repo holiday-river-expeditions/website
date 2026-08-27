@@ -10,10 +10,39 @@ export interface TripMapMarker {
     href: string;
     longitude: number;
     latitude: number;
-    kind: 'raft' | 'bike';
-    /** Circular photo medallion; falls back to a label-only chip. */
+    kind: 'raft' | 'bike' | 'outpost';
+    /** Circular photo medallion; falls back to a plain dot. */
     imageSrc?: string;
+    /** One-to-two sentences shown in the hover/focus context card. */
+    context?: string;
 }
+
+/**
+ * Holiday's physical bases. PROTOTYPE DATA — locations and wording need
+ * Darius/Holiday's confirmation before this leaves the demo flag.
+ */
+export const OUTPOST_MARKERS: TripMapMarker[] = [
+    {
+        label: 'Salt Lake City HQ',
+        href: '/contact',
+        longitude: -111.865,
+        latitude: 40.688,
+        kind: 'outpost',
+        imageSrc: '/logo-icon-red.svg',
+        context:
+            'Headquarters — bookings, planning help, and the crew who answer the phone.',
+    },
+    {
+        label: 'Green River Outpost',
+        href: '/contact',
+        longitude: -110.16,
+        latitude: 38.995,
+        kind: 'outpost',
+        imageSrc: '/logo-icon-red.svg',
+        context:
+            'River-side base for Desolation, Labyrinth, and Cataract launches — check-in, gear, and shuttles.',
+    },
+];
 
 export const TRIP_MAP_COORDS: Record<
     string,
