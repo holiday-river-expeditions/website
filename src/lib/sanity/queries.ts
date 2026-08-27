@@ -285,7 +285,8 @@ export const homepageQuery = defineQuery(`
       slug,
       image,
       "tripCount": count(*[_type == "trip" && references(^._id)]),
-      "tripSlug": *[_type == "trip" && references(^._id)][0].slug.current
+      "tripSlug": *[_type == "trip" && references(^._id)][0].slug.current,
+      description
     },
     learnContent[]{
       _key,

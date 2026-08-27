@@ -46,6 +46,13 @@ export const DEMO_FLAGS = [
         group: 'logo',
     },
     {
+        id: 'logo-legacy',
+        label: 'Legacy (old website)',
+        description:
+            'The pre-rebrand flag-and-waves lockup from bikeraft.com. Note: the 2026 brand guidelines say not to mix old logos — demo only.',
+        group: 'logo',
+    },
+    {
         id: 'bars-on-scroll',
         label: 'Floating bars appear on scroll',
         description:
@@ -67,7 +74,13 @@ export const DEMO_FLAGS = [
         id: 'trips-map',
         label: 'Homepage trips map',
         description:
-            'ON: the topographic trips-map prototype (USGS tiles, MapLibre) replaces the featured-trips grid on the homepage.',
+            'ON: the topographic trips-map prototype (USGS tiles, MapLibre) replaces the river carousel below the Dee story.',
+    },
+    {
+        id: 'badge-live',
+        label: 'Animated anniversary badge',
+        description:
+            'ON: the hero seal stamps into place on load — same artwork, one-time settle, motion-safe only.',
     },
     {
         id: 'trip-finder',

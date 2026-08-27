@@ -103,15 +103,21 @@ export function Hero({
                     )}
                 </div>
 
-                {/* 60-years anniversary seal — straddles the bottom-left edge */}
-                <Image
-                    src='/badge-60-years.svg'
-                    alt='60 years of going with the flow'
-                    width={164}
-                    height={164}
-                    preload
-                    className='absolute bottom-0 left-6 z-20 h-32 w-32 translate-y-[15%] md:left-10 md:h-48 md:w-48'
-                />
+                {/* 60-years anniversary seal — straddles the bottom-left
+                    edge. Same artwork always; the badge-live demo flag adds
+                    the one-time stamp-in settle (motion-safe only). The
+                    wrapper owns positioning so the animation's transform
+                    can't fight the translate. */}
+                <span className='absolute bottom-0 left-6 z-20 block h-32 w-32 translate-y-[15%] md:left-10 md:h-48 md:w-48'>
+                    <Image
+                        src='/badge-60-years.svg'
+                        alt='60 years of going with the flow'
+                        width={164}
+                        height={164}
+                        preload
+                        className='h-full w-full motion-safe:[[data-demo-badge-live=on]_&]:animate-badge-stamp'
+                    />
+                </span>
             </div>
         </section>
     );
