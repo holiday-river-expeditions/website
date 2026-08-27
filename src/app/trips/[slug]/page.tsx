@@ -294,10 +294,15 @@ export default async function TripPage({ params }: TripPageProps) {
             {/* Cross-sell */}
             <RelatedTrips trips={trip.relatedTrips ?? []} />
 
+            {/* Clearance so the floating menu never permanently occludes
+                the last row of content. */}
+            <div aria-hidden className='h-16' />
+
             {/* Floating section menu (Aug 20 decision). Reviews and related
                 trips stay on the page but out of the menu. */}
             <SectionNav
                 ariaLabel='Trip sections'
+                showAfter={0}
                 items={[
                     { id: 'trip-details', label: 'Trip Details' },
                     ...(trip.faqs && trip.faqs.length > 0
