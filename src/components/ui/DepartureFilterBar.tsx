@@ -27,7 +27,7 @@ export interface FilterBarTrip {
     label: string;
 }
 
-export function OpenSeatsFilterBar({
+export function DepartureFilterBar({
     months,
     activeMonth,
     trips,
@@ -45,7 +45,7 @@ export function OpenSeatsFilterBar({
                 <ul className='flex gap-1 overflow-x-auto'>
                     <li className='shrink-0'>
                         <Link
-                            href='/open-seats'
+                            href='/book'
                             aria-current={
                                 activeMonth === null ? 'true' : undefined
                             }
@@ -61,7 +61,7 @@ export function OpenSeatsFilterBar({
                     {months.map((month) => (
                         <li key={month.value} className='shrink-0'>
                             <Link
-                                href={`/open-seats?month=${month.value}`}
+                                href={`/book?month=${month.value}`}
                                 aria-current={
                                     activeMonth === month.value
                                         ? 'true'

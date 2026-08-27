@@ -34,7 +34,7 @@ const NAV = [
 ];
 
 const FOOTER_LINKS = [
-    { label: 'Trip Dates', href: `${SITE}/open-seats` },
+    { label: 'Trip Dates', href: `${SITE}/book` },
     { label: 'F.A.Q.', href: `${SITE}/faq` },
     { label: 'Trip Insurance', href: `${SITE}/trip-insurance` },
     { label: 'Contact', href: `${SITE}/contact` },
@@ -258,7 +258,7 @@ export function GET() {
   <a class="logo" href="${SITE}" aria-label="Holiday River Expeditions home">
     <img src="${SITE}/logo-icon-red.svg" alt="" width="119" height="200"><span class="wordmark">Holiday River Expeditions</span>
   </a>
-  <div class="cta"><a href="${SITE}/open-seats">Open Seats</a></div>
+  <div class="cta"><a href="${SITE}/book">Book Now</a></div>
 </header>
 
 <div class="hre-title"><h1>{SITE-TITLE}</h1></div>

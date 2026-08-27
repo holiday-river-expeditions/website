@@ -8,7 +8,7 @@ import { expect, test } from '@playwright/test';
  */
 
 test('month chips filter the departures list', async ({ page }) => {
-    await page.goto('/open-seats');
+    await page.goto('/book');
 
     const bar = page.getByRole('navigation', { name: 'Filter departures' });
     if ((await bar.count()) === 0) {
@@ -58,7 +58,7 @@ test('month chips filter the departures list', async ({ page }) => {
 });
 
 test('trip jumper scrolls to the chosen group', async ({ page }) => {
-    await page.goto('/open-seats');
+    await page.goto('/book');
 
     const select = page.getByRole('combobox', { name: 'Jump to trip' });
     if ((await select.count()) === 0) {
