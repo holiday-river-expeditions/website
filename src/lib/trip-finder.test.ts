@@ -1,6 +1,8 @@
 import { describe, expect, test } from 'vitest';
 import {
+    answeredQuestionCount,
     answersToParams,
+    completedStepCount,
     currentStep,
     effectiveMinAge,
     lastAnsweredQuestion,
@@ -144,6 +146,28 @@ describe('answersToParams', () => {
 
     test('dropping who also drops age', () => {
         expect(answersToParams(base, { who: null })).toBe('month=7');
+    });
+});
+
+describe('progress honesty', () => {
+    test('step 1 completes only once the kids follow-up is resolved', () => {
+        expect(completedStepCount(answers({ who: 'kids' }))).toBe(0);
+        expect(completedStepCount(answers({ who: 'kids', age: '5-7' }))).toBe(
+            1,
+        );
+        expect(completedStepCount(answers({ who: 'adults' }))).toBe(1);
+    });
+
+    test('skips complete steps but carry no answered signal', () => {
+        const all = answers({
+            who: 'skip',
+            month: 'skip',
+            days: 'skip',
+            thrill: 'big',
+            activity: 'skip',
+        });
+        expect(completedStepCount(all)).toBe(5);
+        expect(answeredQuestionCount(all)).toBe(1);
     });
 });
 

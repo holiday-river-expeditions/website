@@ -69,6 +69,8 @@
        below) so reduced-motion users get a static site. */
     --animate-hero-drift: hero-drift 25s ease-out both;
     --animate-spark-draw: spark-draw 1.1s ease-out both;
+    --animate-finder-rise: finder-rise 0.5s ease-out both;
+    --animate-finder-stamp: finder-stamp 0.35s ease-out both;
 }
 
 @keyframes hero-drift {
@@ -90,6 +92,82 @@
     to {
         stroke-dasharray: 1;
         stroke-dashoffset: 0;
+    }
+}
+
+/* --- Find Your Trip wizard choreography. Every wizard step and the results
+   reveal are REAL navigations (URL-as-state), so these are load entrances,
+   not scroll reveals — they gate on prefers-reduced-motion alone and are
+   applied with motion-safe: utilities. Stagger via [animation-delay:...]
+   arbitrary values at the call site. */
+@keyframes finder-rise {
+    from {
+        opacity: 0;
+        transform: translateY(14px);
+    }
+    to {
+        opacity: 1;
+        transform: none;
+    }
+}
+
+/* The 60-years seal lands like a passport stamp on the results reveal. */
+@keyframes finder-stamp {
+    from {
+        opacity: 0;
+        transform: scale(1.35) rotate(-9deg);
+    }
+    to {
+        opacity: 1;
+        transform: scale(1) rotate(-3deg);
+    }
+}
+
+/* Canyon-wall curtains on the results reveal: two evergreen panels slide
+   apart off the hero. Base state is invisible; the animation's `both` fill
+   makes them opaque only while it runs, so reduced-motion users (where the
+   media query never applies the animation) simply never see the panels. */
+@keyframes finder-curtain {
+    from {
+        opacity: 1;
+        transform: none;
+    }
+    to {
+        opacity: 1;
+        transform: translateX(var(--curtain-to));
+    }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+    .finder-curtain-l,
+    .finder-curtain-r {
+        animation: finder-curtain 0.9s cubic-bezier(0.7, 0, 0.3, 1) 0.15s both;
+    }
+    .finder-curtain-l {
+        --curtain-to: -101%;
+    }
+    .finder-curtain-r {
+        --curtain-to: 101%;
+    }
+}
+
+/* Option-card hover: a teal waterline rises from the bottom of the card.
+   Pair with `group` + `group-hover:text-holiday-white transition-colors`
+   on the card's text so the label surfaces above the water. */
+.water-fill {
+    background-image: linear-gradient(#3f786b, #3f786b);
+    background-repeat: no-repeat;
+    background-size: 100% 0;
+    background-position: bottom;
+}
+.water-fill:hover,
+.water-fill:focus-visible,
+.water-fill:active {
+    background-size: 100% 100%;
+}
+@media (prefers-reduced-motion: no-preference) {
+    .water-fill {
+        transition: background-size 0.3s ease-out;
     }
 }
 

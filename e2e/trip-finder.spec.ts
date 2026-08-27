@@ -52,7 +52,10 @@ test('armed browser walks the wizard from homepage to results', async ({
     await page.getByRole('link', { name: /bringing kids/i }).click();
     await page.waitForURL('/trip-finder?who=kids');
     await expect(
-        page.getByRole('heading', { level: 1, name: /youngest adventurer/i }),
+        page.getByRole('heading', {
+            level: 1,
+            name: /how old is your youngest/i,
+        }),
     ).toBeVisible();
 
     // Back drops the last answer.
@@ -64,8 +67,8 @@ test('armed browser walks the wizard from homepage to results', async ({
     // Answer through to results. Scoped to main — option labels like
     // "Rafting" also exist in the nav.
     const main = page.getByRole('main');
-    await main.getByRole('link', { name: '8–12' }).click();
-    await main.getByRole('link', { name: 'July' }).click();
+    await main.getByRole('link', { name: /8–12/ }).click();
+    await main.getByRole('link', { name: /^July/ }).click();
     await main.getByRole('link', { name: /the classic/i }).click();
     await main.getByRole('link', { name: /some splash/i }).click();
     await main.getByRole('link', { name: /^Rafting$/ }).click();
@@ -74,8 +77,9 @@ test('armed browser walks the wizard from homepage to results', async ({
         '/trip-finder?who=kids&age=8-12&month=7&days=classic&thrill=splash&activity=raft',
     );
     await expect(
-        page.getByRole('heading', { level: 2, name: 'Best Match' }),
+        page.getByRole('heading', { level: 1, name: /is calling/i }),
     ).toBeVisible();
+    await expect(page.getByText('Best Match')).toBeVisible();
 
     // Editable chips: dropping "when" returns to exactly that question.
     await page.getByRole('link', { name: /when: july/i }).click();
@@ -92,9 +96,7 @@ test('a shared results URL renders results directly', async ({ page }) => {
     await page.goto(
         '/trip-finder?who=adults&month=skip&days=skip&thrill=big&activity=raft',
     );
-    await expect(
-        page.getByRole('heading', { level: 2, name: 'Best Match' }),
-    ).toBeVisible();
+    await expect(page.getByText('Best Match')).toBeVisible();
     // The human fallback is always present.
     await expect(
         page.getByRole('link', { name: '801-266-2087' }).last(),

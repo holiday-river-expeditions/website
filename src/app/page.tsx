@@ -139,12 +139,9 @@ export default async function Home() {
             {/* Find Your Trip wizard entry (Aug 20 decision) — ships in the
                 markup but hidden until the trip-finder demo flag is armed,
                 same technique as the trips-map prototype above. */}
-            <Section
-                background='sand'
-                className='hidden py-16 md:py-20 [[data-demo-trip-finder=on]_&]:block'
-            >
+            <section className='hidden [[data-demo-trip-finder=on]_&]:block'>
                 <TripFinderEntry />
-            </Section>
+            </section>
 
             {/* Rafting Since 1966 */}
             <Section background='white' className='py-20 md:py-24'>

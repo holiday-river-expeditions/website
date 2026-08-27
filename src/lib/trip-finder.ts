@@ -53,8 +53,15 @@ export interface TripFinderQuestion {
     /** Progress slot 1–5. The `age` follow-up shares `who`'s slot. */
     step: number;
     title: string;
+    /** Optional reassurance/context line under the title. */
+    subline?: string;
     /** Chip prefix on the results screen, e.g. "Youngest: 8–12". */
     shortLabel: string;
+    /** Full-bleed background for this screen (public/ path). */
+    image: string;
+    imageAlt: string;
+    /** One quiet brand line in the screen's footer. */
+    ethos: string;
     options: QuestionOption[];
     skipLabel: string;
 }
@@ -85,17 +92,21 @@ export const TRIP_FINDER_QUESTIONS: readonly TripFinderQuestion[] = [
         id: 'who',
         shortLabel: 'Who',
         step: 1,
-        title: "Who's coming?",
+        title: "Who's in the boat?",
+        image: '/trip-finder/who-fiddle-raft.jpg',
+        imageAlt:
+            'A Holiday raft drifting calm green water while a guest plays fiddle',
+        ethos: 'Family-run since 1966.',
         options: [
             {
                 value: 'adults',
                 label: 'Adults',
-                sublabel: 'Friends, couples, or flying solo',
+                sublabel: 'Friends, couples, or just you and the canyon',
             },
             {
                 value: 'kids',
                 label: 'Bringing kids',
-                sublabel: 'A family trip',
+                sublabel: 'Our favorite kind of trip',
             },
         ],
         skipLabel: 'Not sure yet — skip',
@@ -104,25 +115,61 @@ export const TRIP_FINDER_QUESTIONS: readonly TripFinderQuestion[] = [
         id: 'age',
         shortLabel: 'Youngest',
         step: 1,
-        title: 'How old is your youngest adventurer?',
+        title: 'How old is your youngest?',
+        subline: "Every river has an age it loves — we'll match yours.",
+        image: '/trip-finder/age-duckie-calm.jpg',
+        imageAlt:
+            'A guest paddling a red inflatable kayak on flat, calm river water',
+        ethos: 'Our guides have raised kids on these rivers.',
         options: [
-            { value: 'u5', label: 'Under 5' },
-            { value: '5-7', label: '5–7' },
-            { value: '8-12', label: '8–12' },
-            { value: 'teens', label: 'Teens' },
+            { value: 'u5', label: 'Under 5', sublabel: 'Little duckling' },
+            { value: '5-7', label: '5–7', sublabel: 'Sandcastle architect' },
+            {
+                value: '8-12',
+                label: '8–12',
+                sublabel: 'Prime rock-skipping age',
+            },
+            { value: 'teens', label: 'Teens', sublabel: 'Ready to paddle' },
         ],
-        skipLabel: 'Skip',
+        skipLabel: "Skip — we'll keep every river in play",
     },
     {
         id: 'month',
         shortLabel: 'When',
         step: 2,
         title: 'When can you get away?',
+        subline: 'Our season runs April through October.',
+        image: '/trip-finder/month-golden-canyon.jpg',
+        imageAlt:
+            'Sunburst over a canyon river at golden hour, rafts beached below',
+        ethos: 'The canyon has moods too.',
         // River and trail season only — Holiday doesn't run winter trips.
-        options: [4, 5, 6, 7, 8, 9, 10].map((month) => ({
-            value: String(month),
-            label: MONTH_NAMES[month - 1],
-        })),
+        // Sublabels teach the water states a first-timer can't know.
+        options: [
+            {
+                value: '4',
+                label: 'April',
+                sublabel: 'First trips, quiet canyons',
+            },
+            {
+                value: '5',
+                label: 'May',
+                sublabel: 'Snowmelt — big, fast, cold',
+            },
+            { value: '6', label: 'June', sublabel: 'Peak flow' },
+            {
+                value: '7',
+                label: 'July',
+                sublabel: 'Warm water, splash fights',
+            },
+            { value: '8', label: 'August', sublabel: 'Sunny and easygoing' },
+            {
+                value: '9',
+                label: 'September',
+                sublabel: 'Golden cottonwoods, empty canyons',
+            },
+            { value: '10', label: 'October', sublabel: 'Crisp air, last runs' },
+        ],
         skipLabel: "I'm flexible — skip",
     },
     {
@@ -130,6 +177,10 @@ export const TRIP_FINDER_QUESTIONS: readonly TripFinderQuestion[] = [
         shortLabel: 'Days',
         step: 3,
         title: 'How many days do you have?',
+        image: '/trip-finder/days-beach-camp.jpg',
+        imageAlt:
+            'A wide sandy beach camp deep in the canyon, kayaks and rafts pulled ashore',
+        ethos: 'No bars. No motors. No hurry.',
         options: [
             {
                 value: 'short',
@@ -141,7 +192,11 @@ export const TRIP_FINDER_QUESTIONS: readonly TripFinderQuestion[] = [
                 label: 'The classic',
                 sublabel: '4–6 days',
             },
-            { value: 'epic', label: 'The full escape', sublabel: '7+ days' },
+            {
+                value: 'epic',
+                label: 'The full disconnect',
+                sublabel: '7+ days — no bars, no hurry',
+            },
         ],
         skipLabel: 'Not sure — skip',
     },
@@ -150,11 +205,15 @@ export const TRIP_FINDER_QUESTIONS: readonly TripFinderQuestion[] = [
         shortLabel: 'Whitewater',
         step: 4,
         title: 'How much whitewater do you want?',
+        image: '/trip-finder/thrill-eddy-rapid.jpg',
+        imageAlt:
+            'A Holiday oar raft punching through a whitewater rapid, crew grinning',
+        ethos: 'No motors. Ever.',
         options: [
             {
                 value: 'mellow',
                 label: 'Mellow float',
-                sublabel: 'Scenery, swimming, naps on the boat',
+                sublabel: 'Quiet water, big canyon — no motor to drown it out',
             },
             {
                 value: 'splash',
@@ -164,22 +223,26 @@ export const TRIP_FINDER_QUESTIONS: readonly TripFinderQuestion[] = [
             {
                 value: 'big',
                 label: 'Big whitewater',
-                sublabel: 'Class IV — the real deal',
+                sublabel: 'Class IV — Cataract-grade. Hang on.',
             },
         ],
-        skipLabel: 'Not sure — show me everything',
+        skipLabel: "Guides' call — show me everything",
     },
     {
         id: 'activity',
         shortLabel: 'Activity',
         step: 5,
         title: 'Rafts, bikes, or both?',
+        image: '/trip-finder/activity-white-rim.jpg',
+        imageAlt:
+            'A mountain biker riding the White Rim road along the canyon edge',
+        ethos: 'Sixty seasons of canyon country.',
         options: [
             { value: 'raft', label: 'Rafting' },
             { value: 'bike', label: 'Mountain biking' },
             { value: 'both', label: 'A bit of both' },
         ],
-        skipLabel: 'Surprise me',
+        skipLabel: 'Surprise me — skip',
     },
 ];
 
@@ -307,6 +370,33 @@ export function lastAnsweredQuestion(
         if (isApplicable(id, answers) && answers[id] !== null) return id;
     }
     return null;
+}
+
+/**
+ * Fully completed progress steps (of TOTAL_STEPS). Step 1 counts only once
+ * the age follow-up is also resolved — honest progress, per NN/g: the
+ * current step renders as in-progress, never pre-filled.
+ */
+export function completedStepCount(answers: TripFinderAnswers): number {
+    let completed = 0;
+    if (
+        answers.who !== null &&
+        (answers.who !== 'kids' || answers.age !== null)
+    ) {
+        completed += 1;
+    }
+    if (answers.month !== null) completed += 1;
+    if (answers.days !== null) completed += 1;
+    if (answers.thrill !== null) completed += 1;
+    if (answers.activity !== null) completed += 1;
+    return completed;
+}
+
+/** Questions answered with a real preference (skips carry no signal). */
+export function answeredQuestionCount(answers: TripFinderAnswers): number {
+    return QUESTION_ORDER.filter(
+        (id) => answers[id] !== null && answers[id] !== 'skip',
+    ).length;
 }
 
 // --- Matching ---

@@ -17,7 +17,7 @@ export function TripFinderFab() {
     if (pathname === '/trip-finder') return null;
 
     return (
-        <div className='fixed bottom-6 left-6 z-40 hidden [[data-demo-trip-finder=on]_&]:block'>
+        <div className='fixed left-6 z-40 hidden bottom-[max(1.5rem,env(safe-area-inset-bottom))] [[data-demo-trip-finder=on]_&]:block'>
             <Link
                 href='/trip-finder'
                 className={buttonClasses({

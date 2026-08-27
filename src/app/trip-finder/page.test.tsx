@@ -115,7 +115,7 @@ test('no params renders question 1 with progress and a skip link', async () => {
     render(await TripFinderPage(props()));
 
     expect(
-        screen.getByRole('heading', { level: 1, name: /who's coming\?/i }),
+        screen.getByRole('heading', { level: 1, name: /who's in the boat\?/i }),
     ).toBeInTheDocument();
     expect(screen.getByText(/question 1 of 5/i)).toBeInTheDocument();
     // Options are links carrying the answer as a query param.
@@ -133,7 +133,7 @@ test('kids answer asks the age follow-up on the same progress step', async () =>
     expect(
         screen.getByRole('heading', {
             level: 1,
-            name: /youngest adventurer/i,
+            name: /how old is your youngest/i,
         }),
     ).toBeInTheDocument();
     expect(screen.getByText(/question 1 of 5/i)).toBeInTheDocument();
@@ -171,11 +171,16 @@ test('full answers render a best match with reasons and a /book deep link', asyn
     );
 
     // Lodore wins for a family with an 8-year-old wanting splash in July.
+    // The reveal: river call as h1, Best Match chip, trip name as h2.
     expect(
-        screen.getByRole('heading', { level: 2, name: 'Best Match' }),
+        screen.getByRole('heading', {
+            level: 1,
+            name: /the green river is calling/i,
+        }),
     ).toBeInTheDocument();
+    expect(screen.getByText('Best Match')).toBeInTheDocument();
     expect(
-        screen.getByRole('heading', { level: 3, name: /gates of lodore/i }),
+        screen.getByRole('heading', { level: 2, name: /gates of lodore/i }),
     ).toBeInTheDocument();
     expect(
         screen.getByRole('heading', { level: 3, name: /why it fits/i }),
@@ -214,9 +219,7 @@ test('results render with the phone fallback when Arctic is down', async () => {
         ),
     );
 
-    expect(
-        screen.getByRole('heading', { level: 2, name: 'Best Match' }),
-    ).toBeInTheDocument();
+    expect(screen.getByText('Best Match')).toBeInTheDocument();
     expect(
         screen.getByText(/live availability is napping/i),
     ).toBeInTheDocument();
