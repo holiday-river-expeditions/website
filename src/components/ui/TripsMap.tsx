@@ -57,8 +57,14 @@ function usgsStyle(services: string[]) {
 }
 
 /** Prototype style options for Darius/Holiday to compare live. Tint is
-    per-style: the warm duotone flatters line maps but muddies imagery. */
+    per-style: the warm duotone flatters line maps but muddies imagery.
+    Relief first — Darius picked it as the default. */
 const MAP_STYLES = {
+    relief: {
+        label: 'Relief',
+        style: usgsStyle(['USGSShadedReliefOnly', 'USGSHydroCached']),
+        tint: '[&_canvas]:contrast-[1.05] [&_canvas]:sepia-[0.45] [&_canvas]:saturate-[0.9]',
+    },
     topo: {
         label: 'Topo',
         style: usgsStyle(['USGSTopo']),
@@ -69,13 +75,27 @@ const MAP_STYLES = {
         style: usgsStyle(['USGSImageryTopo']),
         tint: '',
     },
-    relief: {
-        label: 'Relief',
-        style: usgsStyle(['USGSShadedReliefOnly', 'USGSHydroCached']),
-        tint: '[&_canvas]:contrast-[1.05] [&_canvas]:sepia-[0.45] [&_canvas]:saturate-[0.9]',
-    },
 } as const;
 type MapStyleKey = keyof typeof MAP_STYLES;
+
+/** Named sub-regions for the fly-to targeting, grouping the marker
+    clusters the way guests think about the geography. */
+const MAP_REGIONS = [
+    {
+        label: 'Dinosaur Country',
+        longitude: -108.72,
+        latitude: 40.58,
+        zoom: 8,
+    },
+    {
+        label: 'Green River Corridor',
+        longitude: -110.2,
+        latitude: 39.2,
+        zoom: 7.8,
+    },
+    { label: 'Canyonlands', longitude: -109.97, latitude: 38.28, zoom: 8.2 },
+    { label: 'San Juan', longitude: -109.68, latitude: 37.25, zoom: 8.4 },
+] as const;
 
 /** Scale presets: the whole operating region vs tight on the plateau
     cluster where most trips sit. */
@@ -130,17 +150,36 @@ export default function TripsMap({ markers }: { markers: TripMapMarker[] }) {
     const [active, setActive] = useState<TripMapMarker | null>(null);
     // Prototype comparison controls: basemap style + scale preset,
     // flippable live so Holiday can judge options side by side.
-    const [styleKey, setStyleKey] = useState<MapStyleKey>('topo');
-    const [viewKey, setViewKey] = useState<MapViewKey>('region');
+    const [styleKey, setStyleKey] = useState<MapStyleKey>('relief');
+    // null while a fly-to target (river/region) is active instead of a
+    // scale preset — the Scale buttons unpress and the select shows it.
+    const [viewKey, setViewKey] = useState<MapViewKey | null>('region');
+    const [target, setTarget] = useState('');
     const mapRef = useRef<MapRef>(null);
-    const flyTo = (key: MapViewKey) => {
-        setViewKey(key);
-        const view = MAP_VIEWS[key];
+    const flyToPoint = (longitude: number, latitude: number, zoom: number) => {
         mapRef.current?.flyTo({
-            center: [view.longitude, view.latitude],
-            zoom: view.zoom,
+            center: [longitude, latitude],
+            zoom,
             duration: 1200,
         });
+    };
+    const flyTo = (key: MapViewKey) => {
+        setViewKey(key);
+        setTarget('');
+        const view = MAP_VIEWS[key];
+        flyToPoint(view.longitude, view.latitude, view.zoom);
+    };
+    const flyToTarget = (value: string) => {
+        setTarget(value);
+        if (!value) return;
+        setViewKey(null);
+        const region = MAP_REGIONS.find((r) => r.label === value);
+        if (region) {
+            flyToPoint(region.longitude, region.latitude, region.zoom);
+            return;
+        }
+        const marker = markers.find((m) => m.label === value);
+        if (marker) flyToPoint(marker.longitude, marker.latitude, 8.6);
     };
     // Custom expand instead of the Fullscreen API control: a CSS takeover
     // always works (the API control silently no-ops in embedded/iframe
@@ -365,6 +404,40 @@ export default function TripsMap({ markers }: { markers: TripMapMarker[] }) {
                                 )}
                             </div>
                         </fieldset>
+                        <label className='mt-2 block'>
+                            <span className='font-alt-gothic text-[11px] font-semibold uppercase tracking-[0.08em] text-onyx/70'>
+                                Fly to
+                            </span>
+                            <select
+                                value={target}
+                                onChange={(event) =>
+                                    flyToTarget(event.target.value)
+                                }
+                                className='mt-1 block w-full max-w-40 border border-holiday-grey/40 bg-holiday-white px-1.5 py-1 font-alt-gothic text-[12px] font-semibold uppercase tracking-[0.04em] text-onyx'
+                            >
+                                <option value=''>Anywhere…</option>
+                                <optgroup label='Regions'>
+                                    {MAP_REGIONS.map((region) => (
+                                        <option
+                                            key={region.label}
+                                            value={region.label}
+                                        >
+                                            {region.label}
+                                        </option>
+                                    ))}
+                                </optgroup>
+                                <optgroup label='Rivers & outposts'>
+                                    {markers.map((marker) => (
+                                        <option
+                                            key={`${marker.kind}-${marker.label}`}
+                                            value={marker.label}
+                                        >
+                                            {marker.label}
+                                        </option>
+                                    ))}
+                                </optgroup>
+                            </select>
+                        </label>
                     </div>
 
                     {/* Legend: three marker kinds is past the point where the
