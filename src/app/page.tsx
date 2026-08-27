@@ -7,7 +7,11 @@ import { RiverSelector } from '@/components/ui/RiverSelector';
 import { Section } from '@/components/ui/Section';
 import { TripCard, type TripCardProps } from '@/components/ui/TripCard';
 import { TripsMapSection } from '@/components/ui/TripsMapSection';
-import { TRIP_MAP_COORDS, type TripMapMarker } from '@/lib/trip-map-data';
+import {
+    OUTPOST_MARKERS,
+    TRIP_MAP_COORDS,
+    type TripMapMarker,
+} from '@/lib/trip-map-data';
 import { getHomepage, getSiteSettings, imageUrl } from '@/lib/sanity';
 
 // Re-fetch from Sanity at most once a minute so content edits in /studio appear
@@ -66,9 +70,10 @@ export default async function Home() {
     }));
 
     // Trips-map prototype markers: hardcoded coords joined to the river
-    // docs' photos by slug. Rivers without coords are skipped.
-    const mapMarkers: TripMapMarker[] = (homepage.rivers ?? []).flatMap(
-        (river) => {
+    // docs' photos and descriptions by slug, plus Holiday's outposts.
+    // Rivers without coords are skipped.
+    const mapMarkers: TripMapMarker[] = [
+        ...(homepage.rivers ?? []).flatMap((river) => {
             const slug = river.slug?.current;
             const coords = slug ? TRIP_MAP_COORDS[slug] : undefined;
             if (!slug || !coords || !river.name) return [];
@@ -77,11 +82,13 @@ export default async function Home() {
                     label: river.name,
                     href: `/rivers/${slug}`,
                     imageSrc: imageUrl(river.image, 160, 160) || undefined,
+                    context: river.description ?? undefined,
                     ...coords,
                 },
             ];
-        },
-    );
+        }),
+        ...OUTPOST_MARKERS,
+    ];
 
     const learnContent = (homepage.learnContent ?? []).map((card) => ({
         title: card.title ?? '',
@@ -115,13 +122,11 @@ export default async function Home() {
                 }}
             />
 
-            {/* Trip Grid — the trips-map demo flag swaps it for the
-                topographic map prototype (Aug 20 decision under review). */}
+            {/* Trip Grid */}
             <Section background='white' className='py-20 md:py-24'>
-                <TripsMapSection markers={mapMarkers} />
                 <div
                     data-reveal-stagger
-                    className='grid gap-10 sm:grid-cols-2 lg:grid-cols-3 [[data-demo-trips-map=on]_&]:hidden'
+                    className='grid gap-10 sm:grid-cols-2 lg:grid-cols-3'
                 >
                     {featuredTrips.map((trip) => (
                         <TripCard key={trip.href} {...trip} />
@@ -227,7 +232,15 @@ export default async function Home() {
             </Section>
 
             {/* Rivers Selector */}
-            {rivers.length > 0 && <RiverSelector rivers={rivers} />}
+            {/* River selector carousel — the trips-map demo flag swaps this
+                section (below the Dee story) for the topographic map. */}
+            <div
+                data-testid='river-selector-wrap'
+                className='[[data-demo-trips-map=on]_&]:hidden'
+            >
+                {rivers.length > 0 && <RiverSelector rivers={rivers} />}
+            </div>
+            <TripsMapSection markers={mapMarkers} />
 
             {/* Learn & Get Inspired */}
             <Section background='white' className='py-20 md:py-24'>

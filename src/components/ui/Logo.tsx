@@ -48,11 +48,11 @@ export function Logo({
                 alt=''
                 width={2000}
                 height={798}
-                className='h-[1em] w-auto [[data-demo-logo-bold=on]_&]:hidden [[data-demo-logo-line=on]_&]:hidden [[data-demo-logo-secondary=on]_&]:hidden [[data-demo-logo-fresh=on]_&]:hidden'
+                className='h-[1em] w-auto [[data-demo-logo-bold=on]_&]:hidden [[data-demo-logo-line=on]_&]:hidden [[data-demo-logo-secondary=on]_&]:hidden [[data-demo-logo-fresh=on]_&]:hidden [[data-demo-logo-legacy=on]_&]:hidden'
             />
             <span
                 data-logo='stack'
-                className='hidden items-center gap-[0.28em] [[data-demo-logo-bold=on]:not([data-demo-logo-line=on]):not([data-demo-logo-secondary=on]):not([data-demo-logo-fresh=on])_&]:inline-flex'
+                className='hidden items-center gap-[0.28em] [[data-demo-logo-bold=on]:not([data-demo-logo-line=on]):not([data-demo-logo-secondary=on]):not([data-demo-logo-fresh=on]):not([data-demo-logo-legacy=on])_&]:inline-flex'
             >
                 <Image
                     src='/logo-icon-red.svg'
@@ -73,7 +73,7 @@ export function Logo({
                 line dwarfs the header row and crowds the nav columns. */}
             <span
                 data-logo='line'
-                className='hidden items-center gap-[0.28em] text-[0.72em] [[data-demo-logo-line=on]:not([data-demo-logo-secondary=on]):not([data-demo-logo-fresh=on])_&]:inline-flex'
+                className='hidden items-center gap-[0.28em] text-[0.72em] [[data-demo-logo-line=on]:not([data-demo-logo-secondary=on]):not([data-demo-logo-fresh=on]):not([data-demo-logo-legacy=on])_&]:inline-flex'
             >
                 <Image
                     src='/logo-icon-red.svg'
@@ -100,14 +100,14 @@ export function Logo({
                 alt=''
                 width={2001}
                 height={1193}
-                className='hidden h-[1.25em] w-auto [[data-demo-logo-secondary=on]:not([data-demo-logo-fresh=on])_&]:block'
+                className='hidden h-[1.25em] w-auto [[data-demo-logo-secondary=on]:not([data-demo-logo-fresh=on]):not([data-demo-logo-legacy=on])_&]:block'
             />
             {/* Fresh hierarchy exploration: the brand name carries the
                 lockup, the descriptor rides beneath as a letterspaced line
                 stretched to the name's width. */}
             <span
                 data-logo='fresh'
-                className='hidden items-center gap-[0.3em] [[data-demo-logo-fresh=on]_&]:inline-flex'
+                className='hidden items-center gap-[0.3em] [[data-demo-logo-fresh=on]:not([data-demo-logo-legacy=on])_&]:inline-flex'
             >
                 <Image
                     src='/logo-icon-red.svg'
@@ -129,6 +129,17 @@ export function Logo({
                     </span>
                 </span>
             </span>
+            {/* Legacy lockup from the old website (bikeraft.com), recolored
+                to brand red. Demo-only: the 2026 guidelines forbid mixing
+                old logos in production. */}
+            <Image
+                data-logo='legacy'
+                src='/logo-legacy-red.svg'
+                alt=''
+                width={908}
+                height={374}
+                className='hidden h-[1.15em] w-auto [[data-demo-logo-legacy=on]_&]:block'
+            />
         </span>
     );
 }

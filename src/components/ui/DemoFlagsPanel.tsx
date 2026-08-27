@@ -80,7 +80,7 @@ export function DemoFlagsPanel() {
     return (
         <div className='fixed bottom-4 right-4 z-[100]'>
             {open ? (
-                <div className='w-60 border border-holiday-grey/40 bg-holiday-white p-4 shadow-lg'>
+                <div className='max-h-[calc(100vh-4rem)] w-64 overflow-y-auto border border-holiday-grey/40 bg-holiday-white p-4 shadow-lg'>
                     <div className='flex items-center justify-between'>
                         <h2 className='font-alt-gothic text-[15px] font-semibold uppercase tracking-[0.05em] text-onyx'>
                             Demo Flags

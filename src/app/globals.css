@@ -69,6 +69,21 @@
        below) so reduced-motion users get a static site. */
     --animate-hero-drift: hero-drift 25s ease-out both;
     --animate-spark-draw: spark-draw 1.1s ease-out both;
+    --animate-badge-stamp: badge-stamp 0.7s cubic-bezier(0.2, 1.4, 0.4, 1) 0.35s
+        both;
+}
+
+/* Anniversary seal pressed into place: over-scaled and counter-rotated,
+   settling with a slight overshoot. Runs once; motion-safe only. */
+@keyframes badge-stamp {
+    from {
+        opacity: 0;
+        transform: scale(1.5) rotate(-8deg);
+    }
+    to {
+        opacity: 1;
+        transform: scale(1) rotate(0deg);
+    }
 }
 
 @keyframes hero-drift {
