@@ -3,6 +3,7 @@ import { PT_Sans, Oswald } from 'next/font/google';
 import { Header } from '@/components/layout/Header';
 import { RevealObserver } from '@/components/ui/RevealObserver';
 import { DemoFlagsPanel } from '@/components/ui/DemoFlagsPanel';
+import { TripFinderFab } from '@/components/ui/TripFinderFab';
 import { Footer } from '@/components/layout/Footer';
 import { DEMO_INIT_SCRIPT } from '@/lib/demo-flags';
 import './globals.css';
@@ -88,6 +89,7 @@ export default function RootLayout({
                 className={`${oswald.variable} ${ptSans.variable} antialiased`}
             >
                 <RevealObserver />
+                <TripFinderFab />
                 <DemoFlagsPanel />
                 <Header />
                 <main className='min-h-screen'>{children}</main>

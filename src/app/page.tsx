@@ -5,6 +5,7 @@ import { ContentCard } from '@/components/ui/ContentCard';
 import { Hero } from '@/components/ui/Hero';
 import { Section } from '@/components/ui/Section';
 import { TripCard, type TripCardProps } from '@/components/ui/TripCard';
+import { TripFinderEntry } from '@/components/ui/TripFinderEntry';
 import { TripsMapSection } from '@/components/ui/TripsMapSection';
 import {
     OUTPOST_MARKERS,
@@ -102,6 +103,7 @@ export default async function Home() {
                     text: homepage.heroCtaText ?? 'Find Your Trip',
                     href: homepage.heroCtaLink ?? '/trips',
                 }}
+                demoTripFinderCta
                 contact={{
                     phone: settings?.phone ?? '801-266-2087',
                     email: settings?.email ?? 'Info@HolidayExpeditions.com',
@@ -124,6 +126,13 @@ export default async function Home() {
                     </Button>
                 </div>
             </Section>
+
+            {/* Find Your Trip wizard entry (Aug 20 decision) — ships in the
+                markup but hidden until the trip-finder demo flag is armed,
+                same technique as the trips-map prototype above. */}
+            <section className='hidden [[data-demo-trip-finder=on]_&]:block'>
+                <TripFinderEntry />
+            </section>
 
             {/* Rafting Since 1966 */}
             <Section background='white' className='py-20 md:py-24'>

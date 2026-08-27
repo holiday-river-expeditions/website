@@ -15,6 +15,11 @@ const pages = [
     { name: 'faq', path: '/faq' },
     { name: 'contact', path: '/contact' },
     { name: 'book', path: '/book' },
+    { name: 'trip finder', path: '/trip-finder' },
+    {
+        name: 'trip finder results',
+        path: '/trip-finder?who=kids&age=8-12&month=7&days=classic&thrill=splash&activity=raft',
+    },
 ];
 
 for (const { name, path } of pages) {

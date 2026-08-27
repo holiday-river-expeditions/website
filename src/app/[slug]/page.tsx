@@ -24,6 +24,7 @@ const RESERVED_SLUGS = new Set([
     'store',
     'studio',
     'trip-dates',
+    'trip-finder',
     'trips',
 ]);
 
