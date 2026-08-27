@@ -3,6 +3,7 @@ import type { Metadata } from 'next';
 import Image from 'next/image';
 import Link from 'next/link';
 import { Section } from '@/components/ui/Section';
+import { SectionNav } from '@/components/ui/SectionNav';
 import { TripCard } from '@/components/ui/TripCard';
 import { getAllSpecialtyTypes, getAllTrips, imageUrl } from '@/lib/sanity';
 
@@ -39,25 +40,22 @@ export default async function SpecialtyPage() {
                     band on the beach, a new moon over the canyon rim, a boat
                     full of people who came for the same reason you did.
                 </p>
-                {types.length > 1 && (
-                    <nav aria-label='Specialty trip families' className='mt-8'>
-                        <ul className='flex flex-wrap gap-3'>
-                            {types.map((type) =>
-                                type.slug?.current ? (
-                                    <li key={type._id}>
-                                        <a
-                                            href={`#${type.slug.current}`}
-                                            className='inline-block border border-holiday-red px-3.5 py-1.5 text-[14px] font-bold leading-tight text-holiday-red transition-colors hover:bg-holiday-red hover:text-holiday-white'
-                                        >
-                                            {type.name}
-                                        </a>
-                                    </li>
-                                ) : null,
-                            )}
-                        </ul>
-                    </nav>
-                )}
             </Section>
+
+            {/* Floating family menu (Aug 20 decision: categories get copy,
+                photos, and a floating-menu jump link). Always visible — the
+                first family starts immediately below the intro. */}
+            {types.length > 1 && (
+                <SectionNav
+                    ariaLabel='Specialty trip families'
+                    showAfter={0}
+                    items={types.flatMap((type) =>
+                        type.slug?.current && type.name
+                            ? [{ id: type.slug.current, label: type.name }]
+                            : [],
+                    )}
+                />
+            )}
 
             {types.length === 0 ? (
                 <Section background='white' className='pb-20 pt-8 md:pb-24'>
