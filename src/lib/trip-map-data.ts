@@ -18,29 +18,40 @@ export interface TripMapMarker {
 }
 
 /**
- * Holiday's physical bases. PROTOTYPE DATA — locations and wording need
- * Darius/Holiday's confirmation before this leaves the demo flag.
+ * Holiday's physical bases, per the company's own contact page
+ * (bikeraft.com/contact, checked 2026-08-27): the year-round Salt Lake
+ * City office plus two seasonal trip headquarters.
  */
 export const OUTPOST_MARKERS: TripMapMarker[] = [
     {
-        label: 'Salt Lake City HQ',
+        label: 'Salt Lake City Office',
         href: '/contact',
-        longitude: -111.865,
-        latitude: 40.688,
+        longitude: -111.878,
+        latitude: 40.687,
         kind: 'outpost',
         imageSrc: '/logo-icon-red.svg',
         context:
-            'Headquarters — bookings, planning help, and the crew who answer the phone.',
+            'Year-round business office — bookings, planning help, and the crew who answer the phone. 801-266-2087.',
     },
     {
-        label: 'Green River Outpost',
+        label: 'Green River HQ',
         href: '/contact',
         longitude: -110.16,
         latitude: 38.995,
         kind: 'outpost',
         imageSrc: '/logo-icon-red.svg',
         context:
-            'River-side base for Desolation, Labyrinth, and Cataract launches — check-in, gear, and shuttles.',
+            'Seasonal trip headquarters, May–September — meeting point for Green and Colorado River launches. 435-564-3273.',
+    },
+    {
+        label: 'Vernal HQ',
+        href: '/contact',
+        longitude: -109.529,
+        latitude: 40.456,
+        kind: 'outpost',
+        imageSrc: '/logo-icon-red.svg',
+        context:
+            'Seasonal trip headquarters, May–September — meeting point for Gates of Lodore and Yampa launches. 435-789-4586.',
     },
 ];
 

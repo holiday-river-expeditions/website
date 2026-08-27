@@ -3,7 +3,6 @@ import Link from 'next/link';
 import { Button } from '@/components/ui/Button';
 import { ContentCard } from '@/components/ui/ContentCard';
 import { Hero } from '@/components/ui/Hero';
-import { RiverSelector } from '@/components/ui/RiverSelector';
 import { Section } from '@/components/ui/Section';
 import { TripCard, type TripCardProps } from '@/components/ui/TripCard';
 import { TripFinderEntry } from '@/components/ui/TripFinderEntry';
@@ -56,23 +55,10 @@ export default async function Home() {
         }),
     );
 
-    // 16:9 master large enough for 2x DPR full-bleed; next/image scales it
-    // down per device so smaller screens don't pay for the big crop.
-    // A river name links straight to its trip when it has exactly one —
-    // the river pages are too thin to be a useful stop. Zero trips (or,
-    // someday, several) falls back to the full trip listing.
-    const rivers = (homepage.rivers ?? []).map((river) => ({
-        name: river.name ?? '',
-        href:
-            river.tripCount === 1 && river.tripSlug
-                ? `/trips/${river.tripSlug}`
-                : '/trips',
-        image: imageUrl(river.image, 2880, 1620),
-    }));
-
-    // Trips-map prototype markers: hardcoded coords joined to the river
-    // docs' photos and descriptions by slug, plus Holiday's outposts.
-    // Rivers without coords are skipped.
+    // Trips-map markers: coords joined to the river docs' photos and
+    // descriptions by slug, plus Holiday's outposts. Rivers without
+    // coords are skipped. (Coords live in code for now — moving them
+    // onto the river documents is the follow-up so editors own them.)
     const mapMarkers: TripMapMarker[] = [
         ...(homepage.rivers ?? []).flatMap((river) => {
             const slug = river.slug?.current;
@@ -241,14 +227,9 @@ export default async function Home() {
             </Section>
 
             {/* Rivers Selector */}
-            {/* River selector carousel — the trips-map demo flag swaps this
-                section (below the Dee story) for the topographic map. */}
-            <div
-                data-testid='river-selector-wrap'
-                className='[[data-demo-trips-map=on]_&]:hidden'
-            >
-                {rivers.length > 0 && <RiverSelector rivers={rivers} />}
-            </div>
+            {/* The trips map (below the Dee story) — replaced the river
+                selector carousel per the Aug 20 decision, graduated from
+                the demo flag 2026-08-27. */}
             <TripsMapSection markers={mapMarkers} />
 
             {/* Learn & Get Inspired */}
