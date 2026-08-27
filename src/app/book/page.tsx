@@ -269,7 +269,7 @@ export default async function BookPage({
                                 <div
                                     key={group.key}
                                     id={groupAnchor(group.key)}
-                                    className='scroll-mt-6'
+                                    className='scroll-mt-6 [[data-demo-sticky-header=on]_&]:scroll-mt-28'
                                     data-availability
                                 >
                                     {/* Group header: for authored trips a

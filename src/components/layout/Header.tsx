@@ -7,7 +7,10 @@ import { MobileNav } from './MobileNav';
 
 export function Header() {
     return (
-        <header className='relative bg-holiday-white'>
+        // sticky-header demo flag: persistent nav + logo while scrolling
+        // (wayfinding on long pages). z-50 sits above content and the
+        // floating bars (z-40), below the demo panel (z-[100]).
+        <header className='relative bg-holiday-white [[data-demo-sticky-header=on]_&]:sticky [[data-demo-sticky-header=on]_&]:top-0 [[data-demo-sticky-header=on]_&]:z-50 [[data-demo-sticky-header=on]_&]:shadow-md'>
             {/* Full-bleed: nav hugs the left edge, hamburger/Book Now the right
                 (mock places them ~48px from the viewport edges, no max-width). */}
             <div className='flex items-center justify-between gap-2 px-4 py-5 sm:px-6 md:px-12 lg:grid lg:grid-cols-[1fr_auto_1fr]'>

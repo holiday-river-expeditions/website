@@ -49,6 +49,12 @@ export const DEMO_FLAGS = [
         description:
             'ON: the floating section/filter bars stay hidden until the page is scrolled. OFF (default): always visible.',
     },
+    {
+        id: 'sticky-header',
+        label: 'Sticky header',
+        description:
+            'ON: the header (nav + logo) sticks to the top while scrolling — persistent wayfinding on long pages.',
+    },
 ] as const satisfies readonly {
     id: string;
     label: string;

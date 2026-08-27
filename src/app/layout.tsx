@@ -66,6 +66,11 @@ export default function RootLayout({
         <html
             lang='en'
             suppressHydrationWarning
+            // data-scroll-behavior: with CSS smooth scrolling, Next 16 no
+            // longer forces an instant scroll-to-top on navigation unless
+            // this attribute opts back in — without it, route changes
+            // animated (or appeared to keep) the old scroll position.
+            data-scroll-behavior='smooth'
             className='motion-safe:scroll-smooth'
         >
             <head>
