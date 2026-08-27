@@ -25,6 +25,12 @@ export const DEMO_FLAGS = [
         description:
             'ON: stacked Alternate Gothic lockup. OFF: original horizontal SVG brand lockup.',
     },
+    {
+        id: 'logo-line',
+        label: 'Single-line logo',
+        description:
+            'ON: HOLIDAY RIVER EXPEDITIONS live text on one line. Takes precedence over the stacked bold flag.',
+    },
 ] as const satisfies readonly {
     id: string;
     label: string;
