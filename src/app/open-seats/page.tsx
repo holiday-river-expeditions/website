@@ -2,8 +2,11 @@ import type { Metadata } from 'next';
 import Link from 'next/link';
 import { Button } from '@/components/ui/Button';
 import { DepartureList } from '@/components/ui/DepartureList';
+import {
+    OpenSeatsFilterBar,
+    type FilterBarTrip,
+} from '@/components/ui/OpenSeatsFilterBar';
 import { Section } from '@/components/ui/Section';
-import { SectionNav } from '@/components/ui/SectionNav';
 import {
     type ArcticDeparture,
     getAllUpcomingDepartures,
@@ -13,8 +16,12 @@ import {
     buildCalloutMap,
     cleanTypeName,
     type DepartureCalloutMap,
+    filterByMonth,
     formatDateRange,
+    formatDayLabel,
+    monthOptions,
     nextAvailable,
+    parseMonthParam,
 } from '@/lib/departures';
 import { getAllTrips } from '@/lib/sanity';
 
@@ -42,12 +49,18 @@ function groupAnchor(key: string): string {
     return `trip-${key.replace(/[^a-zA-Z0-9-]/g, '-')}`;
 }
 
-export default async function OpenSeatsPage() {
-    const [departures, tripTypes, sanityTrips] = await Promise.all([
+export default async function OpenSeatsPage({
+    searchParams,
+}: {
+    searchParams: Promise<{ month?: string | string[] }>;
+}) {
+    const [departures, tripTypes, sanityTrips, params] = await Promise.all([
         getAllUpcomingDepartures(),
         getBookableTripTypes(),
         getAllTrips(),
+        searchParams,
     ]);
+    const activeMonth = parseMonthParam(params.month);
 
     let groups: TripGroup[] | null = null;
     if (departures !== null && tripTypes !== null) {
@@ -118,6 +131,49 @@ export default async function OpenSeatsPage() {
         );
     }
 
+    // Filter-bar data comes from the UNfiltered groups so the month chips
+    // and trip jumper stay stable while a filter is active.
+    const months = groups
+        ? monthOptions(groups.flatMap((group) => group.departures)).map(
+              (month) => ({
+                  ...month,
+                  count: groups!.reduce(
+                      (sum, group) =>
+                          sum +
+                          filterByMonth(group.departures, month.value).length,
+                      0,
+                  ),
+              }),
+          )
+        : [];
+    const titleCounts = new Map<string, number>();
+    for (const group of groups ?? []) {
+        titleCounts.set(group.title, (titleCounts.get(group.title) ?? 0) + 1);
+    }
+    const jumpTrips: FilterBarTrip[] = (groups ?? []).map((group) => {
+        const next = nextAvailable(group.departures);
+        // Unmapped Arctic types can share a display name; the next date
+        // tells them apart in the jumper.
+        const ambiguous = (titleCounts.get(group.title) ?? 0) > 1;
+        return {
+            id: groupAnchor(group.key),
+            label:
+                ambiguous && next
+                    ? `${group.title} · ${formatDayLabel(next.start)}`
+                    : group.title,
+        };
+    });
+
+    const visibleGroups =
+        groups === null || activeMonth === null
+            ? groups
+            : groups
+                  .map((group) => ({
+                      ...group,
+                      departures: filterByMonth(group.departures, activeMonth),
+                  }))
+                  .filter((group) => group.departures.length > 0);
+
     return (
         <>
             <Section background='white' className='pb-4 pt-14 md:pt-20'>
@@ -153,20 +209,33 @@ export default async function OpenSeatsPage() {
                         </a>{' '}
                         and we&rsquo;ll find you a seat.
                     </p>
-                ) : groups.length === 0 ? (
-                    <p className='max-w-2xl text-body leading-body text-onyx'>
-                        Nothing is listed online right now. Call{' '}
-                        <a
-                            href='tel:+18012662087'
-                            className='font-bold text-holiday-red transition-opacity hover:opacity-70'
-                        >
-                            801-266-2087
-                        </a>{' '}
-                        to ask about upcoming dates.
-                    </p>
+                ) : visibleGroups!.length === 0 ? (
+                    activeMonth !== null && groups.length > 0 ? (
+                        <p className='max-w-2xl text-body leading-body text-onyx'>
+                            No departures in that month.{' '}
+                            <Link
+                                href='/open-seats'
+                                className='font-bold text-holiday-red underline'
+                            >
+                                See all dates
+                            </Link>
+                            .
+                        </p>
+                    ) : (
+                        <p className='max-w-2xl text-body leading-body text-onyx'>
+                            Nothing is listed online right now. Call{' '}
+                            <a
+                                href='tel:+18012662087'
+                                className='font-bold text-holiday-red transition-opacity hover:opacity-70'
+                            >
+                                801-266-2087
+                            </a>{' '}
+                            to ask about upcoming dates.
+                        </p>
+                    )
                 ) : (
                     <div className='max-w-4xl space-y-14'>
-                        {groups.map((group) => {
+                        {visibleGroups!.map((group) => {
                             const next = nextAvailable(group.departures);
                             return (
                                 <div
@@ -217,15 +286,14 @@ export default async function OpenSeatsPage() {
                 )}
             </Section>
 
-            {/* Floating menu, driven by whatever Arctic returned: one stop
-                per trip group with open departures. */}
-            {groups !== null && groups.length > 1 && (
-                <SectionNav
-                    ariaLabel='Trips with availability'
-                    items={groups.map((group) => ({
-                        id: groupAnchor(group.key),
-                        label: group.title,
-                    }))}
+            {/* Floating filter bar, driven by whatever Arctic returned:
+                month chips filter server-side via ?month=, the select jumps
+                to a trip group. */}
+            {groups !== null && groups.length > 0 && (
+                <OpenSeatsFilterBar
+                    months={months}
+                    activeMonth={activeMonth}
+                    trips={jumpTrips}
                 />
             )}
 
