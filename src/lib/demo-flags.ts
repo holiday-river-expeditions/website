@@ -21,27 +21,29 @@ export const DEMO_UPDATED_EVENT = 'hre:demo-updated';
 export const DEMO_FLAGS = [
     {
         id: 'logo-bold',
-        label: 'Bold live-text logo',
-        description:
-            'ON: stacked Alternate Gothic lockup. OFF: original horizontal SVG brand lockup.',
+        label: 'Bold live-text lockup',
+        description: 'Stacked Alternate Gothic lockup from the August batch.',
+        group: 'logo',
     },
     {
         id: 'logo-line',
-        label: 'Single-line logo',
-        description:
-            'ON: HOLIDAY RIVER EXPEDITIONS live text on one line. Takes precedence over the stacked bold flag.',
+        label: 'Single line',
+        description: 'HOLIDAY RIVER EXPEDITIONS live text on one line.',
+        group: 'logo',
     },
     {
         id: 'logo-secondary',
         label: 'Official secondary lockup',
         description:
-            "ON: the brand package's Secondary Horizontal lockup — bigger mark, squarer proportions, delivered by Holiday's designer but never used on the site.",
+            "The brand package's Secondary Horizontal — bigger mark, squarer.",
+        group: 'logo',
     },
     {
         id: 'logo-fresh',
-        label: 'Fresh hierarchy lockup',
+        label: 'Fresh hierarchy',
         description:
-            'ON: new exploration — HOLIDAY dominant with RIVER EXPEDITIONS as a letterspaced line beneath. Wins over every other logo flag.',
+            'HOLIDAY dominant with RIVER EXPEDITIONS letterspaced beneath.',
+        group: 'logo',
     },
     {
         id: 'bars-on-scroll',
@@ -55,13 +57,38 @@ export const DEMO_FLAGS = [
         description:
             'ON: the header (nav + logo) sticks to the top while scrolling — persistent wayfinding on long pages.',
     },
+    {
+        id: 'river-flow',
+        label: 'Live river flow (CFS)',
+        description:
+            'ON: the CFS reading + 7-day sparkline on trip and river pages, from USGS gauges.',
+    },
+    {
+        id: 'trips-map',
+        label: 'Homepage trips map',
+        description:
+            'ON: the topographic trips-map prototype (USGS tiles, MapLibre) replaces the featured-trips grid on the homepage.',
+    },
 ] as const satisfies readonly {
     id: string;
     label: string;
     description: string;
+    /** Mutually exclusive flags share a group and render as radios. */
+    group?: string;
 }[];
 
 export type DemoFlagId = (typeof DEMO_FLAGS)[number]['id'];
+
+/** Radio-group metadata for mutually exclusive flag sets. */
+export const DEMO_FLAG_GROUPS: Record<
+    string,
+    { label: string; defaultLabel: string }
+> = {
+    logo: {
+        label: 'Logo treatment',
+        defaultLabel: 'Classic SVG lockup (default)',
+    },
+};
 
 const demoStateSchema = z.object({
     armed: z.boolean(),

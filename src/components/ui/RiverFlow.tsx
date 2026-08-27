@@ -42,7 +42,10 @@ export async function RiverFlow({
 
     if (variant === 'fact') {
         return (
-            <div>
+            // Demoed behind the river-flow flag: hidden for real visitors
+            // until Holiday signs off. Data still renders server-side (the
+            // fetches are cached), CSS picks visibility per browser.
+            <div className='hidden [[data-demo-river-flow=on]_&]:block'>
                 {/* "Now" is load-bearing: the dates below are future trips,
                     and this reading is today's conditions, not a forecast
                     for those dates. */}
@@ -63,7 +66,7 @@ export async function RiverFlow({
     }
 
     return (
-        <p className='flex items-center gap-2.5 text-body leading-body text-onyx'>
+        <p className='hidden items-center gap-2.5 text-body leading-body text-onyx [[data-demo-river-flow=on]_&]:flex'>
             <span>
                 Current flow:{' '}
                 <ExternalLink

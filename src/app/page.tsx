@@ -6,6 +6,8 @@ import { Hero } from '@/components/ui/Hero';
 import { RiverSelector } from '@/components/ui/RiverSelector';
 import { Section } from '@/components/ui/Section';
 import { TripCard, type TripCardProps } from '@/components/ui/TripCard';
+import { TripsMapSection } from '@/components/ui/TripsMapSection';
+import { TRIP_MAP_COORDS, type TripMapMarker } from '@/lib/trip-map-data';
 import { getHomepage, getSiteSettings, imageUrl } from '@/lib/sanity';
 
 // Re-fetch from Sanity at most once a minute so content edits in /studio appear
@@ -63,6 +65,24 @@ export default async function Home() {
         image: imageUrl(river.image, 2880, 1620),
     }));
 
+    // Trips-map prototype markers: hardcoded coords joined to the river
+    // docs' photos by slug. Rivers without coords are skipped.
+    const mapMarkers: TripMapMarker[] = (homepage.rivers ?? []).flatMap(
+        (river) => {
+            const slug = river.slug?.current;
+            const coords = slug ? TRIP_MAP_COORDS[slug] : undefined;
+            if (!slug || !coords || !river.name) return [];
+            return [
+                {
+                    label: river.name,
+                    href: `/rivers/${slug}`,
+                    imageSrc: imageUrl(river.image, 160, 160) || undefined,
+                    ...coords,
+                },
+            ];
+        },
+    );
+
     const learnContent = (homepage.learnContent ?? []).map((card) => ({
         title: card.title ?? '',
         image: imageUrl(card.image, 616, 856),
@@ -95,11 +115,13 @@ export default async function Home() {
                 }}
             />
 
-            {/* Trip Grid */}
+            {/* Trip Grid — the trips-map demo flag swaps it for the
+                topographic map prototype (Aug 20 decision under review). */}
             <Section background='white' className='py-20 md:py-24'>
+                <TripsMapSection markers={mapMarkers} />
                 <div
                     data-reveal-stagger
-                    className='grid gap-10 sm:grid-cols-2 lg:grid-cols-3'
+                    className='grid gap-10 sm:grid-cols-2 lg:grid-cols-3 [[data-demo-trips-map=on]_&]:hidden'
                 >
                     {featuredTrips.map((trip) => (
                         <TripCard key={trip.href} {...trip} />

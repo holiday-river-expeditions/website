@@ -39,24 +39,22 @@ test('/admin arms the overlay and the logo flips live', async ({ page }) => {
     await pill.click();
 
     const header = page.getByRole('banner');
-    const boldCheckbox = page.getByRole('checkbox', {
-        name: /Bold live-text logo/,
+    const boldRadio = page.getByRole('radio', {
+        name: /Bold live-text lockup/,
     });
-    const lineCheckbox = page.getByRole('checkbox', {
-        name: /Single-line logo/,
-    });
+    const lineRadio = page.getByRole('radio', { name: /Single line/ });
 
-    // Flip bold ON: stack lockup appears in place, classic hides — no
+    // Pick bold: stack lockup appears in place, classic hides — no
     // navigation.
-    await boldCheckbox.check();
+    await boldRadio.check();
     await expect(header.locator('[data-logo="classic"]')).toBeHidden();
     await expect(header.locator('[data-logo="stack"]')).toBeVisible();
 
-    // Line ON takes precedence over the stack.
-    await lineCheckbox.check();
+    // Radios are mutually exclusive: picking line swaps the treatments.
+    await lineRadio.check();
     await expect(header.locator('[data-logo="stack"]')).toBeHidden();
     await expect(header.locator('[data-logo="line"]')).toBeVisible();
-    await lineCheckbox.uncheck();
+    await boldRadio.check();
     await expect(header.locator('[data-logo="stack"]')).toBeVisible();
 
     // Survives reload with the attribute present before paint: the inline
