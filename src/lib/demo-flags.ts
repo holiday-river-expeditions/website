@@ -31,6 +31,12 @@ export const DEMO_FLAGS = [
         description:
             'ON: HOLIDAY RIVER EXPEDITIONS live text on one line. Takes precedence over the stacked bold flag.',
     },
+    {
+        id: 'logo-secondary',
+        label: 'Official secondary lockup',
+        description:
+            "ON: the brand package's Secondary Horizontal lockup — bigger mark, squarer proportions, delivered by Holiday's designer but never used on the site. Wins over the other logo flags.",
+    },
 ] as const satisfies readonly {
     id: string;
     label: string;
