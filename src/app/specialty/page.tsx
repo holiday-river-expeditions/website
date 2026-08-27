@@ -217,6 +217,10 @@ export default async function SpecialtyPage() {
                     </details>
                 </Section>
             )}
+
+            {/* Clearance so the floating family menu never permanently
+                occludes the last row of content. */}
+            <div aria-hidden className='h-16' />
         </>
     );
 }

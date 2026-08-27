@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import { useDemoFlag } from '@/lib/use-demo-flag';
 
 export interface SectionNavItem {
     /** id of the target section element (rendered as href="#id"). */
@@ -29,16 +30,21 @@ export function SectionNav({
     /** Scroll offset (px) before the bar appears; 0 = always visible. */
     showAfter?: number;
 }) {
-    const [visible, setVisible] = useState(showAfter === 0);
+    // Demo flag: Holiday can compare always-visible bars against
+    // show-on-scroll without a deploy.
+    const barsOnScroll = useDemoFlag('bars-on-scroll');
+    const threshold = barsOnScroll ? Math.max(showAfter, 320) : showAfter;
+    const [scrolled, setScrolled] = useState(false);
     const [active, setActive] = useState<string | null>(null);
+    const visible = threshold === 0 || scrolled;
 
     useEffect(() => {
-        if (showAfter === 0) return;
-        const onScroll = () => setVisible(window.scrollY > showAfter);
+        if (threshold === 0) return;
+        const onScroll = () => setScrolled(window.scrollY > threshold);
         onScroll();
         window.addEventListener('scroll', onScroll, { passive: true });
         return () => window.removeEventListener('scroll', onScroll);
-    }, [showAfter]);
+    }, [threshold]);
 
     useEffect(() => {
         const sections = items

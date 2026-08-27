@@ -7,17 +7,15 @@ import { expect, test } from '@playwright/test';
  * and always visible on the specialty hub.
  */
 
-test('trip page floating menu appears on scroll and jumps to sections', async ({
+test('trip page floating menu is visible on load and jumps to sections', async ({
     page,
 }) => {
     await page.goto('/trips/cataract-canyon');
 
-    // CSS locator: while hidden the nav has no accessible role (visibility:
-    // hidden removes it from the a11y tree, which is the point).
-    const nav = page.locator('nav[aria-label="Trip sections"]');
-    await expect(nav).toHaveClass(/invisible/);
-
-    await page.mouse.wheel(0, 800);
+    // Always visible (Darius: appearing only after a long scroll hid the
+    // navigation exactly when a new visitor needs it), consistent with the
+    // specialty hub and /book bars.
+    const nav = page.getByRole('navigation', { name: 'Trip sections' });
     await expect(nav).not.toHaveClass(/invisible/);
     await expect(nav.getByRole('link', { name: 'Trip Details' })).toBeVisible();
 

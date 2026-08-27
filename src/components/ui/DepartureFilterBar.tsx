@@ -1,6 +1,8 @@
 'use client';
 
 import Link from 'next/link';
+import { useEffect, useState } from 'react';
+import { useDemoFlag } from '@/lib/use-demo-flag';
 import type { MonthOption } from '@/lib/departures';
 
 /**
@@ -36,10 +38,27 @@ export function DepartureFilterBar({
     activeMonth: string | null;
     trips: FilterBarTrip[];
 }) {
+    // Demo flag: compare always-visible against show-on-scroll (matches
+    // SectionNav's behavior under the same flag).
+    const barsOnScroll = useDemoFlag('bars-on-scroll');
+    const [scrolled, setScrolled] = useState(false);
+    useEffect(() => {
+        if (!barsOnScroll) return;
+        const onScroll = () => setScrolled(window.scrollY > 320);
+        onScroll();
+        window.addEventListener('scroll', onScroll, { passive: true });
+        return () => window.removeEventListener('scroll', onScroll);
+    }, [barsOnScroll]);
+    const visible = !barsOnScroll || scrolled;
+
     return (
         <nav
             aria-label='Filter departures'
-            className='fixed bottom-4 left-1/2 z-40 w-max max-w-[calc(100vw-2rem)] -translate-x-1/2'
+            className={`fixed bottom-4 left-1/2 z-40 w-max max-w-[calc(100vw-2rem)] -translate-x-1/2 transition-opacity duration-200 ${
+                visible
+                    ? 'opacity-100'
+                    : 'pointer-events-none invisible opacity-0'
+            }`}
         >
             <div className='flex items-center gap-3 border border-holiday-grey/40 bg-holiday-white p-1.5 pl-3 shadow-lg'>
                 <ul className='flex gap-1 overflow-x-auto'>

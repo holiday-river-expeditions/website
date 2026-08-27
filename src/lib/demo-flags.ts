@@ -43,6 +43,12 @@ export const DEMO_FLAGS = [
         description:
             'ON: new exploration — HOLIDAY dominant with RIVER EXPEDITIONS as a letterspaced line beneath. Wins over every other logo flag.',
     },
+    {
+        id: 'bars-on-scroll',
+        label: 'Floating bars appear on scroll',
+        description:
+            'ON: the floating section/filter bars stay hidden until the page is scrolled. OFF (default): always visible.',
+    },
 ] as const satisfies readonly {
     id: string;
     label: string;

@@ -403,6 +403,10 @@ export default async function BookPage({
                     </div>
                 </div>
             </Section>
+
+            {/* Clearance so the floating filter bar never permanently
+                occludes the last row of content. */}
+            <div aria-hidden className='h-16' />
         </>
     );
 }
