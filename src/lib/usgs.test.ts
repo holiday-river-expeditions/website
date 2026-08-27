@@ -1,5 +1,10 @@
 import { describe, expect, test } from 'vitest';
-import { parseUsgsFlow, usgsGaugeUrl } from './usgs';
+import {
+    flowTrend,
+    parseUsgsDailySeries,
+    parseUsgsFlow,
+    usgsGaugeUrl,
+} from './usgs';
 
 function payload(
     series: Array<Array<{ value: string; dateTime: string }>>,
@@ -88,4 +93,69 @@ test('usgsGaugeUrl links the first gauge', () => {
     expect(usgsGaugeUrl('09180500, 09315000')).toBe(
         'https://waterdata.usgs.gov/monitoring-location/09180500/',
     );
+});
+
+function dailyPayload(
+    series: Array<Array<{ value: string; dateTime: string }>>,
+): unknown {
+    return {
+        value: {
+            timeSeries: series.map((values) => ({
+                values: [{ value: values }],
+            })),
+        },
+    };
+}
+
+describe('parseUsgsDailySeries', () => {
+    test('sums per date and keeps only dates every site reported', () => {
+        const series = parseUsgsDailySeries(
+            dailyPayload([
+                [
+                    { value: '1600', dateTime: '2026-08-25T00:00:00.000' },
+                    { value: '1610', dateTime: '2026-08-26T00:00:00.000' },
+                ],
+                [
+                    { value: '1950', dateTime: '2026-08-26T00:00:00.000' },
+                    { value: '1900', dateTime: '2026-08-27T00:00:00.000' },
+                ],
+            ]),
+        );
+        // Only Aug 26 has readings from both gauges.
+        expect(series).toEqual([{ date: '2026-08-26', cfs: 3560 }]);
+    });
+
+    test('sorts a single-gauge week ascending and skips sentinels', () => {
+        const series = parseUsgsDailySeries(
+            dailyPayload([
+                [
+                    { value: '600', dateTime: '2026-08-26T00:00:00.000' },
+                    { value: '-999999', dateTime: '2026-08-25T00:00:00.000' },
+                    { value: '580', dateTime: '2026-08-24T00:00:00.000' },
+                ],
+            ]),
+        );
+        expect(series).toEqual([
+            { date: '2026-08-24', cfs: 580 },
+            { date: '2026-08-26', cfs: 600 },
+        ]);
+    });
+
+    test('returns empty for garbage', () => {
+        expect(parseUsgsDailySeries(null)).toEqual([]);
+        expect(parseUsgsDailySeries({})).toEqual([]);
+    });
+});
+
+describe('flowTrend', () => {
+    const point = (date: string, cfs: number) => ({ date, cfs });
+    test('classifies rising, falling, steady with a 5% band', () => {
+        expect(flowTrend([point('a', 1000), point('b', 1100)])).toBe('rising');
+        expect(flowTrend([point('a', 1000), point('b', 800)])).toBe('falling');
+        expect(flowTrend([point('a', 1000), point('b', 1020)])).toBe('steady');
+    });
+    test('null on empty or zero baselines', () => {
+        expect(flowTrend([])).toBeNull();
+        expect(flowTrend([point('a', 0), point('b', 10)])).toBeNull();
+    });
 });
