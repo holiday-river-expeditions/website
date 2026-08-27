@@ -5,9 +5,11 @@ import { expect, test } from '@playwright/test';
  * SVG logo lockup, no panel); a browser armed via /admin gets the
  * floating overlay and can flip the logo live, persisting across reloads
  * without a flash of the default variant.
+ *
+ * The three logo treatments carry data-logo hooks (classic/stack/line)
+ * because their text contents collide for text-based locators.
  */
 
-const CLASSIC = 'img[src*="logo-horizontal"]';
 const PILL = { name: 'Open demo flags panel' };
 
 test('default visitor sees the classic logo and no demo panel', async ({
@@ -17,12 +19,11 @@ test('default visitor sees the classic logo and no demo panel', async ({
 
     const header = page.getByRole('banner');
     const footer = page.locator('footer');
-    await expect(header.locator(CLASSIC)).toBeVisible();
-    await expect(footer.locator(CLASSIC)).toBeVisible();
-    // The bold live-text lockup ships in the HTML but stays display:none.
-    await expect(
-        header.getByText('Holiday River', { exact: false }),
-    ).toBeHidden();
+    await expect(header.locator('[data-logo="classic"]')).toBeVisible();
+    await expect(footer.locator('[data-logo="classic"]')).toBeVisible();
+    // The live-text lockups ship in the HTML but stay display:none.
+    await expect(header.locator('[data-logo="stack"]')).toBeHidden();
+    await expect(header.locator('[data-logo="line"]')).toBeHidden();
 
     await expect(page.getByRole('button', PILL)).toHaveCount(0);
     await expect(page.locator('html[data-demo-logo-bold]')).toHaveCount(0);
@@ -38,30 +39,37 @@ test('/admin arms the overlay and the logo flips live', async ({ page }) => {
     await pill.click();
 
     const header = page.getByRole('banner');
-    const checkbox = page.getByRole('checkbox', {
+    const boldCheckbox = page.getByRole('checkbox', {
         name: /Bold live-text logo/,
     });
+    const lineCheckbox = page.getByRole('checkbox', {
+        name: /Single-line logo/,
+    });
 
-    // Flip ON: bold lockup appears in place, classic hides — no navigation.
-    await checkbox.check();
-    await expect(header.locator(CLASSIC)).toBeHidden();
-    await expect(
-        header.getByText('Holiday River', { exact: false }),
-    ).toBeVisible();
+    // Flip bold ON: stack lockup appears in place, classic hides — no
+    // navigation.
+    await boldCheckbox.check();
+    await expect(header.locator('[data-logo="classic"]')).toBeHidden();
+    await expect(header.locator('[data-logo="stack"]')).toBeVisible();
+
+    // Line ON takes precedence over the stack.
+    await lineCheckbox.check();
+    await expect(header.locator('[data-logo="stack"]')).toBeHidden();
+    await expect(header.locator('[data-logo="line"]')).toBeVisible();
+    await lineCheckbox.uncheck();
+    await expect(header.locator('[data-logo="stack"]')).toBeVisible();
 
     // Survives reload with the attribute present before paint: the inline
     // head script sets it at document parse time, so it is already there
     // at domcontentloaded.
     await page.reload({ waitUntil: 'domcontentloaded' });
     await expect(page.locator('html[data-demo-logo-bold="on"]')).toHaveCount(1);
-    await expect(
-        header.getByText('Holiday River', { exact: false }),
-    ).toBeVisible();
+    await expect(header.locator('[data-logo="stack"]')).toBeVisible();
 
     // Reset all: back to defaults, still armed.
     await page.getByRole('button', PILL).click();
     await page.getByRole('button', { name: 'Reset all' }).click();
-    await expect(header.locator(CLASSIC)).toBeVisible();
+    await expect(header.locator('[data-logo="classic"]')).toBeVisible();
 
     // Disarm: panel gone, storage cleared.
     await page.getByRole('button', { name: 'Disarm' }).click();
