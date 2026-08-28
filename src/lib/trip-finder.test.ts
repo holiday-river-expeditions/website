@@ -32,8 +32,7 @@ function trip(overrides: Partial<TripFinderTrip> = {}): TripFinderTrip {
         craftTypes: null,
         arcticTripId: null,
         river: null,
-        activities: null,
-        category: null,
+        tripType: null,
         image: null,
         ...overrides,
     };
@@ -360,12 +359,12 @@ describe('scoreTrips', () => {
         const [match] = scoreTrips(
             [
                 trip({
-                    activities: [
-                        {
-                            name: 'Mountain Biking',
-                            slug: { _type: 'slug', current: 'biking' },
-                        },
-                    ],
+                    tripType: {
+                        name: 'Biking',
+                        cardLabel: null,
+                        tagColor: 'sand',
+                        slug: { _type: 'slug', current: 'biking' },
+                    },
                 }),
             ],
             answers({ activity: 'raft' }),

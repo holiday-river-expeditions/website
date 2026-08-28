@@ -93,7 +93,7 @@ export default async function BookPage({
             // Built once per trip and shared across its trip-type ids.
             const callouts = buildCalloutMap(trip.specialtyDepartures);
             const summary: TripSummary = {
-                imageSrc: imageUrl(trip.mainImage, 320, 320),
+                imageSrc: imageUrl(trip.image, 320, 320),
                 startingPrice: trip.startingPrice,
                 durationLabel: trip.durationLabel,
                 tagline: trip.tagline,

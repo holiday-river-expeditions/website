@@ -2,7 +2,7 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { Button, buttonClasses } from '@/components/ui/Button';
 import { Section } from '@/components/ui/Section';
-import { TripCard } from '@/components/ui/TripCard';
+import { TripCard, tripCardProps } from '@/components/ui/TripCard';
 import { imageUrl } from '@/lib/sanity';
 import {
     answerLabel,
@@ -51,16 +51,14 @@ const CALL_LINE = (
 function cardProps(match: TripMatch) {
     const { trip } = match;
     return {
-        name: trip.name ?? 'Trip',
-        category: trip.category ?? 'River Trip',
-        image: imageUrl(trip.image, 720, 706),
-        startingPrice: trip.startingPrice ?? '',
+        ...tripCardProps(trip, 720, 706),
+        // Results lead with the match reasons, not the card tagline.
+        description: undefined,
+        // Fall back to the numeric duration when no display label is set —
+        // the wizard surfaces trips that may still be mid-authoring.
         duration:
             trip.durationLabel ??
             (trip.duration ? `${trip.duration} Days` : ''),
-        href: `/trips/${trip.slug?.current ?? ''}`,
-        subtitle: trip.subtitle ?? undefined,
-        river: trip.river?.name ?? undefined,
     };
 }
 
@@ -274,26 +272,6 @@ export function TripFinderResults({
                                         {caveat}
                                     </p>
                                 ))}
-                                {/* "Both" means the raft & ride combos —
-                                    until those trips are authored on the
-                                    site, be straight about it and hand off
-                                    to a human, guide-style. */}
-                                {answers.activity === 'both' &&
-                                    (best.trip.activities?.length ?? 0) < 2 && (
-                                        <p className='mt-3 border-l-4 border-teal pl-3 text-body leading-body text-holiday-white/90'>
-                                            After the true raft &amp; ride combo
-                                            — pedal the White Rim, then run
-                                            Cataract? Those trips aren&rsquo;t
-                                            bookable online yet. Call{' '}
-                                            <a
-                                                href='tel:+18012662087'
-                                                className='font-bold underline underline-offset-4 transition-opacity hover:opacity-70'
-                                            >
-                                                801-266-2087
-                                            </a>{' '}
-                                            and we&rsquo;ll build yours.
-                                        </p>
-                                    )}
                             </div>
 
                             <div className='mt-6 flex flex-wrap items-center gap-x-6 gap-y-3 motion-safe:animate-finder-rise motion-safe:[animation-delay:1.35s]'>

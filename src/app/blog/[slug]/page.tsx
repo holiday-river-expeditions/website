@@ -81,14 +81,12 @@ export default async function PostPage({ params }: PostPageProps) {
 
             <Section background='white' className='py-12 md:py-16'>
                 <div className='mx-auto max-w-3xl'>
-                    {post.body ? (
+                    {/* No placeholder when empty — an unwritten post should
+                        read as a shorter page, not as a note to the editor. */}
+                    {post.body && (
                         <div className='space-y-4 text-body leading-body text-onyx [&_a]:text-holiday-red [&_a]:underline [&_h2]:font-alt-gothic [&_h2]:text-section [&_h2]:font-black [&_h2]:uppercase [&_h2]:text-holiday-red [&_h3]:font-alt-gothic [&_h3]:text-h3 [&_h3]:font-black [&_h3]:uppercase [&_h3]:leading-h3 [&_h3]:text-onyx [&_li]:ml-5 [&_ul]:list-disc'>
                             <PortableText value={post.body} />
                         </div>
-                    ) : (
-                        <p className='text-body leading-body text-onyx/70'>
-                            Post body coming soon. Add it in the Studio.
-                        </p>
                     )}
                     <div className='mt-12'>
                         <Button href='/blog' variant='outline'>

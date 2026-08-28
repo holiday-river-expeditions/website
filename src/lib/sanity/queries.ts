@@ -1,82 +1,86 @@
 import { defineQuery } from 'next-sanity';
 
+/**
+ * Every grid on the site renders the same TripCard, so every grid projects
+ * the same shape. This used to be copy-pasted at eight call sites, one of
+ * which resolved the ribbon differently and could disagree with the rest.
+ */
+const TRIP_CARD = `
+  _id,
+  name,
+  slug,
+  tagline,
+  subtitle,
+  "ribbon": coalesce(ribbon, specialtyTypes[0]->ribbonLabel),
+  startingPrice,
+  durationLabel,
+  "river": river->{ "name": coalesce(riverName, name), slug },
+  "tripType": tripType->{ name, cardLabel, tagColor, slug },
+  "image": photos[0]
+`;
+
 export const allTripsQuery = defineQuery(`
   *[_type == "trip"] | order(name asc) {
-    _id,
-    name,
-    slug,
-    difficulty,
-    duration,
-    pricingNotes,
+    ${TRIP_CARD},
     arcticTripId,
-    tagline,
-    subtitle,
-    "ribbon": coalesce(ribbon, specialtyTypes[0]->ribbonLabel),
-    startingPrice,
-    durationLabel,
-    "river": river->{ "name": coalesce(riverName, name), slug },
-    "activities": activities[]->{ name, slug },
-    "categories": categories[]->{ name, slug },
     "specialtyDepartures": specialtyDepartures[]{
       _key,
       startDate,
       label,
       note,
       "specialtyType": specialtyType->{ name, slug }
-    },
-    "mainImage": photos[0]
+    }
   }
 `);
 
-/** Trip-finder wizard: the TripCard projection plus the structured
-    matching fields. Kept separate from allTripsQuery so /book and the
-    listing grid don't pay for fields only the wizard reads. */
+/** Trip-finder wizard: the card projection plus the structured matching
+    fields. Kept separate from allTripsQuery so /book and the listing grid
+    don't pay for fields only the wizard reads. */
 export const tripFinderTripsQuery = defineQuery(`
   *[_type == "trip"] | order(name asc) {
-    _id,
-    name,
-    slug,
-    tagline,
-    subtitle,
-    "ribbon": coalesce(ribbon, specialtyTypes[0]->ribbonLabel),
-    startingPrice,
-    durationLabel,
+    ${TRIP_CARD},
     duration,
     minAge,
     "minAgeOverrides": minAgeOverrides[]{ months, minAge, reason },
     maxRapidClass,
     seasonMonths,
     craftTypes,
-    arcticTripId,
-    "river": river->{ "name": coalesce(riverName, name), slug },
-    "activities": activities[]->{ name, slug },
-    "category": categories[0]->name,
-    "image": photos[0]
+    arcticTripId
   }
 `);
 
 export const tripBySlugQuery = defineQuery(`
   *[_type == "trip" && slug.current == $slug][0] {
-    _id,
-    name,
-    slug,
-    difficulty,
-    duration,
+    ${TRIP_CARD},
     description,
     highlights,
+    whatsIncluded,
+    videoUrl,
     photos,
     pricingNotes,
     arcticTripId,
-    tagline,
-    subtitle,
-    "ribbon": coalesce(ribbon, specialtyTypes[0]->ribbonLabel),
-    startingPrice,
-    durationLabel,
-    "river": river->{ _id, name, slug, description, image, usgsSiteId, flowLinkUrl },
-    "activities": activities[]->{ _id, name, slug },
-    "categories": categories[]->{ _id, name, slug },
+    whoIsThisFor,
+    meetingPlace,
+    deposit,
     minAge,
     season,
+    maxRapidClass,
+    duration,
+    "river": river->{
+      _id,
+      name,
+      "riverLabel": coalesce(riverName, name),
+      slug,
+      description,
+      image,
+      usgsSiteId,
+      flowLinkUrl
+    },
+    "infoSections": infoSections[]{
+      _key,
+      overrideBody,
+      "section": section->{ _id, title, slug, body }
+    },
     "specialtyTypes": specialtyTypes[]->{ _id, name, slug, ribbonLabel },
     "specialtyDepartures": specialtyDepartures[]{
       _key,
@@ -89,32 +93,11 @@ export const tripBySlugQuery = defineQuery(`
     itinerary,
     "faqs": faqs[]->{ _id, question, answer, category },
     "relatedTrips": select(
-      count(relatedTrips) > 0 => relatedTrips[]->{
-        _id, name, slug, tagline, subtitle, "ribbon": coalesce(ribbon, specialtyTypes[0]->ribbonLabel), startingPrice,
-        durationLabel, "river": river->{ "name": coalesce(riverName, name) },
-        "category": categories[0]->name,
-        "image": photos[0]
-      },
+      count(relatedTrips) > 0 => relatedTrips[]->{ ${TRIP_CARD} },
       *[_type == "trip" && slug.current != $slug &&
-        (river._ref == ^.river._ref ||
-         count(activities[@._ref in ^.^.activities[]._ref]) > 0)
-      ] | order(name asc) [0...3] {
-        _id, name, slug, tagline, subtitle, "ribbon": coalesce(ribbon, specialtyTypes[0]->ribbonLabel), startingPrice,
-        durationLabel, "river": river->{ "name": coalesce(riverName, name) },
-        "category": categories[0]->name,
-        "image": photos[0]
-      }
+        (river._ref == ^.river._ref || tripType._ref == ^.tripType._ref)
+      ] | order(name asc) [0...3] { ${TRIP_CARD} }
     )
-  }
-`);
-
-export const allRiversQuery = defineQuery(`
-  *[_type == "river"] | order(name asc) {
-    _id,
-    name,
-    slug,
-    description,
-    image
   }
 `);
 
@@ -122,57 +105,46 @@ export const riverBySlugQuery = defineQuery(`
   *[_type == "river" && slug.current == $slug][0] {
     _id,
     name,
+    "riverLabel": coalesce(riverName, name),
     slug,
     description,
     image,
     usgsSiteId,
     flowLinkUrl,
     "trips": *[_type == "trip" && river._ref == ^._id] | order(name asc) {
-      _id,
-      name,
-      slug,
-      tagline,
-      subtitle,
-      "ribbon": coalesce(ribbon, specialtyTypes[0]->ribbonLabel),
-      startingPrice,
-      durationLabel,
-      "river": river->{ "name": coalesce(riverName, name) },
-      "category": categories[0]->name,
-      "image": photos[0]
+      ${TRIP_CARD}
     }
   }
 `);
 
-export const allActivitiesQuery = defineQuery(`
-  *[_type == "activity"] | order(name asc) {
-    _id,
-    name,
-    slug,
-    description,
-    image
-  }
-`);
-
-export const activityBySlugQuery = defineQuery(`
-  *[_type == "activity" && slug.current == $slug][0] {
+/** Landing pages: /rafting, /biking. Also picks up trips whose type lists
+    with this one — combo trips appear under Biking (Aug 20 decision) while
+    keeping their own card tag. */
+export const tripTypeBySlugQuery = defineQuery(`
+  *[_type == "tripType" && slug.current == $slug][0] {
     _id,
     name,
     slug,
     description,
     image,
-    "trips": *[_type == "trip" && references(^._id)] | order(name asc) {
-      _id,
-      name,
-      slug,
-      tagline,
-      subtitle,
-      "ribbon": coalesce(ribbon, specialtyTypes[0]->ribbonLabel),
-      startingPrice,
-      durationLabel,
-      "river": river->{ "name": coalesce(riverName, name) },
-      "category": categories[0]->name,
-      "image": photos[0]
+    "trips": *[
+      _type == "trip" &&
+      (tripType._ref == ^._id || tripType->listsWith._ref == ^._id)
+    ] | order(name asc) {
+      ${TRIP_CARD}
     }
+  }
+`);
+
+/** Navigation order and the trip-finder's activity question. */
+export const allTripTypesQuery = defineQuery(`
+  *[_type == "tripType"] | order(order asc, name asc) {
+    _id,
+    name,
+    slug,
+    cardLabel,
+    tagColor,
+    "listsWith": listsWith->slug.current
   }
 `);
 
@@ -186,17 +158,7 @@ export const allSpecialtyTypesQuery = defineQuery(`
     image,
     ribbonLabel,
     "trips": *[_type == "trip" && references(^._id)] | order(name asc) {
-      _id,
-      name,
-      slug,
-      tagline,
-      subtitle,
-      "ribbon": coalesce(ribbon, ^.ribbonLabel),
-      startingPrice,
-      durationLabel,
-      "river": river->{ "name": coalesce(riverName, name) },
-      "category": categories[0]->name,
-      "image": photos[0]
+      ${TRIP_CARD}
     }
   }
 `);
@@ -261,19 +223,7 @@ export const homepageQuery = defineQuery(`
     "heroImageAlt": heroImage.alt,
     heroCtaText,
     heroCtaLink,
-    "featuredTrips": featuredTrips[]->{
-      _id,
-      name,
-      slug,
-      tagline,
-      subtitle,
-      "ribbon": coalesce(ribbon, specialtyTypes[0]->ribbonLabel),
-      startingPrice,
-      durationLabel,
-      "river": river->{ "name": coalesce(riverName, name) },
-      "category": categories[0]->name,
-      "image": photos[0]
-    },
+    "featuredTrips": featuredTrips[]->{ ${TRIP_CARD} },
     storyBody,
     storyImageLeft,
     storyImagePortrait,
@@ -284,8 +234,6 @@ export const homepageQuery = defineQuery(`
       name,
       slug,
       image,
-      "tripCount": count(*[_type == "trip" && references(^._id)]),
-      "tripSlug": *[_type == "trip" && references(^._id)][0].slug.current,
       description
     },
     learnContent[]{
