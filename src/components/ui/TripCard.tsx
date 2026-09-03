@@ -1,8 +1,22 @@
 import Link from 'next/link';
+import { imageUrl } from '@/lib/sanity';
+
+/** Card tag fills, one per trip type. Sand needs dark text for WCAG AA
+    contrast; the rest carry white. */
+export type TripTagColor = 'teal' | 'sand' | 'evergreen' | 'red';
+
+const TAG_CLASSES: Record<TripTagColor, string> = {
+    teal: 'bg-teal text-holiday-white',
+    sand: 'bg-sand text-onyx',
+    evergreen: 'bg-evergreen text-holiday-white',
+    red: 'bg-holiday-red text-holiday-white',
+};
 
 export interface TripCardProps {
     name: string;
     category: string;
+    /** Fill for the category tag, from the trip type. */
+    categoryColor?: TripTagColor;
     image: string;
     startingPrice: string;
     duration: string;
@@ -15,16 +29,59 @@ export interface TripCardProps {
     ribbon?: string;
     /** When true, frames the image in a red border (specialty/featured trips). */
     featured?: boolean;
-    /** River/destination label, rendered verbatim (Sanity river docs are
-        named by section — "Cataract", "Westwater", "Maze" — so appending
-        "River" would fabricate wrong names). Replaces the old difficulty
-        chip per the Aug 20 decision. */
+    /** River label, rendered verbatim. Section documents are named by stretch
+        ("Cataract", "Westwater", "Maze"), so the query resolves the river name
+        first and falls back to the section. Replaces the old difficulty chip
+        per the Aug 20 decision. */
     river?: string;
+}
+
+/** The shared TRIP_CARD projection in lib/sanity/queries.ts. Every grid on
+    the site fetches this shape, so every grid maps it the same way. */
+export interface TripCardSource {
+    name?: string | null;
+    slug?: { current?: string | null } | null;
+    tagline?: string | null;
+    subtitle?: string | null;
+    ribbon?: string | null;
+    startingPrice?: string | null;
+    durationLabel?: string | null;
+    river?: { name?: string | null } | null;
+    tripType?: {
+        name?: string | null;
+        cardLabel?: string | null;
+        tagColor?: TripTagColor | null;
+    } | null;
+    image?: Parameters<typeof imageUrl>[0];
+}
+
+/** Maps a TRIP_CARD projection to card props. Spread it and override what
+    the call site needs — /specialty drops the description, for instance. */
+export function tripCardProps(
+    trip: TripCardSource,
+    width = 760,
+    height = 740,
+): TripCardProps {
+    return {
+        name: trip.name ?? '',
+        category: trip.tripType?.cardLabel ?? trip.tripType?.name ?? '',
+        categoryColor: trip.tripType?.tagColor ?? 'teal',
+        image: imageUrl(trip.image, width, height),
+        startingPrice: trip.startingPrice ?? '',
+        duration: trip.durationLabel ?? '',
+        description: trip.tagline ?? undefined,
+        subtitle: trip.subtitle ?? undefined,
+        ribbon: trip.ribbon ?? undefined,
+        featured: Boolean(trip.ribbon),
+        river: trip.river?.name ?? undefined,
+        href: trip.slug?.current ? `/trips/${trip.slug.current}` : '#',
+    };
 }
 
 export function TripCard({
     name,
     category,
+    categoryColor = 'teal',
     image,
     startingPrice,
     duration,
@@ -35,11 +92,7 @@ export function TripCard({
     featured = false,
     river,
 }: TripCardProps) {
-    // Category tag is a solid fill: teal for rafting, sand for biking (per mockup).
-    // Sand fill needs dark text for WCAG AA contrast; teal carries white.
-    const tagColor = /bik/i.test(category)
-        ? 'bg-sand text-onyx'
-        : 'bg-teal text-holiday-white';
+    const tagColor = TAG_CLASSES[categoryColor];
     const riverLabel = river || null;
 
     return (
@@ -61,11 +114,13 @@ export function TripCard({
             </div>
             <div className='mt-4 flex items-start justify-between gap-4'>
                 <span className='flex flex-wrap gap-2'>
-                    <span
-                        className={`inline-block ${tagColor} px-3.5 py-1.5 text-[14px] font-bold leading-tight`}
-                    >
-                        {category}
-                    </span>
+                    {category && (
+                        <span
+                            className={`inline-block ${tagColor} px-3.5 py-1.5 text-[14px] font-bold leading-tight`}
+                        >
+                            {category}
+                        </span>
+                    )}
                     {riverLabel && (
                         <span className='inline-block border border-onyx/40 px-3.5 py-1.5 text-[14px] font-bold leading-tight text-onyx'>
                             {riverLabel}

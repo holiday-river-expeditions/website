@@ -1,7 +1,7 @@
 import type { Metadata } from 'next';
 import { Section } from '@/components/ui/Section';
-import { TripCard } from '@/components/ui/TripCard';
-import { getAllTrips, imageUrl } from '@/lib/sanity';
+import { TripCard, tripCardProps } from '@/components/ui/TripCard';
+import { getAllTrips } from '@/lib/sanity';
 
 // Same ISR window as the homepage: Studio edits go live within a minute.
 export const revalidate = 60;
@@ -33,24 +33,7 @@ export default async function TripsPage() {
                         className='grid gap-10 sm:grid-cols-2 lg:grid-cols-3'
                     >
                         {trips.map((trip) => (
-                            <TripCard
-                                key={trip._id}
-                                name={trip.name ?? ''}
-                                category={trip.categories?.[0]?.name ?? ''}
-                                image={imageUrl(trip.mainImage, 760, 740)}
-                                startingPrice={trip.startingPrice ?? ''}
-                                duration={trip.durationLabel ?? ''}
-                                description={trip.tagline ?? undefined}
-                                subtitle={trip.subtitle ?? undefined}
-                                ribbon={trip.ribbon ?? undefined}
-                                featured={Boolean(trip.ribbon)}
-                                river={trip.river?.name ?? undefined}
-                                href={
-                                    trip.slug?.current
-                                        ? `/trips/${trip.slug.current}`
-                                        : '#'
-                                }
-                            />
+                            <TripCard key={trip._id} {...tripCardProps(trip)} />
                         ))}
                     </div>
                 ) : (

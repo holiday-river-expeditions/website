@@ -4,7 +4,11 @@ import { Button } from '@/components/ui/Button';
 import { ContentCard } from '@/components/ui/ContentCard';
 import { Hero } from '@/components/ui/Hero';
 import { Section } from '@/components/ui/Section';
-import { TripCard, type TripCardProps } from '@/components/ui/TripCard';
+import {
+    TripCard,
+    tripCardProps,
+    type TripCardProps,
+} from '@/components/ui/TripCard';
 import { TripFinderEntry } from '@/components/ui/TripFinderEntry';
 import { TripsMapSection } from '@/components/ui/TripsMapSection';
 import {
@@ -40,19 +44,7 @@ export default async function Home() {
     }
 
     const featuredTrips: TripCardProps[] = (homepage.featuredTrips ?? []).map(
-        (trip) => ({
-            name: trip.name ?? '',
-            category: trip.category ?? '',
-            image: imageUrl(trip.image, 760, 740),
-            startingPrice: trip.startingPrice ?? '',
-            duration: trip.durationLabel ?? '',
-            description: trip.tagline ?? undefined,
-            href: trip.slug?.current ? `/trips/${trip.slug.current}` : '#',
-            subtitle: trip.subtitle ?? undefined,
-            ribbon: trip.ribbon ?? undefined,
-            featured: Boolean(trip.ribbon),
-            river: trip.river?.name ?? undefined,
-        }),
+        (trip) => tripCardProps(trip),
     );
 
     // Trips-map markers: coords joined to the river docs' photos and

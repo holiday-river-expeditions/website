@@ -16,6 +16,7 @@ import { Section } from '@/components/ui/Section';
 import { SectionNav } from '@/components/ui/SectionNav';
 import { TrustStrip } from '@/components/ui/TrustStrip';
 import { getSiteSettings, getTripBySlug, imageUrl } from '@/lib/sanity';
+import { embedUrl } from '@/lib/video';
 
 // Same ISR window as the homepage: Studio edits go live within a minute.
 export const revalidate = 60;
@@ -24,12 +25,7 @@ interface TripPageProps {
     params: Promise<{ slug: string }>;
 }
 
-const difficultyLabels: Record<string, string> = {
-    easy: 'Easy',
-    moderate: 'Moderate',
-    challenging: 'Challenging',
-    expert: 'Expert',
-};
+const RAPID_CLASS_NUMERALS = ['I', 'II', 'III', 'IV', 'V'];
 
 export async function generateMetadata({
     params,
@@ -51,30 +47,53 @@ export default async function TripPage({ params }: TripPageProps) {
     ]);
     if (!trip) notFound();
 
-    const category = trip.categories?.[0]?.name ?? null;
+    const category = trip.tripType?.cardLabel ?? trip.tripType?.name ?? null;
     const heroPhoto = imageUrl(trip.photos?.[0], 2560, 900);
     const galleryPhotos = (trip.photos ?? []).slice(1, 7);
-    const difficulty = trip.difficulty
-        ? difficultyLabels[trip.difficulty]
-        : null;
+
+    // Rapid class replaces the old difficulty scale (Justin's build-out doc).
+    // Trips with no whitewater have no class, so they show who the trip is
+    // for in the same slot rather than leaving a gap.
+    const rapidClass =
+        trip.maxRapidClass && RAPID_CLASS_NUMERALS[trip.maxRapidClass - 1]
+            ? `Class ${RAPID_CLASS_NUMERALS[trip.maxRapidClass - 1]}`
+            : null;
 
     const facts: Array<{ label: string; value: string; href?: string }> = [];
     if (trip.startingPrice)
         facts.push({ label: 'Starts at', value: trip.startingPrice });
     if (trip.durationLabel)
         facts.push({ label: 'Duration', value: trip.durationLabel });
-    if (difficulty) facts.push({ label: 'Difficulty', value: difficulty });
+    if (rapidClass) {
+        facts.push({ label: 'Whitewater', value: rapidClass });
+    } else if (trip.whoIsThisFor) {
+        facts.push({ label: 'Who it’s for', value: trip.whoIsThisFor });
+    }
     if (trip.season) facts.push({ label: 'Season', value: trip.season });
     if (trip.minAge)
         facts.push({ label: 'Min Age', value: String(trip.minAge) });
-    if (trip.river?.name)
+    if (trip.meetingPlace)
+        facts.push({ label: 'Meet at', value: trip.meetingPlace });
+    if (trip.deposit) facts.push({ label: 'Deposit', value: trip.deposit });
+    if (trip.river?.riverLabel)
         facts.push({
             label: 'River',
-            value: trip.river.name,
+            value: trip.river.riverLabel,
             href: trip.river.slug?.current
                 ? `/rivers/${trip.river.slug.current}`
                 : undefined,
         });
+
+    // A trip-level override replaces the shared body entirely; sections with
+    // neither are dropped rather than rendered as an empty panel.
+    const infoSections = (trip.infoSections ?? []).flatMap((entry) => {
+        const body =
+            entry.overrideBody && entry.overrideBody.length > 0
+                ? entry.overrideBody
+                : entry.section?.body;
+        if (!entry.section?.title || !body || body.length === 0) return [];
+        return [{ key: entry._key, title: entry.section.title, body }];
+    });
 
     return (
         <>
@@ -170,16 +189,39 @@ export default async function TripPage({ params }: TripPageProps) {
                                 {trip.tagline}
                             </p>
                         )}
-                        {trip.description ? (
+                        {/* No placeholder when empty — an unwritten
+                            description should read as a shorter page, not as
+                            a note to the editor. */}
+                        {trip.description && (
                             <div className='mt-6 space-y-4 text-body leading-body text-onyx [&_a]:text-holiday-red [&_a]:underline'>
                                 <PortableText value={trip.description} />
                             </div>
-                        ) : (
-                            <p className='mt-6 text-body leading-body text-onyx/70'>
-                                Trip description coming soon. Add it in the
-                                Studio.
-                            </p>
                         )}
+
+                        {trip.whatsIncluded &&
+                            trip.whatsIncluded.length > 0 && (
+                                <div className='mt-10'>
+                                    <h2 className='font-alt-gothic text-h3 font-black uppercase leading-h3 text-holiday-red'>
+                                        What’s Included
+                                    </h2>
+                                    <ul className='mt-4 grid gap-x-8 gap-y-2 sm:grid-cols-2'>
+                                        {trip.whatsIncluded.map((item) => (
+                                            <li
+                                                key={item}
+                                                className='flex gap-3 text-body leading-body text-onyx'
+                                            >
+                                                <span
+                                                    aria-hidden
+                                                    className='text-holiday-red'
+                                                >
+                                                    ✓
+                                                </span>
+                                                {item}
+                                            </li>
+                                        ))}
+                                    </ul>
+                                </div>
+                            )}
                     </div>
 
                     {trip.highlights && trip.highlights.length > 0 && (
@@ -219,6 +261,27 @@ export default async function TripPage({ params }: TripPageProps) {
 
             {/* Day-by-day itinerary */}
             <ItinerarySection days={trip.itinerary ?? []} />
+
+            {/* Trip video, above the gallery per Justin's build-out doc */}
+            {trip.videoUrl && (
+                <Section
+                    background='white'
+                    className='pb-4 pt-12 md:pb-6 md:pt-16'
+                >
+                    <div className='mx-auto max-w-4xl'>
+                        <div className='relative aspect-video overflow-hidden bg-evergreen'>
+                            <iframe
+                                src={embedUrl(trip.videoUrl)}
+                                title={`${trip.name ?? 'Trip'} video`}
+                                allow='accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture'
+                                allowFullScreen
+                                loading='lazy'
+                                className='absolute inset-0 h-full w-full border-0'
+                            />
+                        </div>
+                    </div>
+                </Section>
+            )}
 
             {/* Photo gallery */}
             {galleryPhotos.length > 0 && (
@@ -280,6 +343,38 @@ export default async function TripPage({ params }: TripPageProps) {
                 </Section>
             )}
 
+            {/* Packing List / Getting Here / Before You Go. Shared documents
+                so one edit reaches every trip; a trip that differs overrides
+                the body in the Studio. */}
+            {infoSections.length > 0 && (
+                <Section
+                    id='trip-info'
+                    background='white'
+                    className='scroll-mt-6 [[data-demo-sticky-header=on]_&]:scroll-mt-28 pb-16 pt-12 md:pb-20 md:pt-16'
+                >
+                    <div className='max-w-3xl'>
+                        <div className='divide-y divide-holiday-grey/40 border-y border-holiday-grey/40'>
+                            {infoSections.map((entry) => (
+                                <details key={entry.key} className='group py-4'>
+                                    <summary className='flex cursor-pointer list-none items-center justify-between gap-4 font-alt-gothic text-h3 font-semibold uppercase leading-h3 text-onyx transition-opacity hover:opacity-70 [&::-webkit-details-marker]:hidden'>
+                                        {entry.title}
+                                        <span
+                                            aria-hidden
+                                            className='text-holiday-red transition-transform group-open:rotate-45'
+                                        >
+                                            +
+                                        </span>
+                                    </summary>
+                                    <div className='mt-3 space-y-3 text-body leading-body text-onyx [&_a]:text-holiday-red [&_a]:underline'>
+                                        <PortableText value={entry.body} />
+                                    </div>
+                                </details>
+                            ))}
+                        </div>
+                    </div>
+                </Section>
+            )}
+
             {/* Third-party review trust strip */}
             {settings?.reviews?.ratingLabel &&
                 (settings.reviews.tripadvisorUrl ||
@@ -307,6 +402,9 @@ export default async function TripPage({ params }: TripPageProps) {
                     { id: 'trip-details', label: 'Trip Details' },
                     ...(trip.faqs && trip.faqs.length > 0
                         ? [{ id: 'faqs', label: 'FAQs' }]
+                        : []),
+                    ...(infoSections.length > 0
+                        ? [{ id: 'trip-info', label: 'Before You Go' }]
                         : []),
                     { id: AVAILABILITY_ANCHOR, label: 'Rates & Dates' },
                 ]}

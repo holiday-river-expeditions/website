@@ -4,7 +4,7 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { Section } from '@/components/ui/Section';
 import { SectionNav } from '@/components/ui/SectionNav';
-import { TripCard } from '@/components/ui/TripCard';
+import { TripCard, tripCardProps } from '@/components/ui/TripCard';
 import { getAllSpecialtyTypes, getAllTrips, imageUrl } from '@/lib/sanity';
 
 // Same ISR window as the homepage: Studio edits go live within a minute.
@@ -131,33 +131,7 @@ export default async function SpecialtyPage() {
                                     {trips.map((trip) => (
                                         <TripCard
                                             key={trip._id}
-                                            name={trip.name ?? ''}
-                                            category={trip.category ?? ''}
-                                            image={imageUrl(
-                                                trip.image,
-                                                760,
-                                                740,
-                                            )}
-                                            startingPrice={
-                                                trip.startingPrice ?? ''
-                                            }
-                                            duration={trip.durationLabel ?? ''}
-                                            description={
-                                                trip.tagline ?? undefined
-                                            }
-                                            subtitle={
-                                                trip.subtitle ?? undefined
-                                            }
-                                            ribbon={trip.ribbon ?? undefined}
-                                            featured={Boolean(trip.ribbon)}
-                                            river={
-                                                trip.river?.name ?? undefined
-                                            }
-                                            href={
-                                                trip.slug?.current
-                                                    ? `/trips/${trip.slug.current}`
-                                                    : '#'
-                                            }
+                                            {...tripCardProps(trip)}
                                         />
                                     ))}
                                 </div>
@@ -196,21 +170,7 @@ export default async function SpecialtyPage() {
                             {allTrips.map((trip) => (
                                 <TripCard
                                     key={trip._id}
-                                    name={trip.name ?? ''}
-                                    category={trip.categories?.[0]?.name ?? ''}
-                                    image={imageUrl(trip.mainImage, 760, 740)}
-                                    startingPrice={trip.startingPrice ?? ''}
-                                    duration={trip.durationLabel ?? ''}
-                                    description={trip.tagline ?? undefined}
-                                    subtitle={trip.subtitle ?? undefined}
-                                    ribbon={trip.ribbon ?? undefined}
-                                    featured={Boolean(trip.ribbon)}
-                                    river={trip.river?.name ?? undefined}
-                                    href={
-                                        trip.slug?.current
-                                            ? `/trips/${trip.slug.current}`
-                                            : '#'
-                                    }
+                                    {...tripCardProps(trip)}
                                 />
                             ))}
                         </div>

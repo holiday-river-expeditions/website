@@ -1,4 +1,3 @@
-import { activity } from './activity';
 import { contentBlock } from './blocks/content-block';
 import { heroBlock } from './blocks/hero-block';
 import { contactSubmission } from './contact-submission';
@@ -11,17 +10,18 @@ import { river } from './river';
 import { siteSettings } from './site-settings';
 import { specialtyType } from './specialty-type';
 import { trip } from './trip';
-import { tripCategory } from './trip-category';
+import { tripInfoSection } from './trip-info-section';
+import { tripType } from './trip-type';
 
 export const schemaTypes = [
     // Taxonomy documents
     river,
-    activity,
-    tripCategory,
+    tripType,
     specialtyType,
 
     // Core documents
     trip,
+    tripInfoSection,
     faq,
     page,
     post,

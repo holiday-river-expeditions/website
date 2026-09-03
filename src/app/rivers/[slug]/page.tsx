@@ -4,7 +4,7 @@ import { notFound } from 'next/navigation';
 import { Button } from '@/components/ui/Button';
 import { RiverFlow } from '@/components/ui/RiverFlow';
 import { Section } from '@/components/ui/Section';
-import { TripCard } from '@/components/ui/TripCard';
+import { TripCard, tripCardProps } from '@/components/ui/TripCard';
 import { getRiverBySlug, imageUrl } from '@/lib/sanity';
 
 // Same ISR window as the homepage: Studio edits go live within a minute.
@@ -20,8 +20,10 @@ export async function generateMetadata({
     const { slug } = await params;
     const river = await getRiverBySlug(slug);
     if (!river) return {};
+    // Never append "River" to the name: sections are named by stretch, so
+    // that would invent "Maze River" and "White Rim River".
     return {
-        title: river.name ? `${river.name} River` : undefined,
+        title: river.name ?? undefined,
         description: river.description ?? undefined,
     };
 }
@@ -54,19 +56,26 @@ export default async function RiverPage({ params }: RiverPageProps) {
                         <h1 className='font-alt-gothic text-h2 font-black uppercase leading-h2 text-holiday-white md:text-h1 md:leading-h1'>
                             {river.name}
                         </h1>
+                        {/* Cards link here labelled by river ("Colorado
+                            River") while the page is titled by section
+                            ("Westwater"); naming both closes that gap. */}
+                        {river.riverLabel &&
+                            river.riverLabel !== river.name && (
+                                <p className='mt-2 font-alt-gothic text-subheading font-black uppercase leading-[0.95] text-holiday-white/80'>
+                                    {river.riverLabel}
+                                </p>
+                            )}
                     </div>
                 </div>
             </section>
 
             {/* Description */}
             <Section background='white' className='py-12 md:py-16'>
-                {river.description ? (
+                {/* No placeholder when empty — an unwritten description should
+                    read as a shorter page, not as a note to the editor. */}
+                {river.description && (
                     <p className='max-w-3xl text-paragraph leading-paragraph text-onyx'>
                         {river.description}
-                    </p>
-                ) : (
-                    <p className='max-w-3xl text-body leading-body text-onyx/70'>
-                        River description coming soon. Add it in the Studio.
                     </p>
                 )}
                 {/* Live CFS from USGS; renders nothing without a gauge. */}
@@ -83,31 +92,14 @@ export default async function RiverPage({ params }: RiverPageProps) {
             {trips.length > 0 && (
                 <Section background='white' className='pb-20 pt-0 md:pb-24'>
                     <h2 className='font-alt-gothic text-section font-black uppercase text-holiday-red'>
-                        Trips on the {river.name}
+                        Trips on the {river.riverLabel ?? river.name}
                     </h2>
                     <div
                         data-reveal-stagger
                         className='mt-10 grid gap-10 sm:grid-cols-2 lg:grid-cols-3'
                     >
                         {trips.map((trip) => (
-                            <TripCard
-                                key={trip._id}
-                                name={trip.name ?? ''}
-                                category={trip.category ?? ''}
-                                image={imageUrl(trip.image, 760, 740)}
-                                startingPrice={trip.startingPrice ?? ''}
-                                duration={trip.durationLabel ?? ''}
-                                description={trip.tagline ?? undefined}
-                                subtitle={trip.subtitle ?? undefined}
-                                ribbon={trip.ribbon ?? undefined}
-                                featured={Boolean(trip.ribbon)}
-                                river={trip.river?.name ?? undefined}
-                                href={
-                                    trip.slug?.current
-                                        ? `/trips/${trip.slug.current}`
-                                        : '#'
-                                }
-                            />
+                            <TripCard key={trip._id} {...tripCardProps(trip)} />
                         ))}
                     </div>
                     <div className='mt-14 text-center'>

@@ -29,7 +29,7 @@ export type WhoValue = 'adults' | 'kids' | 'skip';
 export type AgeValue = 'u5' | '5-7' | '8-12' | 'teens' | 'skip';
 export type DaysValue = 'short' | 'classic' | 'epic' | 'skip';
 export type ThrillValue = 'mellow' | 'splash' | 'big' | 'skip';
-export type ActivityValue = 'raft' | 'bike' | 'both' | 'skip';
+export type ActivityValue = 'raft' | 'bike' | 'skip';
 /** 1–12, or 'skip' for "I'm flexible". */
 export type MonthValue = number | 'skip';
 
@@ -135,7 +135,7 @@ export const TRIP_FINDER_QUESTIONS: readonly TripFinderQuestion[] = [
     {
         id: 'activity',
         shortLabel: 'Trip type',
-        title: 'River, trail, or both?',
+        title: 'River or trail?',
         subline: 'Everything after this bends to your answer.',
         image: '/trip-finder/activity-white-rim.jpg',
         imageAlt:
@@ -151,11 +151,6 @@ export const TRIP_FINDER_QUESTIONS: readonly TripFinderQuestion[] = [
                 value: 'bike',
                 label: 'Mountain biking',
                 sublabel: 'The White Rim, the Maze, the Swell',
-            },
-            {
-                value: 'both',
-                label: 'Raft & ride combo',
-                sublabel: 'Pedal the rim, then run the river',
             },
         ],
         skipLabel: 'Surprise me — skip',
@@ -290,7 +285,7 @@ const WHO_VALUES = new Set(['adults', 'kids', 'skip']);
 const AGE_VALUES = new Set(['u5', '5-7', '8-12', 'teens', 'skip']);
 const DAYS_VALUES = new Set(['short', 'classic', 'epic', 'skip']);
 const THRILL_VALUES = new Set(['mellow', 'splash', 'big', 'skip']);
-const ACTIVITY_VALUES = new Set(['raft', 'bike', 'both', 'skip']);
+const ACTIVITY_VALUES = new Set(['raft', 'bike', 'skip']);
 
 type RawParams = Record<string, string | string[] | undefined>;
 
@@ -638,22 +633,18 @@ function scoreActivity(
     trip: TripFinderTrip,
     activity: Exclude<ActivityValue, 'skip'>,
 ): ScorerResult {
-    const slugs = (trip.activities ?? [])
-        .map((a) => a.slug?.current)
-        .filter((slug): slug is string => Boolean(slug));
-    if (slugs.length === 0) return UNKNOWN;
-    const hasRaft = slugs.includes('rafting');
-    const hasBike = slugs.includes('biking');
-    if (activity === 'both') {
-        return hasRaft && hasBike
-            ? {
-                  score: 1,
-                  unknown: false,
-                  reason: 'Paddle and pedal in one trip',
-              }
-            : { score: 0.5, unknown: false };
+    const slug = trip.tripType?.slug?.current;
+    if (!slug) return UNKNOWN;
+    // Combo trips run both, so they satisfy either answer — a shade below a
+    // dedicated trip, which is what someone picking one activity asked for.
+    if (slug === 'combo') {
+        return {
+            score: 0.7,
+            unknown: false,
+            reason: 'Paddle and pedal in one trip',
+        };
     }
-    const wanted = activity === 'raft' ? hasRaft : hasBike;
+    const wanted = activity === 'raft' ? slug === 'rafting' : slug === 'biking';
     if (wanted) {
         return {
             score: 1,

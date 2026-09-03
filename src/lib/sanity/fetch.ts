@@ -1,12 +1,10 @@
 import { client } from './client';
 import {
-    activityBySlugQuery,
-    allActivitiesQuery,
     allFaqsQuery,
     allPostsQuery,
-    allRiversQuery,
     allSpecialtyTypesQuery,
     allTripsQuery,
+    allTripTypesQuery,
     homepageQuery,
     pageBySlugQuery,
     postBySlugQuery,
@@ -14,6 +12,7 @@ import {
     siteSettingsQuery,
     tripBySlugQuery,
     tripFinderTripsQuery,
+    tripTypeBySlugQuery,
 } from './queries';
 
 export async function getAllTrips() {
@@ -28,20 +27,16 @@ export async function getTripBySlug(slug: string) {
     return client.fetch(tripBySlugQuery, { slug });
 }
 
-export async function getAllRivers() {
-    return client.fetch(allRiversQuery);
-}
-
 export async function getRiverBySlug(slug: string) {
     return client.fetch(riverBySlugQuery, { slug });
 }
 
-export async function getAllActivities() {
-    return client.fetch(allActivitiesQuery);
+export async function getTripTypeBySlug(slug: string) {
+    return client.fetch(tripTypeBySlugQuery, { slug });
 }
 
-export async function getActivityBySlug(slug: string) {
-    return client.fetch(activityBySlugQuery, { slug });
+export async function getAllTripTypes() {
+    return client.fetch(allTripTypesQuery);
 }
 
 export async function getAllSpecialtyTypes() {
