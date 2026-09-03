@@ -8,7 +8,7 @@ export const homepage = defineType({
         { name: 'hero', title: 'Hero' },
         { name: 'trips', title: 'Featured Trips' },
         { name: 'story', title: 'Rafting Since 1966' },
-        { name: 'rivers', title: 'River Selector' },
+        { name: 'rivers', title: 'Map' },
         { name: 'learn', title: 'Learn & Get Inspired' },
     ],
     fields: [
@@ -109,14 +109,14 @@ export const homepage = defineType({
             group: 'story',
         }),
 
-        // --- River selector ---
+        // --- Homepage map ---
         defineField({
             name: 'rivers',
-            title: 'Rivers',
+            title: 'Map Pins',
             type: 'array',
             group: 'rivers',
             description:
-                'Rivers listed in the selector, in this order. Drag to reorder.',
+                'Sections shown as pins on the homepage map, using each one’s photo and description. Order does not matter. A section only appears once its map coordinates exist in code, so ask Darius when adding a new one.',
             of: [
                 defineArrayMember({
                     type: 'reference',
