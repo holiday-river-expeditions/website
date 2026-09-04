@@ -70,17 +70,12 @@ test('renders the home page with the hero headline and key sections', async () =
     ).toBeInTheDocument();
     expect(screen.getByText('Cataract')).toBeInTheDocument();
 
-    // Hero CTA ships both targets: the authored default plus a
-    // /trip-finder variant that CSS shows only while the trip-finder demo
-    // flag is on.
-    const heroCtas = screen.getAllByRole('link', { name: 'Find Your Trip' });
-    expect(heroCtas.map((link) => link.getAttribute('href'))).toEqual([
-        '/trips',
-        '/trip-finder',
-    ]);
+    // Hero CTA is the authored link from the Homepage document.
+    expect(
+        screen.getByRole('link', { name: 'Find Your Trip' }),
+    ).toHaveAttribute('href', '/trips');
 
-    // Find Your Trip wizard entry — ships in the markup, hidden by CSS
-    // until the trip-finder demo flag is armed, so role queries still see it.
+    // Find Your Trip wizard entry, question 1 inline.
     expect(
         screen.getByRole('heading', { level: 2, name: /find your trip/i }),
     ).toBeInTheDocument();

@@ -6,18 +6,18 @@ import { buttonClasses } from '@/components/ui/Button';
 
 /**
  * Floating site-wide "Find Your Trip" pill — the escape hatch for visitors
- * overwhelmed mid-browse (Aug 20 decision). Bottom-LEFT: bottom-center is
- * owned by SectionNav/DepartureFilterBar and bottom-right by the demo-flags
- * panel pill, which armed browsers (the only ones who see this) always
- * have. Gated by the trip-finder demo flag via CSS; hidden on the wizard
- * itself — the only reason this is a client component.
+ * overwhelmed mid-browse (Aug 20 decision; live for everyone since
+ * 2026-09-04). Bottom-LEFT: bottom-center is owned by
+ * SectionNav/DepartureFilterBar and bottom-right by the demo-flags panel
+ * pill. Hidden on the wizard itself — the only reason this is a client
+ * component.
  */
 export function TripFinderFab() {
     const pathname = usePathname();
     if (pathname === '/trip-finder') return null;
 
     return (
-        <div className='fixed left-6 z-40 hidden bottom-[max(1.5rem,env(safe-area-inset-bottom))] [[data-demo-trip-finder=on]_&]:block'>
+        <div className='fixed left-6 z-40 bottom-[max(1.5rem,env(safe-area-inset-bottom))]'>
             <Link
                 href='/trip-finder'
                 className={buttonClasses({

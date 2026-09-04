@@ -97,7 +97,6 @@ export default async function Home() {
                     text: homepage.heroCtaText ?? 'Find Your Trip',
                     href: homepage.heroCtaLink ?? '/trips',
                 }}
-                demoTripFinderCta
                 contact={{
                     phone: settings?.phone ?? '801-266-2087',
                     email: settings?.email ?? 'Info@HolidayExpeditions.com',
@@ -121,10 +120,9 @@ export default async function Home() {
                 </div>
             </Section>
 
-            {/* Find Your Trip wizard entry (Aug 20 decision) — ships in the
-                markup but hidden until the trip-finder demo flag is armed,
-                same technique as the trips-map prototype above. */}
-            <section className='hidden [[data-demo-trip-finder=on]_&]:block'>
+            {/* Find Your Trip wizard entry (Aug 20 decision; graduated from
+                the trip-finder demo flag 2026-09-04). */}
+            <section>
                 <TripFinderEntry spec={finderSpec} />
             </section>
 

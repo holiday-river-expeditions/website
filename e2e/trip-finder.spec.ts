@@ -1,52 +1,29 @@
 import { expect, test } from '@playwright/test';
 
 /**
- * Find Your Trip wizard, gated by the trip-finder demo flag: real visitors
- * see no entry points; an armed browser gets the homepage section and the
- * floating pill. The wizard itself is URL-state — every answer is a link
- * that adds one query param — so the flow is asserted through hrefs and
- * URLs, no JS state to wait on.
+ * Find Your Trip wizard, live for every visitor: the homepage section with
+ * question 1 inline, the floating pill, and the wizard itself. The wizard
+ * is URL-state — every answer is a link that adds one query param — so the
+ * flow is asserted through hrefs and URLs, no JS state to wait on.
  */
 
 const PILL = { name: 'Open demo flags panel' };
 
-test('default visitor sees no wizard entry points', async ({ page }) => {
+test('every visitor sees the wizard entry points', async ({ page }) => {
     await page.goto('/');
 
-    // The homepage entry section ships in the markup but stays display:none,
-    // and the floating pill and hero CTA variant likewise. (The visible
-    // hero CTA also says "Find Your Trip" but points at /trips, so assert
-    // on wizard hrefs, not names.)
-    await expect(page.locator('a[href^="/trip-finder"]:visible')).toHaveCount(
-        0,
-    );
+    // Homepage section with question 1 inline, and the floating pill.
     await expect(
-        page.getByRole('main').getByRole('link', { name: 'Find Your Trip' }),
-    ).toHaveAttribute('href', '/trips');
+        page.getByRole('heading', { level: 2, name: /find your trip/i }),
+    ).toBeVisible();
+    await expect(
+        page.getByRole('link', { name: /bringing kids/i }),
+    ).toHaveAttribute('href', '/trip-finder?who=kids');
+    await expect(page.locator('a[href="/trip-finder"]').first()).toBeVisible();
 });
 
-test('armed browser walks the wizard from homepage to results', async ({
-    page,
-}) => {
-    await page.goto('/admin');
-    await page.waitForURL('/');
-    await page.getByRole('button', PILL).click();
-    await page.getByRole('checkbox', { name: /Find Your Trip wizard/ }).check();
-    await page.getByRole('button', { name: 'Collapse demo panel' }).click();
-
-    // Homepage section appears; question 1 is inline.
-    const entry = page.getByRole('heading', {
-        level: 2,
-        name: /find your trip/i,
-    });
-    await expect(entry).toBeVisible();
-
-    // The hero CTA swaps its target to the wizard (label unchanged) — only
-    // one of the two shipped anchors is visible, so the role query
-    // resolves to the flag variant.
-    await expect(
-        page.getByRole('main').getByRole('link', { name: 'Find Your Trip' }),
-    ).toHaveAttribute('href', '/trip-finder');
+test('walks the wizard from homepage to results', async ({ page }) => {
+    await page.goto('/');
 
     // First click is already an answer, landing on the age follow-up.
     await page.getByRole('link', { name: /bringing kids/i }).click();

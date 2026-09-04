@@ -77,12 +77,6 @@ export const DEMO_FLAGS = [
             'ON: the hero seal stamps into place on load — same artwork, one-time settle, motion-safe only.',
     },
     {
-        id: 'trip-finder',
-        label: 'Find Your Trip wizard',
-        description:
-            'ON: the homepage Find Your Trip section and a floating site-wide link to the /trip-finder wizard (questions live in the Studio under Trip Finder).',
-    },
-    {
         id: 'finder-logic',
         label: 'Trip finder logic panel',
         description:
