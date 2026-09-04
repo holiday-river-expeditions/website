@@ -32,7 +32,9 @@ const newBase = opt('--new', 'https://holidayriver.com');
 const concurrency = Number(opt('--concurrency', '8'));
 
 if (!mapPath || (!targetsBase && !sourceBase)) {
-    console.error('usage: verify-redirect-map.mjs <map.md> (--targets <base> | --source <base> [--new <base>])');
+    console.error(
+        'usage: verify-redirect-map.mjs <map.md> (--targets <base> | --source <base> [--new <base>])',
+    );
     process.exit(2);
 }
 
@@ -50,7 +52,13 @@ for (const line of readFileSync(mapPath, 'utf8').split('\n')) {
     const oldPath = m[1];
     const target = (cells[1].match(/^`([^`]+)`$/) ?? [])[1];
     if (!target) continue;
-    rows.push({ oldPath, target, kind: cells[2], status: cells[3], note: cells[4] ?? '' });
+    rows.push({
+        oldPath,
+        target,
+        kind: cells[2],
+        status: cells[3],
+        note: cells[4] ?? '',
+    });
 }
 
 const isPattern = (p) => p.includes('*');
@@ -60,7 +68,8 @@ const normalise = (p) => stripAnchor(p).replace(/\/$/, '') || '/';
 async function head(url, redirect) {
     try {
         let res = await fetch(url, { method: 'HEAD', redirect });
-        if (res.status === 405) res = await fetch(url, { method: 'GET', redirect });
+        if (res.status === 405)
+            res = await fetch(url, { method: 'GET', redirect });
         return res;
     } catch (err) {
         return { status: 0, headers: new Headers(), error: err.message };
@@ -87,7 +96,13 @@ const report = (level, row, msg) => findings.push({ level, row, msg });
 if (targetsBase) {
     const base = targetsBase.replace(/\/$/, '');
     const seen = new Map();
-    const unique = [...new Set(rows.filter((r) => r.kind !== 'drop').map((r) => normalise(r.target)))];
+    const unique = [
+        ...new Set(
+            rows
+                .filter((r) => r.kind !== 'drop')
+                .map((r) => normalise(r.target)),
+        ),
+    ];
     await mapLimit(unique, concurrency, async (path) => {
         const res = await head(base + path, 'follow');
         seen.set(path, res.status);
@@ -96,18 +111,32 @@ if (targetsBase) {
         if (row.kind === 'drop') continue;
         const status = seen.get(normalise(row.target));
         if (row.status === 'ready' && status !== 200) {
-            report('FAIL', row, `target ${row.target} returned ${status} on ${base}`);
+            report(
+                'FAIL',
+                row,
+                `target ${row.target} returned ${status} on ${base}`,
+            );
         } else if (row.status === 'pending' && status === 200) {
-            report('INFO', row, `target ${row.target} is live now; flip status to ready`);
+            report(
+                'INFO',
+                row,
+                `target ${row.target} is live now; flip status to ready`,
+            );
         } else if (row.status === 'decision' && status !== 200) {
-            report('NOTE', row, `proposed target ${row.target} returned ${status}`);
+            report(
+                'NOTE',
+                row,
+                `proposed target ${row.target} returned ${status}`,
+            );
         }
     }
 }
 
 if (sourceBase) {
     const base = sourceBase.replace(/\/$/, '');
-    const checkable = rows.filter((r) => !isPattern(r.oldPath) && r.kind !== 'drop');
+    const checkable = rows.filter(
+        (r) => !isPattern(r.oldPath) && r.kind !== 'drop',
+    );
     await mapLimit(checkable, concurrency, async (row) => {
         const expected = newBase.replace(/\/$/, '') + row.target;
         let url = base + row.oldPath;
@@ -120,7 +149,8 @@ if (sourceBase) {
             url = new URL(loc, url).href;
         }
         const first = hops[0];
-        if (first.status === 0) return report('FAIL', row, `request failed: ${first.error}`);
+        if (first.status === 0)
+            return report('FAIL', row, `request failed: ${first.error}`);
         if (![301, 308].includes(first.status)) {
             return report('FAIL', row, `expected 301, got ${first.status}`);
         }
@@ -128,17 +158,28 @@ if (sourceBase) {
         if (normalise(landed) !== normalise(expected)) {
             report('FAIL', row, `301 to ${landed}, expected ${expected}`);
         }
-        if (hops.length > 2 || (hops.length === 2 && [301, 302, 307, 308].includes(hops[1].status))) {
-            report('WARN', row, `chain: ${hops.map((h) => `${h.status} ${h.url}`).join(' -> ')}`);
+        if (
+            hops.length > 2 ||
+            (hops.length === 2 && [301, 302, 307, 308].includes(hops[1].status))
+        ) {
+            report(
+                'WARN',
+                row,
+                `chain: ${hops.map((h) => `${h.status} ${h.url}`).join(' -> ')}`,
+            );
         }
     });
 }
 
 const order = { FAIL: 0, WARN: 1, INFO: 2, NOTE: 3 };
 findings.sort((a, b) => order[a.level] - order[b.level]);
-for (const f of findings) console.log(`${f.level.padEnd(4)} ${f.row.oldPath}  ${f.msg}`);
+for (const f of findings)
+    console.log(`${f.level.padEnd(4)} ${f.row.oldPath}  ${f.msg}`);
 
-const counts = findings.reduce((acc, f) => ((acc[f.level] = (acc[f.level] ?? 0) + 1), acc), {});
+const counts = findings.reduce(
+    (acc, f) => ((acc[f.level] = (acc[f.level] ?? 0) + 1), acc),
+    {},
+);
 console.log(
     `\n${rows.length} rows checked. ` +
         Object.entries(counts)
