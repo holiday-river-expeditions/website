@@ -1,52 +1,29 @@
 import { expect, test } from '@playwright/test';
 
 /**
- * Find Your Trip wizard, gated by the trip-finder demo flag: real visitors
- * see no entry points; an armed browser gets the homepage section and the
- * floating pill. The wizard itself is URL-state — every answer is a link
- * that adds one query param — so the flow is asserted through hrefs and
- * URLs, no JS state to wait on.
+ * Find Your Trip wizard, live for every visitor: the homepage section with
+ * question 1 inline, the floating pill, and the wizard itself. The wizard
+ * is URL-state — every answer is a link that adds one query param — so the
+ * flow is asserted through hrefs and URLs, no JS state to wait on.
  */
 
 const PILL = { name: 'Open demo flags panel' };
 
-test('default visitor sees no wizard entry points', async ({ page }) => {
+test('every visitor sees the wizard entry points', async ({ page }) => {
     await page.goto('/');
 
-    // The homepage entry section ships in the markup but stays display:none,
-    // and the floating pill and hero CTA variant likewise. (The visible
-    // hero CTA also says "Find Your Trip" but points at /trips, so assert
-    // on wizard hrefs, not names.)
-    await expect(page.locator('a[href^="/trip-finder"]:visible')).toHaveCount(
-        0,
-    );
+    // Homepage section with question 1 inline, and the floating pill.
     await expect(
-        page.getByRole('main').getByRole('link', { name: 'Find Your Trip' }),
-    ).toHaveAttribute('href', '/trips');
+        page.getByRole('heading', { level: 2, name: /find your trip/i }),
+    ).toBeVisible();
+    await expect(
+        page.getByRole('link', { name: /bringing kids/i }),
+    ).toHaveAttribute('href', '/trip-finder?who=kids');
+    await expect(page.locator('a[href="/trip-finder"]').first()).toBeVisible();
 });
 
-test('armed browser walks the wizard from homepage to results', async ({
-    page,
-}) => {
-    await page.goto('/admin');
-    await page.waitForURL('/');
-    await page.getByRole('button', PILL).click();
-    await page.getByRole('checkbox', { name: /Find Your Trip wizard/ }).check();
-    await page.getByRole('button', { name: 'Collapse demo panel' }).click();
-
-    // Homepage section appears; question 1 is inline.
-    const entry = page.getByRole('heading', {
-        level: 2,
-        name: /find your trip/i,
-    });
-    await expect(entry).toBeVisible();
-
-    // The hero CTA swaps its target to the wizard (label unchanged) — only
-    // one of the two shipped anchors is visible, so the role query
-    // resolves to the flag variant.
-    await expect(
-        page.getByRole('main').getByRole('link', { name: 'Find Your Trip' }),
-    ).toHaveAttribute('href', '/trip-finder');
+test('walks the wizard from homepage to results', async ({ page }) => {
+    await page.goto('/');
 
     // First click is already an answer, landing on the age follow-up.
     await page.getByRole('link', { name: /bringing kids/i }).click();
@@ -81,7 +58,7 @@ test('armed browser walks the wizard from homepage to results', async ({
     await expect(
         page.getByRole('heading', { level: 1, name: /is calling/i }),
     ).toBeVisible();
-    await expect(page.getByText('Best Match')).toBeVisible();
+    await expect(page.getByText('Best Match', { exact: true })).toBeVisible();
 
     // Editable chips: dropping "when" returns to exactly that question.
     await page.getByRole('link', { name: /when: july/i }).click();
@@ -98,9 +75,43 @@ test('a shared results URL renders results directly', async ({ page }) => {
     await page.goto(
         '/trip-finder?who=adults&month=skip&days=skip&thrill=big&activity=raft',
     );
-    await expect(page.getByText('Best Match')).toBeVisible();
+    await expect(page.getByText('Best Match', { exact: true })).toBeVisible();
     // The human fallback is always present.
     await expect(
         page.getByRole('link', { name: '801-266-2087' }).last(),
     ).toBeVisible();
+});
+
+test('logic panel appears only when its flag is on', async ({ page }) => {
+    const heading = page.getByRole('heading', {
+        level: 2,
+        name: /trip finder logic/i,
+    });
+
+    // Ships in the markup, display:none for everyone else.
+    await page.goto('/trip-finder?who=kids');
+    await expect(heading).toBeHidden();
+
+    await page.goto('/admin');
+    await page.waitForURL('/');
+    await page.getByRole('button', PILL).click();
+    await page
+        .getByRole('checkbox', { name: /Trip finder logic panel/ })
+        .check();
+    await page.getByRole('button', { name: 'Collapse demo panel' }).click();
+
+    // A wizard step: the state table names the current question.
+    await page.goto('/trip-finder?who=kids');
+    await expect(heading).toBeVisible();
+    await expect(
+        page.getByText(/now asking: .*how old is your youngest/i),
+    ).toBeVisible();
+
+    // Results: the full ranking and the Arctic data-sources section.
+    await page.goto(
+        '/trip-finder?who=kids&age=8-12&activity=raft&month=7&days=classic&thrill=splash',
+    );
+    await expect(heading).toBeVisible();
+    await expect(page.getByText(/best match threshold/i).first()).toBeVisible();
+    await expect(page.getByText(/how every trip scores/i)).toBeVisible();
 });

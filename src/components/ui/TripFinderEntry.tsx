@@ -1,9 +1,6 @@
 import Image from 'next/image';
 import Link from 'next/link';
-import {
-    TRIP_FINDER_QUESTIONS,
-    type TripFinderQuestion,
-} from '@/lib/trip-finder';
+import type { TripFinderSpec } from '@/lib/trip-finder';
 
 /**
  * The homepage "Find Your Trip" entry: a photographic band with question 1
@@ -12,8 +9,9 @@ import {
  * Server-rendered; gated by the trip-finder demo flag via CSS at the call
  * site. Text sits on the evergreen scrim, never on raw photo.
  */
-export function TripFinderEntry() {
-    const question = TRIP_FINDER_QUESTIONS[0] as TripFinderQuestion;
+export function TripFinderEntry({ spec }: { spec: TripFinderSpec }) {
+    const question = spec.questions[0];
+    if (!question) return null;
 
     return (
         <div className='relative overflow-hidden'>
@@ -36,7 +34,7 @@ export function TripFinderEntry() {
                         Find Your Trip
                     </h2>
                     <p className='mt-3 text-paragraph leading-paragraph text-holiday-white'>
-                        Five questions, zero wrong answers. Like talking to a
+                        A few questions, zero wrong answers. Like talking to a
                         guide, minus the sunburn.
                     </p>
                     <p className='mt-6 font-alt-gothic text-subheading font-bold uppercase text-opal'>

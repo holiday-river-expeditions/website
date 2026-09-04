@@ -1,6 +1,6 @@
 import { defineField, defineType } from 'sanity';
 
-const MONTHS = [
+export const MONTHS = [
     { title: 'January', value: 1 },
     { title: 'February', value: 2 },
     { title: 'March', value: 3 },

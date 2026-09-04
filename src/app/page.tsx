@@ -17,6 +17,7 @@ import {
     type TripMapMarker,
 } from '@/lib/trip-map-data';
 import { getHomepage, getSiteSettings, imageUrl } from '@/lib/sanity';
+import { resolveTripFinderSpec } from '@/lib/trip-finder-spec';
 
 // Re-fetch from Sanity at most once a minute so content edits in /studio appear
 // on the live site without a redeploy. (Swap for webhook-based on-demand
@@ -24,9 +25,10 @@ import { getHomepage, getSiteSettings, imageUrl } from '@/lib/sanity';
 export const revalidate = 60;
 
 export default async function Home() {
-    const [homepage, settings] = await Promise.all([
+    const [homepage, settings, finderSpec] = await Promise.all([
         getHomepage(),
         getSiteSettings(),
+        resolveTripFinderSpec(),
     ]);
 
     if (!homepage) {
@@ -95,7 +97,6 @@ export default async function Home() {
                     text: homepage.heroCtaText ?? 'Find Your Trip',
                     href: homepage.heroCtaLink ?? '/trips',
                 }}
-                demoTripFinderCta
                 contact={{
                     phone: settings?.phone ?? '801-266-2087',
                     email: settings?.email ?? 'Info@HolidayExpeditions.com',
@@ -119,11 +120,10 @@ export default async function Home() {
                 </div>
             </Section>
 
-            {/* Find Your Trip wizard entry (Aug 20 decision) — ships in the
-                markup but hidden until the trip-finder demo flag is armed,
-                same technique as the trips-map prototype above. */}
-            <section className='hidden [[data-demo-trip-finder=on]_&]:block'>
-                <TripFinderEntry />
+            {/* Find Your Trip wizard entry (Aug 20 decision; graduated from
+                the trip-finder demo flag 2026-09-04). */}
+            <section>
+                <TripFinderEntry spec={finderSpec} />
             </section>
 
             {/* Rafting Since 1966 */}
