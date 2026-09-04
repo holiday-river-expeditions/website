@@ -10,6 +10,12 @@ import { river } from './river';
 import { siteSettings } from './site-settings';
 import { specialtyType } from './specialty-type';
 import { trip } from './trip';
+import {
+    tripFinderCondition,
+    tripFinderOption,
+    tripFinderQuestion,
+    tripFinderSpec,
+} from './trip-finder-spec';
 import { tripInfoSection } from './trip-info-section';
 import { tripType } from './trip-type';
 
@@ -33,8 +39,12 @@ export const schemaTypes = [
     // Singletons
     homepage,
     siteSettings,
+    tripFinderSpec,
 
     // Object types (content blocks)
     heroBlock,
     contentBlock,
+    tripFinderQuestion,
+    tripFinderOption,
+    tripFinderCondition,
 ];

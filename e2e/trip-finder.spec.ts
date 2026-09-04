@@ -81,7 +81,7 @@ test('armed browser walks the wizard from homepage to results', async ({
     await expect(
         page.getByRole('heading', { level: 1, name: /is calling/i }),
     ).toBeVisible();
-    await expect(page.getByText('Best Match')).toBeVisible();
+    await expect(page.getByText('Best Match', { exact: true })).toBeVisible();
 
     // Editable chips: dropping "when" returns to exactly that question.
     await page.getByRole('link', { name: /when: july/i }).click();
@@ -98,9 +98,43 @@ test('a shared results URL renders results directly', async ({ page }) => {
     await page.goto(
         '/trip-finder?who=adults&month=skip&days=skip&thrill=big&activity=raft',
     );
-    await expect(page.getByText('Best Match')).toBeVisible();
+    await expect(page.getByText('Best Match', { exact: true })).toBeVisible();
     // The human fallback is always present.
     await expect(
         page.getByRole('link', { name: '801-266-2087' }).last(),
     ).toBeVisible();
+});
+
+test('logic panel appears only when its flag is on', async ({ page }) => {
+    const heading = page.getByRole('heading', {
+        level: 2,
+        name: /trip finder logic/i,
+    });
+
+    // Ships in the markup, display:none for everyone else.
+    await page.goto('/trip-finder?who=kids');
+    await expect(heading).toBeHidden();
+
+    await page.goto('/admin');
+    await page.waitForURL('/');
+    await page.getByRole('button', PILL).click();
+    await page
+        .getByRole('checkbox', { name: /Trip finder logic panel/ })
+        .check();
+    await page.getByRole('button', { name: 'Collapse demo panel' }).click();
+
+    // A wizard step: the state table names the current question.
+    await page.goto('/trip-finder?who=kids');
+    await expect(heading).toBeVisible();
+    await expect(
+        page.getByText(/now asking: .*how old is your youngest/i),
+    ).toBeVisible();
+
+    // Results: the full ranking and the Arctic data-sources section.
+    await page.goto(
+        '/trip-finder?who=kids&age=8-12&activity=raft&month=7&days=classic&thrill=splash',
+    );
+    await expect(heading).toBeVisible();
+    await expect(page.getByText(/best match threshold/i).first()).toBeVisible();
+    await expect(page.getByText(/how every trip scores/i)).toBeVisible();
 });

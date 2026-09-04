@@ -26,13 +26,12 @@ const trips = [
             name: 'Cataract',
             slug: { _type: 'slug', current: 'cataract' },
         },
-        activities: [
-            {
-                name: 'River Rafting',
-                slug: { _type: 'slug', current: 'rafting' },
-            },
-        ],
-        category: 'Whitewater Rafting',
+        tripType: {
+            name: 'Rafting',
+            cardLabel: null,
+            tagColor: 'teal',
+            slug: { _type: 'slug', current: 'rafting' },
+        },
         image: null,
     },
     {
@@ -55,13 +54,12 @@ const trips = [
             name: 'Green River',
             slug: { _type: 'slug', current: 'lodore' },
         },
-        activities: [
-            {
-                name: 'River Rafting',
-                slug: { _type: 'slug', current: 'rafting' },
-            },
-        ],
-        category: 'Whitewater Rafting',
+        tripType: {
+            name: 'Rafting',
+            cardLabel: null,
+            tagColor: 'teal',
+            slug: { _type: 'slug', current: 'rafting' },
+        },
         image: null,
     },
     {
@@ -81,19 +79,21 @@ const trips = [
         craftTypes: null,
         arcticTripId: '47,48',
         river: { name: 'Maze', slug: { _type: 'slug', current: 'maze' } },
-        activities: [
-            {
-                name: 'Mountain Biking',
-                slug: { _type: 'slug', current: 'biking' },
-            },
-        ],
-        category: 'Mountain Biking',
+        tripType: {
+            name: 'Biking',
+            cardLabel: null,
+            tagColor: 'sand',
+            slug: { _type: 'slug', current: 'biking' },
+        },
         image: null,
     },
 ];
 
+// No Trip Finder document in the mock → the in-code default spec drives
+// the wizard, which is exactly what these assertions were written against.
 vi.mock('@/lib/sanity', () => ({
     getTripFinderTrips: vi.fn(async () => trips),
+    getTripFinderSpec: vi.fn(async () => null),
     imageUrl: () => '',
 }));
 
@@ -185,7 +185,10 @@ test('full answers render a best match with reasons and a /book deep link', asyn
     expect(
         screen.getByRole('heading', { level: 3, name: /why it fits/i }),
     ).toBeInTheDocument();
-    expect(screen.getByText(/kids 7\+ welcome in july/i)).toBeInTheDocument();
+    // The reason also appears in the logic panel's breakdown table.
+    expect(
+        screen.getAllByText(/kids 7\+ welcome in july/i).length,
+    ).toBeGreaterThan(0);
 
     // Availability line deep-links into /book, month-filtered and anchored.
     expect(screen.getByText('Jul 12 – Jul 15')).toBeInTheDocument();
@@ -223,6 +226,13 @@ test('results render with the phone fallback when Arctic is down', async () => {
     expect(
         screen.getByText(/live availability is napping/i),
     ).toBeInTheDocument();
+
+    // The logic panel ships in the markup (CSS-gated by the finder-logic
+    // flag) and reports the whole catalog, not just the three shown.
+    expect(
+        screen.getByRole('heading', { level: 2, name: /trip finder logic/i }),
+    ).toBeInTheDocument();
+    expect(screen.getByText(/arctic was unreachable/i)).toBeInTheDocument();
     const phoneLinks = screen.getAllByRole('link', { name: '801-266-2087' });
     expect(phoneLinks.length).toBeGreaterThan(0);
     expect(phoneLinks[0]).toHaveAttribute('href', 'tel:+18012662087');

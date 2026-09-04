@@ -3,6 +3,7 @@ import {
     TripFinderResults,
     type ResultAvailability,
 } from '@/components/ui/TripFinderResults';
+import { TripFinderLogicPanel } from '@/components/ui/TripFinderLogicPanel';
 import { TripFinderWizard } from '@/components/ui/TripFinderWizard';
 import { getAllUpcomingDepartures, getBookableTripTypes } from '@/lib/arctic';
 import {
@@ -13,12 +14,14 @@ import {
 } from '@/lib/departures';
 import { getTripFinderTrips } from '@/lib/sanity';
 import {
+    chosenMonth,
     currentStep,
     parseArcticIds,
     parseTripFinderParams,
     resolveMonthValue,
     scoreTrips,
 } from '@/lib/trip-finder';
+import { resolveTripFinderSpec } from '@/lib/trip-finder-spec';
 
 // Availability on the results screen changes as reservations come in.
 export const revalidate = 60;
@@ -34,11 +37,29 @@ export default async function TripFinderPage({
 }: {
     searchParams: Promise<Record<string, string | string[] | undefined>>;
 }) {
-    const params = await searchParams;
-    const answers = parseTripFinderParams(params);
+    // The questions are content: the Sanity "Trip Finder" document, or the
+    // in-code default when that is missing or malformed.
+    const [params, spec] = await Promise.all([
+        searchParams,
+        resolveTripFinderSpec(),
+    ]);
+    const answers = parseTripFinderParams(spec, params);
 
-    if (currentStep(answers) !== 'results') {
-        return <TripFinderWizard answers={answers} />;
+    if (currentStep(spec, answers) !== 'results') {
+        // The catalog is ranked on every step too, so the logic panel can
+        // show the running order as answers land. One cached Sanity read.
+        const trips = await getTripFinderTrips();
+        return (
+            <>
+                <TripFinderWizard spec={spec} answers={answers} />
+                <TripFinderLogicPanel
+                    spec={spec}
+                    answers={answers}
+                    ranking={scoreTrips(spec, trips, answers)}
+                    arctic={null}
+                />
+            </>
+        );
     }
 
     // Results: rank the catalog, then attach live availability. Arctic
@@ -50,12 +71,13 @@ export default async function TripFinderPage({
         getBookableTripTypes(),
     ]);
 
-    const matches = scoreTrips(trips, answers).slice(0, 3);
+    const ranking = scoreTrips(spec, trips, answers);
+    const matches = ranking.slice(0, spec.tuning.resultsShown);
+    const arcticDown = departures === null || tripTypes === null;
 
+    const month = chosenMonth(spec, answers);
     const monthValue =
-        typeof answers.month === 'number'
-            ? resolveMonthValue(answers.month, new Date())
-            : null;
+        month !== null ? resolveMonthValue(month, new Date()) : null;
 
     const availabilityBySlug = new Map<string, ResultAvailability>();
     if (departures !== null && tripTypes !== null) {
@@ -88,11 +110,25 @@ export default async function TripFinderPage({
     }
 
     return (
-        <TripFinderResults
-            matches={matches}
-            answers={answers}
-            availabilityBySlug={availabilityBySlug}
-            arcticDown={departures === null || tripTypes === null}
-        />
+        <>
+            <TripFinderResults
+                spec={spec}
+                matches={matches}
+                answers={answers}
+                availabilityBySlug={availabilityBySlug}
+                arcticDown={arcticDown}
+            />
+            <TripFinderLogicPanel
+                spec={spec}
+                answers={answers}
+                ranking={ranking}
+                availabilityBySlug={availabilityBySlug}
+                arctic={{
+                    down: arcticDown,
+                    departures: departures?.length ?? 0,
+                    bookableTypes: tripTypes?.length ?? 0,
+                }}
+            />
+        </>
     );
 }

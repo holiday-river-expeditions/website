@@ -7,10 +7,9 @@ import { imageUrl } from '@/lib/sanity';
 import {
     answerLabel,
     answeredQuestionCount,
+    answeredQuestions,
     answersToParams,
-    MIN_CONFIDENT_SCORE,
-    TRIP_FINDER_QUESTIONS,
-    type QuestionId,
+    type TripFinderSpec,
     type TripFinderAnswers,
     type TripMatch,
 } from '@/lib/trip-finder';
@@ -25,6 +24,7 @@ export interface ResultAvailability {
 }
 
 interface TripFinderResultsProps {
+    spec: TripFinderSpec;
     matches: TripMatch[];
     answers: TripFinderAnswers;
     availabilityBySlug: ReadonlyMap<string, ResultAvailability>;
@@ -99,6 +99,7 @@ function AvailabilityLine({
  * answers ("your trip log") wait at the bottom of the page.
  */
 export function TripFinderResults({
+    spec,
     matches,
     answers,
     availabilityBySlug,
@@ -110,9 +111,9 @@ export function TripFinderResults({
     // dressed up in a ribbon.
     const confident =
         best !== undefined &&
-        best.score >= MIN_CONFIDENT_SCORE &&
+        best.score >= spec.tuning.minConfidentScore &&
         !best.ageConflict &&
-        answeredQuestionCount(answers) >= 2;
+        answeredQuestionCount(spec, answers) >= 2;
 
     const riverName = best?.trip.river?.name ?? null;
     const heroImage = best?.trip.image
@@ -123,11 +124,7 @@ export function TripFinderResults({
         ? availabilityBySlug.get(bestSlug)
         : undefined;
 
-    const answeredChips = TRIP_FINDER_QUESTIONS.filter(
-        (q) =>
-            answers[q.id] !== null &&
-            (q.id !== 'age' || answers.who === 'kids'),
-    );
+    const answeredChips = answeredQuestions(spec, answers);
 
     return (
         <>
@@ -373,15 +370,18 @@ export function TripFinderResults({
                     {answeredChips.map((question) => (
                         <li key={question.id}>
                             <Link
-                                href={`/trip-finder?${answersToParams(answers, {
-                                    [question.id]: null,
-                                })}`}
+                                href={`/trip-finder?${answersToParams(
+                                    spec,
+                                    answers,
+                                    { [question.id]: null },
+                                )}`}
                                 className='flex min-h-11 items-center border border-holiday-white/45 px-3.5 py-2 text-[14px] font-bold leading-tight text-holiday-white transition-colors hover:border-opal hover:text-opal'
                             >
                                 {question.shortLabel}:{' '}
                                 {answerLabel(
-                                    question.id as QuestionId,
-                                    answers[question.id] as string | number,
+                                    spec,
+                                    question.id,
+                                    answers[question.id] ?? '',
                                 )}
                                 <span
                                     aria-hidden='true'

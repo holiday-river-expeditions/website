@@ -17,6 +17,7 @@ import {
     type TripMapMarker,
 } from '@/lib/trip-map-data';
 import { getHomepage, getSiteSettings, imageUrl } from '@/lib/sanity';
+import { resolveTripFinderSpec } from '@/lib/trip-finder-spec';
 
 // Re-fetch from Sanity at most once a minute so content edits in /studio appear
 // on the live site without a redeploy. (Swap for webhook-based on-demand
@@ -24,9 +25,10 @@ import { getHomepage, getSiteSettings, imageUrl } from '@/lib/sanity';
 export const revalidate = 60;
 
 export default async function Home() {
-    const [homepage, settings] = await Promise.all([
+    const [homepage, settings, finderSpec] = await Promise.all([
         getHomepage(),
         getSiteSettings(),
+        resolveTripFinderSpec(),
     ]);
 
     if (!homepage) {
@@ -123,7 +125,7 @@ export default async function Home() {
                 markup but hidden until the trip-finder demo flag is armed,
                 same technique as the trips-map prototype above. */}
             <section className='hidden [[data-demo-trip-finder=on]_&]:block'>
-                <TripFinderEntry />
+                <TripFinderEntry spec={finderSpec} />
             </section>
 
             {/* Rafting Since 1966 */}

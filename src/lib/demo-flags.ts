@@ -80,7 +80,13 @@ export const DEMO_FLAGS = [
         id: 'trip-finder',
         label: 'Find Your Trip wizard',
         description:
-            'ON: the homepage Find Your Trip section and a floating site-wide link to the /trip-finder wizard (sample questions pending Lauren).',
+            'ON: the homepage Find Your Trip section and a floating site-wide link to the /trip-finder wizard (questions live in the Studio under Trip Finder).',
+    },
+    {
+        id: 'finder-logic',
+        label: 'Trip finder logic panel',
+        description:
+            'ON: an explainer under the wizard and its results showing where the questions came from, what the visitor has answered, how every trip scored and why, and which trips are missing facts.',
     },
 ] as const satisfies readonly {
     id: string;

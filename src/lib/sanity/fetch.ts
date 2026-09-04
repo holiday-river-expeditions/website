@@ -11,6 +11,7 @@ import {
     riverBySlugQuery,
     siteSettingsQuery,
     tripBySlugQuery,
+    tripFinderSpecQuery,
     tripFinderTripsQuery,
     tripTypeBySlugQuery,
 } from './queries';
@@ -21,6 +22,10 @@ export async function getAllTrips() {
 
 export async function getTripFinderTrips() {
     return client.fetch(tripFinderTripsQuery);
+}
+
+export async function getTripFinderSpec() {
+    return client.fetch(tripFinderSpecQuery);
 }
 
 export async function getTripBySlug(slug: string) {

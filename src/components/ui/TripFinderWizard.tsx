@@ -1,15 +1,17 @@
 import Image from 'next/image';
 import Link from 'next/link';
 import {
+    answeredQuestions,
     answersToParams,
     answerLabel,
     completedStepCount,
     currentStep,
     lastAnsweredQuestion,
+    prefersBike,
+    questionOf,
     stepInfo,
-    TRIP_FINDER_QUESTIONS,
-    type QuestionId,
     type TripFinderAnswers,
+    type TripFinderSpec,
 } from '@/lib/trip-finder';
 
 /**
@@ -24,25 +26,50 @@ import {
  * photograph.
  */
 
-/** Marker coordinates along RIVER_PATH, put-in to take-out — one set per
-    path length (rafters get five miles, bikers four: no whitewater
-    question on a trail trip). */
+/** The river course, put-in to take-out: three cubic segments (the S
+    commands reflect the previous control point). Mile markers are placed
+    along it for however many questions the spec asks. */
 const RIVER_PATH = 'M2 14 C 18 4, 30 22, 46 12 S 76 4, 92 14 S 112 20, 118 10';
-const RIVER_MARKS: Record<number, [number, number][]> = {
-    5: [
+const RIVER_SEGMENTS: [number, number][][] = [
+    [
         [2, 14],
-        [31, 15],
-        [60, 9],
-        [89, 13],
+        [18, 4],
+        [30, 22],
+        [46, 12],
+    ],
+    [
+        [46, 12],
+        [62, 2],
+        [76, 4],
+        [92, 14],
+    ],
+    [
+        [92, 14],
+        [108, 24],
+        [112, 20],
         [118, 10],
     ],
-    4: [
-        [2, 14],
-        [42, 13],
-        [81, 11],
-        [118, 10],
-    ],
-};
+];
+
+function pointOnRiver(t: number): [number, number] {
+    const scaled = Math.min(t, 0.999999) * RIVER_SEGMENTS.length;
+    const [p0, p1, p2, p3] = RIVER_SEGMENTS[Math.floor(scaled)];
+    const u = scaled - Math.floor(scaled);
+    const v = 1 - u;
+    const at = (i: 0 | 1) =>
+        v * v * v * p0[i] +
+        3 * v * v * u * p1[i] +
+        3 * v * u * u * p2[i] +
+        u * u * u * p3[i];
+    return [Math.round(at(0) * 10) / 10, Math.round(at(1) * 10) / 10];
+}
+
+function riverMarks(total: number): [number, number][] {
+    if (total <= 1) return [pointOnRiver(1)];
+    return Array.from({ length: total }, (_, i) =>
+        pointOnRiver(i / (total - 1)),
+    );
+}
 
 function RiverProgress({
     completed,
@@ -53,7 +80,7 @@ function RiverProgress({
     current: number;
     total: number;
 }) {
-    const marks = RIVER_MARKS[total] ?? RIVER_MARKS[5];
+    const marks = riverMarks(total);
     return (
         <svg viewBox='-2 0 124 24' className='w-40 md:w-48' aria-hidden='true'>
             <path
@@ -107,30 +134,33 @@ function RiverProgress({
     );
 }
 
-export function TripFinderWizard({ answers }: { answers: TripFinderAnswers }) {
-    const step = currentStep(answers);
-    const question = TRIP_FINDER_QUESTIONS.find((q) => q.id === step);
+export function TripFinderWizard({
+    spec,
+    answers,
+}: {
+    spec: TripFinderSpec;
+    answers: TripFinderAnswers;
+}) {
+    const step = currentStep(spec, answers);
+    const question = step === 'results' ? undefined : questionOf(spec, step);
     if (!question) return null;
 
-    const completed = completedStepCount(answers);
-    const { number: mile, total } = stepInfo(answers, question.id);
-    const isFollowUp = question.id === 'age';
+    const completed = completedStepCount(spec, answers);
+    const { number: mile, total } = stepInfo(spec, answers, question.id);
+    const isFollowUp = question.onlyWhen !== undefined;
     const isFinal = mile === total;
+    const biking = prefersBike(spec, answers);
 
-    const back = lastAnsweredQuestion(answers);
+    const back = lastAnsweredQuestion(spec, answers);
     const backHref =
         back === null
             ? null
-            : `/trip-finder?${answersToParams(answers, { [back]: null })}`;
+            : `/trip-finder?${answersToParams(spec, answers, { [back]: null })}`;
 
     // The running trip log: answers so far, visible proof each tap landed
     // (the follow-up screen keeps the same mile marker, so this is the
     // feedback that "Bringing kids" registered).
-    const logged = TRIP_FINDER_QUESTIONS.filter(
-        (q) =>
-            answers[q.id] !== null &&
-            (q.id !== 'age' || answers.who === 'kids'),
-    );
+    const logged = answeredQuestions(spec, answers);
 
     return (
         // key remounts the scene per step so entrance animations replay
@@ -203,10 +233,7 @@ export function TripFinderWizard({ answers }: { answers: TripFinderAnswers }) {
                                     &#10003;
                                 </span>
                                 {q.shortLabel}:{' '}
-                                {answerLabel(
-                                    q.id as QuestionId,
-                                    answers[q.id] as string | number,
-                                )}
+                                {answerLabel(spec, q.id, answers[q.id] ?? '')}
                             </li>
                         ))}
                     </ul>
@@ -244,9 +271,11 @@ export function TripFinderWizard({ answers }: { answers: TripFinderAnswers }) {
                             </Link>
                         )}
                         <Link
-                            href={`/trip-finder?${answersToParams(answers, {
-                                [question.id]: 'skip',
-                            })}`}
+                            href={`/trip-finder?${answersToParams(
+                                spec,
+                                answers,
+                                { [question.id]: 'skip' },
+                            )}`}
                             className='flex min-h-11 items-center font-bold text-holiday-white underline decoration-opal decoration-2 underline-offset-4 transition-opacity hover:opacity-70'
                         >
                             {question.skipLabel}
@@ -267,22 +296,21 @@ export function TripFinderWizard({ answers }: { answers: TripFinderAnswers }) {
                                 wraps; content centers in the extra space. */}
                                 <Link
                                     href={`/trip-finder?${answersToParams(
+                                        spec,
                                         answers,
-                                        {
-                                            [question.id]: option.value,
-                                        },
+                                        { [question.id]: option.value },
                                     )}`}
                                     className='water-fill group flex h-full min-h-[64px] flex-col justify-center bg-holiday-white/95 px-4 py-3.5 transition-transform active:scale-[0.98] md:px-5 md:py-4'
                                 >
                                     <span className='block font-alt-gothic text-subheading font-bold uppercase leading-tight text-onyx transition-colors group-hover:text-holiday-white group-focus-visible:text-holiday-white group-active:text-holiday-white'>
                                         {option.label}
                                     </span>
-                                    {(answers.activity === 'bike'
+                                    {(biking
                                         ? (option.bikeSublabel ??
                                           option.sublabel)
                                         : option.sublabel) && (
                                         <span className='mt-0.5 block text-[14px] leading-snug text-onyx/75 transition-colors group-hover:text-holiday-white/90 group-focus-visible:text-holiday-white/90 group-active:text-holiday-white/90'>
-                                            {answers.activity === 'bike'
+                                            {biking
                                                 ? (option.bikeSublabel ??
                                                   option.sublabel)
                                                 : option.sublabel}
@@ -296,11 +324,13 @@ export function TripFinderWizard({ answers }: { answers: TripFinderAnswers }) {
             </div>
 
             {/* Ethos footer */}
-            <footer className='relative px-6 pb-5 md:px-10'>
-                <p className='mx-auto w-full max-w-5xl text-[14px] font-bold uppercase tracking-[0.08em] text-holiday-white/80'>
-                    {question.ethos}
-                </p>
-            </footer>
+            {question.ethos && (
+                <footer className='relative px-6 pb-5 md:px-10'>
+                    <p className='mx-auto w-full max-w-5xl text-[14px] font-bold uppercase tracking-[0.08em] text-holiday-white/80'>
+                        {question.ethos}
+                    </p>
+                </footer>
+            )}
         </div>
     );
 }

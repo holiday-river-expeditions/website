@@ -50,3 +50,28 @@ for (const { name, path } of pages) {
         ).toEqual([]);
     });
 }
+
+test('trip finder logic panel has no serious accessibility violations', async ({
+    page,
+}) => {
+    await page.emulateMedia({ reducedMotion: 'reduce' });
+    await page.goto('/admin');
+    await page.waitForURL('/');
+    await page.getByRole('button', { name: 'Open demo flags panel' }).click();
+    await page
+        .getByRole('checkbox', { name: /Trip finder logic panel/ })
+        .check();
+    await page.goto(
+        '/trip-finder?who=kids&age=8-12&month=7&days=classic&thrill=splash&activity=raft',
+    );
+    const results = await new AxeBuilder({ page })
+        .withTags(['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa'])
+        .analyze();
+    const serious = results.violations.filter((v) =>
+        ['serious', 'critical'].includes(v.impact ?? ''),
+    );
+    expect(
+        serious,
+        serious.map((v) => `${v.id}: ${v.help}`).join('\n'),
+    ).toEqual([]);
+});

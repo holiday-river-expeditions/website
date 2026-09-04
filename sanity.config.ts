@@ -5,7 +5,7 @@ import { structureTool } from 'sanity/structure';
 import { apiVersion, dataset, projectId } from '@/sanity/env';
 import { schemaTypes } from '@/sanity/schemas';
 
-const singletonTypes = new Set(['homepage', 'siteSettings']);
+const singletonTypes = new Set(['homepage', 'siteSettings', 'tripFinderSpec']);
 
 /**
  * Grouped sidebar. The flat default list put the four taxonomies, the trip
@@ -72,6 +72,15 @@ function structure(S: StructureBuilder) {
                         .schemaType('siteSettings')
                         .documentId('siteSettings')
                         .title('Site Settings'),
+                ),
+            S.listItem()
+                .title('Trip Finder')
+                .id('tripFinderSpec')
+                .child(
+                    S.document()
+                        .schemaType('tripFinderSpec')
+                        .documentId('tripFinderSpec')
+                        .title('Trip Finder'),
                 ),
 
             S.divider(),

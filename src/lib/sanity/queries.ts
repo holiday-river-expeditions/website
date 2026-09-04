@@ -49,6 +49,41 @@ export const tripFinderTripsQuery = defineQuery(`
   }
 `);
 
+/** The Find Your Trip singleton: questions, answers, dials, tuning. Read
+    through src/lib/trip-finder-spec.ts, which validates it and falls back
+    to the in-code default when the document is missing or malformed. */
+export const tripFinderSpecQuery = defineQuery(`
+  *[_type == "tripFinderSpec"][0] {
+    minConfidentScore,
+    resultsShown,
+    "questions": questions[] {
+      _key,
+      kind,
+      title,
+      subline,
+      shortLabel,
+      skipLabel,
+      ethos,
+      weight,
+      image,
+      "onlyWhen": onlyWhen { question, answer },
+      "skipWhen": skipWhen { question, answer },
+      "options": options[] {
+        _key,
+        label,
+        value,
+        sublabel,
+        bikeSublabel,
+        targetClass,
+        floorAge,
+        centerDays,
+        month,
+        "tripTypeSlug": tripType->slug.current
+      }
+    }
+  }
+`);
+
 export const tripBySlugQuery = defineQuery(`
   *[_type == "trip" && slug.current == $slug][0] {
     ${TRIP_CARD},
