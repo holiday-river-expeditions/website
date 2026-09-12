@@ -4,8 +4,8 @@
     "private": true,
     "packageManager": "pnpm@10.29.3",
     "scripts": {
-        "dev": "next dev",
-        "build": "next build",
+        "dev": "node scripts/copy-maplibre-worker.mjs && next dev",
+        "build": "node scripts/copy-maplibre-worker.mjs && next build",
         "start": "next start",
         "lint": "eslint",
         "format": "prettier --write .",
@@ -14,6 +14,7 @@
         "test:e2e": "playwright test",
         "typecheck": "tsc --noEmit",
         "typegen": "sanity schema extract && sanity typegen generate",
+        "postinstall": "node scripts/copy-maplibre-worker.mjs",
         "prepare": "husky"
     },
     "dependencies": {

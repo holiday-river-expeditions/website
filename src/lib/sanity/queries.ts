@@ -56,6 +56,7 @@ export const tripFinderSpecQuery = defineQuery(`
   *[_type == "tripFinderSpec"][0] {
     minConfidentScore,
     resultsShown,
+    "fallbackTripSlug": fallbackTrip->slug.current,
     "questions": questions[] {
       _key,
       kind,
@@ -109,7 +110,8 @@ export const tripBySlugQuery = defineQuery(`
       description,
       image,
       usgsSiteId,
-      flowLinkUrl
+      flowLinkUrl,
+      "mapPoints": mapPoints[]{ _key, title, location, image, caption }
     },
     "infoSections": infoSections[]{
       _key,
@@ -125,6 +127,7 @@ export const tripBySlugQuery = defineQuery(`
       "specialtyType": specialtyType->{ name, slug }
     },
     featuredReview,
+    "reviews": reviews[]{ _key, quote, author, source },
     itinerary,
     "faqs": faqs[]->{ _id, question, answer, category },
     "relatedTrips": select(

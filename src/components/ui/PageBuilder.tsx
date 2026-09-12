@@ -2,6 +2,11 @@ import { PortableText } from '@portabletext/react';
 import type { PortableTextComponents } from '@portabletext/react';
 import Image from 'next/image';
 import { Button } from '@/components/ui/Button';
+import {
+    PAGE_BANNER_HEIGHT,
+    PAGE_BANNER_WIDTH,
+    PageBanner,
+} from '@/components/ui/PageBanner';
 import { Section } from '@/components/ui/Section';
 import { imageUrl } from '@/lib/sanity';
 import type { PageBySlugQueryResult } from '@/sanity/types';
@@ -100,43 +105,36 @@ function HeroBlockSection({
     block: Extract<PageBlock, { _type: 'heroBlock' }>;
     isFirst: boolean;
 }) {
-    const heroPhoto = imageUrl(block.backgroundImage, 2560, 900);
+    const heroPhoto = imageUrl(
+        block.backgroundImage,
+        PAGE_BANNER_WIDTH,
+        PAGE_BANNER_HEIGHT,
+    );
     // The first hero is the page's h1; any later hero demotes to h2.
     const Heading = isFirst ? 'h1' : 'h2';
 
     return (
-        <section>
-            <div className='relative flex h-[320px] items-end overflow-hidden bg-evergreen md:h-[440px]'>
-                {heroPhoto && (
-                    <Image
-                        src={heroPhoto}
-                        alt={block.heading ?? ''}
-                        fill
-                        priority={isFirst}
-                        className='object-cover'
-                        sizes='100vw'
-                    />
-                )}
-                <div className='absolute inset-0 bg-gradient-to-t from-onyx/70 via-onyx/10 to-transparent' />
-                <div className='relative z-10 w-full px-6 pb-10 md:px-12'>
-                    <Heading className='font-alt-gothic text-h2 font-black uppercase leading-h2 text-holiday-white md:text-h1 md:leading-h1'>
-                        {block.heading}
-                    </Heading>
-                    {block.subheading && (
-                        <p className='mt-2 font-alt-gothic text-subheading font-black uppercase leading-[0.95] text-holiday-white'>
-                            {block.subheading}
-                        </p>
-                    )}
-                    {block.ctaText && block.ctaLink && (
-                        <div className='mt-6'>
-                            <Button href={block.ctaLink} size='lg'>
-                                {block.ctaText}
-                            </Button>
-                        </div>
-                    )}
+        <PageBanner
+            image={heroPhoto}
+            imageAlt={block.heading ?? ''}
+            preload={isFirst}
+        >
+            <Heading className='font-alt-gothic text-h2 font-black uppercase leading-h2 text-holiday-white md:text-h1 md:leading-h1'>
+                {block.heading}
+            </Heading>
+            {block.subheading && (
+                <p className='mt-2 font-alt-gothic text-subheading font-black uppercase leading-[0.95] text-holiday-white'>
+                    {block.subheading}
+                </p>
+            )}
+            {block.ctaText && block.ctaLink && (
+                <div className='mt-6'>
+                    <Button href={block.ctaLink} size='lg'>
+                        {block.ctaText}
+                    </Button>
                 </div>
-            </div>
-        </section>
+            )}
+        </PageBanner>
     );
 }
 

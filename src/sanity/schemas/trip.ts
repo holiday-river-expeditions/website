@@ -298,11 +298,11 @@ export const trip = defineType({
         }),
         defineField({
             name: 'featuredReview',
-            title: 'Featured Review',
+            title: 'Lead Review',
             type: 'object',
             group: 'details',
             description:
-                'One standout guest quote, shown as a pull-quote band on the trip page.',
+                'The first guest quote in the "What Guests Say" carousel on the trip page.',
             fields: [
                 defineField({ name: 'quote', title: 'Quote', type: 'text' }),
                 defineField({
@@ -316,6 +316,43 @@ export const trip = defineType({
                     type: 'string',
                     description: 'e.g. TripAdvisor, Google',
                 }),
+            ],
+        }),
+        defineField({
+            name: 'reviews',
+            title: 'More Reviews',
+            type: 'array',
+            group: 'details',
+            description:
+                'Further guest quotes for the carousel, in order. Paste them from TripAdvisor or Google with the reviewer’s name and the platform as the source; the carousel links out to both platforms for the rest.',
+            of: [
+                {
+                    type: 'object',
+                    name: 'guestReview',
+                    fields: [
+                        defineField({
+                            name: 'quote',
+                            title: 'Quote',
+                            type: 'text',
+                            rows: 4,
+                            validation: (rule) => rule.required(),
+                        }),
+                        defineField({
+                            name: 'author',
+                            title: 'Author',
+                            type: 'string',
+                        }),
+                        defineField({
+                            name: 'source',
+                            title: 'Source',
+                            type: 'string',
+                            description: 'e.g. TripAdvisor, Google',
+                        }),
+                    ],
+                    preview: {
+                        select: { title: 'quote', subtitle: 'author' },
+                    },
+                },
             ],
         }),
         defineField({

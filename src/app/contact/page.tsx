@@ -1,6 +1,12 @@
 import type { Metadata } from 'next';
 import { ContactForm } from '@/components/ui/ContactForm';
 import { Section } from '@/components/ui/Section';
+import { contactEmail } from '@/lib/contact-defaults';
+import { getSiteSettings } from '@/lib/sanity';
+
+// Reads Site Settings, so re-render within a minute of a Studio edit like
+// the rest of the site rather than baking the address in at build time.
+export const revalidate = 60;
 
 export const metadata: Metadata = {
     title: 'Contact Us',
@@ -32,7 +38,11 @@ const locations = [
     },
 ] as const;
 
-export default function ContactPage() {
+export default async function ContactPage() {
+    // The address is the Studio's Site Settings → Email Address; the
+    // fallback is the new-domain inbox named at the Sep 3 sync.
+    const settings = await getSiteSettings();
+    const email = contactEmail(settings);
     return (
         <>
             <Section background='white' className='pb-4 pt-14 md:pt-20'>
@@ -43,10 +53,10 @@ export default function ContactPage() {
                     Questions about a trip, a date, or what to pack? Call us,
                     email{' '}
                     <a
-                        href='mailto:Info@HolidayExpeditions.com'
+                        href={`mailto:${email}`}
                         className='text-holiday-red underline'
                     >
-                        Info@HolidayExpeditions.com
+                        {email}
                     </a>
                     , or send a message below.
                 </p>

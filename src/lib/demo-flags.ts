@@ -59,6 +59,12 @@ export const DEMO_FLAGS = [
             'ON: the floating section/filter bars stay hidden until the page is scrolled. OFF (default): always visible.',
     },
     {
+        id: 'bars-top',
+        label: 'Floating bars at the top',
+        description:
+            'ON: the floating section and filter bars dock under the header instead of at the bottom of the screen (Lauren, Sep 3). OFF (default): bottom.',
+    },
+    {
         id: 'sticky-header',
         label: 'Sticky header',
         description:

@@ -1,6 +1,5 @@
 import { PortableText } from '@portabletext/react';
 import type { Metadata } from 'next';
-import Image from 'next/image';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import {
@@ -8,14 +7,26 @@ import {
     AvailabilitySection,
 } from '@/components/ui/AvailabilitySection';
 import { buttonClasses } from '@/components/ui/Button';
-import { FeaturedReview } from '@/components/ui/FeaturedReview';
 import { ItinerarySection } from '@/components/ui/ItinerarySection';
+import {
+    PAGE_BANNER_HEIGHT,
+    PAGE_BANNER_WIDTH,
+    PageBanner,
+} from '@/components/ui/PageBanner';
+import { PhotoGallery } from '@/components/ui/PhotoGallery';
 import { RelatedTrips } from '@/components/ui/RelatedTrips';
+import {
+    type GuestReview,
+    ReviewsSection,
+} from '@/components/ui/ReviewsSection';
 import { RiverFlow } from '@/components/ui/RiverFlow';
 import { Section } from '@/components/ui/Section';
 import { SectionNav } from '@/components/ui/SectionNav';
-import { TrustStrip } from '@/components/ui/TrustStrip';
+import type { TripMapPoint } from '@/components/ui/TripMap';
+import { TripMapSection } from '@/components/ui/TripMapSection';
+import { stretchBySlug } from '@/lib/map-style';
 import { getSiteSettings, getTripBySlug, imageUrl } from '@/lib/sanity';
+import { TRIP_MAP_COORDS } from '@/lib/trip-map-data';
 import { embedUrl } from '@/lib/video';
 
 // Same ISR window as the homepage: Studio edits go live within a minute.
@@ -48,8 +59,17 @@ export default async function TripPage({ params }: TripPageProps) {
     if (!trip) notFound();
 
     const category = trip.tripType?.cardLabel ?? trip.tripType?.name ?? null;
-    const heroPhoto = imageUrl(trip.photos?.[0], 2560, 900);
-    const galleryPhotos = (trip.photos ?? []).slice(1, 7);
+    const heroPhoto = imageUrl(
+        trip.photos?.[0],
+        PAGE_BANNER_WIDTH,
+        PAGE_BANNER_HEIGHT,
+    );
+    const galleryPhotos = (trip.photos ?? []).slice(1, 9).map((photo) => ({
+        key: photo._key,
+        src: imageUrl(photo, 1600, 1067),
+        alt: photo.alt ?? trip.name ?? '',
+        caption: photo.caption,
+    }));
 
     // Rapid class replaces the old difficulty scale (Justin's build-out doc).
     // Trips with no whitewater have no class, so they show who the trip is
@@ -84,6 +104,41 @@ export default async function TripPage({ params }: TripPageProps) {
                 : undefined,
         });
 
+    // Trip map beside the facts: the section's drawn stretch (from the
+    // National Hydrography Dataset) and/or the photo points authored on
+    // the Section document. A section with neither has nothing to map,
+    // so the facts column stands alone.
+    const mapPoints: TripMapPoint[] = (trip.river?.mapPoints ?? [])
+        .filter(
+            (point) =>
+                point.title &&
+                typeof point.location?.lng === 'number' &&
+                typeof point.location?.lat === 'number',
+        )
+        .map((point) => ({
+            key: point._key,
+            title: point.title ?? '',
+            longitude: point.location?.lng ?? 0,
+            latitude: point.location?.lat ?? 0,
+            imageSrc: imageUrl(point.image, 480, 360) || undefined,
+            imageAlt: point.image?.alt ?? undefined,
+            caption: point.caption ?? undefined,
+        }));
+    const sectionSlug = trip.river?.slug?.current;
+    const sectionName = trip.river?.name;
+    const mapSection =
+        sectionSlug &&
+        sectionName &&
+        (stretchBySlug(sectionSlug) || mapPoints.length > 0) ? (
+            <TripMapSection
+                sectionSlug={sectionSlug}
+                sectionName={sectionName}
+                riverLabel={trip.river?.riverLabel}
+                center={TRIP_MAP_COORDS[sectionSlug] ?? null}
+                points={mapPoints}
+            />
+        ) : null;
+
     // A trip-level override replaces the shared body entirely; sections with
     // neither are dropped rather than rendered as an empty panel.
     const infoSections = (trip.infoSections ?? []).flatMap((entry) => {
@@ -95,90 +150,103 @@ export default async function TripPage({ params }: TripPageProps) {
         return [{ key: entry._key, title: entry.section.title, body }];
     });
 
+    // Lead review first, then the rest, for the carousel.
+    const reviews: GuestReview[] = [
+        trip.featuredReview,
+        ...(trip.reviews ?? []),
+    ]
+        .filter((review) => Boolean(review?.quote))
+        .map((review) => ({
+            quote: review?.quote ?? '',
+            author: review?.author,
+            source: review?.source,
+        }));
+
     return (
         <>
-            {/* Banner — inset like the homepage hero */}
-            <section>
-                <div className='relative flex h-[320px] items-end overflow-hidden bg-evergreen md:h-[440px]'>
-                    {heroPhoto && (
-                        <Image
-                            src={heroPhoto}
-                            alt={trip.photos?.[0]?.alt ?? trip.name ?? ''}
-                            fill
-                            priority
-                            className='object-cover'
-                            sizes='100vw'
-                        />
-                    )}
-                    <div className='absolute inset-0 bg-gradient-to-t from-onyx/70 via-onyx/10 to-transparent' />
-                    <div className='relative z-10 w-full px-6 pb-10 md:px-12'>
-                        {category && (
-                            <span className='inline-block bg-teal px-3.5 py-1.5 text-[14px] font-bold leading-tight text-holiday-white'>
-                                {category}
-                            </span>
-                        )}
-                        <h1 className='mt-3 font-alt-gothic text-h2 font-black uppercase leading-h2 text-holiday-white md:text-h1 md:leading-h1'>
-                            {trip.name}
-                        </h1>
-                        {trip.subtitle && (
-                            <p className='mt-2 font-alt-gothic text-subheading font-black uppercase leading-[0.95] text-holiday-white'>
-                                {trip.subtitle}
-                            </p>
-                        )}
-                    </div>
-                </div>
-            </section>
+            {/* Banner — hero-height (Justin: a larger header image on trip
+                pages). */}
+            <PageBanner
+                image={heroPhoto}
+                imageAlt={trip.photos?.[0]?.alt ?? trip.name ?? ''}
+            >
+                {category && (
+                    <span className='inline-block bg-teal px-3.5 py-1.5 text-[14px] font-bold leading-tight text-holiday-white'>
+                        {category}
+                    </span>
+                )}
+                <h1 className='mt-3 font-alt-gothic text-h2 font-black uppercase leading-h2 text-holiday-white md:text-h1 md:leading-h1'>
+                    {trip.name}
+                </h1>
+                {trip.subtitle && (
+                    <p className='mt-2 font-alt-gothic text-subheading font-black uppercase leading-[0.95] text-holiday-white'>
+                        {trip.subtitle}
+                    </p>
+                )}
+            </PageBanner>
 
-            {/* Fact bar */}
+            {/* Quick facts — vertical, beside the trip map (Justin's
+                build-out doc). */}
             <Section
                 id='trip-details'
                 background='white'
-                className='scroll-mt-6 [[data-demo-sticky-header=on]_&]:scroll-mt-28 py-8 md:py-10'
+                className='scroll-mt-6 [[data-demo-sticky-header=on]_&]:scroll-mt-28 py-10 md:py-14'
             >
-                <div className='flex flex-wrap items-center justify-between gap-6 border-b border-holiday-grey/40 pb-8'>
-                    <dl className='grid w-full grid-cols-2 gap-x-6 gap-y-5 sm:flex sm:w-auto sm:flex-wrap sm:gap-x-12 sm:gap-y-4'>
-                        {facts.map((fact) => (
-                            <div key={fact.label}>
-                                <dt className='font-alt-gothic text-[12px] font-medium uppercase tracking-[0.05em] text-onyx/70'>
-                                    {fact.label}
-                                </dt>
-                                <dd className='mt-1 font-alt-gothic text-h3 font-semibold uppercase leading-h3 text-holiday-red'>
-                                    {fact.href ? (
-                                        <Link
-                                            href={fact.href}
-                                            className='transition-opacity hover:opacity-70'
-                                        >
-                                            {fact.value}
-                                        </Link>
-                                    ) : (
-                                        fact.value
-                                    )}
-                                </dd>
-                            </div>
-                        ))}
-                        {/* Live CFS from USGS; renders nothing without a
-                            configured gauge or reading. */}
-                        <RiverFlow
-                            variant='fact'
-                            siteIds={trip.river?.usgsSiteId}
-                            href={trip.river?.flowLinkUrl}
-                        />
-                    </dl>
-                    <div className='flex flex-wrap items-center gap-3'>
+                <div
+                    className={`grid gap-10 ${
+                        mapSection
+                            ? 'lg:grid-cols-[minmax(0,2fr)_minmax(0,3fr)] lg:items-stretch'
+                            : ''
+                    }`}
+                >
+                    <div className='flex max-w-xl flex-col'>
+                        <dl className='divide-y divide-holiday-grey/40 border-y border-holiday-grey/40'>
+                            {facts.map((fact) => (
+                                <div
+                                    key={fact.label}
+                                    className='flex items-baseline justify-between gap-6 py-3'
+                                >
+                                    <dt className='font-alt-gothic text-[13px] font-medium uppercase tracking-[0.05em] text-onyx/70'>
+                                        {fact.label}
+                                    </dt>
+                                    <dd className='text-right font-alt-gothic text-h3 font-semibold uppercase leading-h3 text-holiday-red'>
+                                        {fact.href ? (
+                                            <Link
+                                                href={fact.href}
+                                                className='transition-opacity hover:opacity-70'
+                                            >
+                                                {fact.value}
+                                            </Link>
+                                        ) : (
+                                            fact.value
+                                        )}
+                                    </dd>
+                                </div>
+                            ))}
+                            {/* Live CFS from USGS; renders nothing without a
+                                configured gauge or reading. */}
+                            <RiverFlow
+                                variant='fact'
+                                siteIds={trip.river?.usgsSiteId}
+                                href={trip.river?.flowLinkUrl}
+                            />
+                        </dl>
                         {/* Book Now jumps to Dates & Availability on this page
                             (Aug 20 decision). Plain anchor, not Link: a
                             same-page fragment needs native scrolling, not a
                             router navigation. */}
                         <a
                             href={`#${AVAILABILITY_ANCHOR}`}
-                            className={buttonClasses({
+                            className={`${buttonClasses({
                                 variant: 'primary',
                                 size: 'lg',
-                            })}
+                            })} mt-6 w-full text-center`}
                         >
                             Book Now
                         </a>
                     </div>
+
+                    {mapSection}
                 </div>
 
                 {/* Description + highlights */}
@@ -244,21 +312,6 @@ export default async function TripPage({ params }: TripPageProps) {
                 </div>
             </Section>
 
-            {/* Featured review — social proof before the pitch deepens */}
-            {trip.featuredReview?.quote && (
-                <FeaturedReview
-                    quote={trip.featuredReview.quote}
-                    author={trip.featuredReview.author}
-                    source={trip.featuredReview.source}
-                />
-            )}
-
-            {/* Live availability from Arctic */}
-            <AvailabilitySection
-                arcticTripId={trip.arcticTripId ?? null}
-                specialtyDepartures={trip.specialtyDepartures}
-            />
-
             {/* Day-by-day itinerary */}
             <ItinerarySection days={trip.itinerary ?? []} />
 
@@ -283,30 +336,8 @@ export default async function TripPage({ params }: TripPageProps) {
                 </Section>
             )}
 
-            {/* Photo gallery */}
-            {galleryPhotos.length > 0 && (
-                <Section
-                    background='white'
-                    className='pb-20 pt-12 md:pb-24 md:pt-16'
-                >
-                    <div className='grid gap-4 sm:grid-cols-2 lg:grid-cols-3'>
-                        {galleryPhotos.map((photo) => (
-                            <div
-                                key={photo._key}
-                                className='relative aspect-[4/3] overflow-hidden bg-holiday-grey/15'
-                            >
-                                <Image
-                                    src={imageUrl(photo, 800, 600)}
-                                    alt={photo.alt ?? trip.name ?? ''}
-                                    fill
-                                    className='object-cover'
-                                    sizes='(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw'
-                                />
-                            </div>
-                        ))}
-                    </div>
-                </Section>
-            )}
+            {/* Photo slideshow */}
+            <PhotoGallery photos={galleryPhotos} />
 
             {/* Trip-specific FAQs */}
             {trip.faqs && trip.faqs.length > 0 && (
@@ -375,16 +406,22 @@ export default async function TripPage({ params }: TripPageProps) {
                 </Section>
             )}
 
-            {/* Third-party review trust strip */}
-            {settings?.reviews?.ratingLabel &&
-                (settings.reviews.tripadvisorUrl ||
-                    settings.reviews.googleUrl) && (
-                    <TrustStrip
-                        ratingLabel={settings.reviews.ratingLabel}
-                        tripadvisorUrl={settings.reviews.tripadvisorUrl}
-                        googleUrl={settings.reviews.googleUrl}
-                    />
-                )}
+            {/* Live availability from Arctic — last, per Justin's build-out
+                doc ("Rates and Dates LAST"), so the floating menu's order
+                matches the page's. */}
+            <AvailabilitySection
+                arcticTripId={trip.arcticTripId ?? null}
+                specialtyDepartures={trip.specialtyDepartures}
+            />
+
+            {/* Reviews carousel + platform links (Aug 20 decision). On the
+                page, out of the floating menu. */}
+            <ReviewsSection
+                reviews={reviews}
+                ratingLabel={settings?.reviews?.ratingLabel}
+                tripadvisorUrl={settings?.reviews?.tripadvisorUrl}
+                googleUrl={settings?.reviews?.googleUrl}
+            />
 
             {/* Cross-sell */}
             <RelatedTrips trips={trip.relatedTrips ?? []} />

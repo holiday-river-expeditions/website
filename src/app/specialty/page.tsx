@@ -3,6 +3,7 @@ import type { Metadata } from 'next';
 import Image from 'next/image';
 import Link from 'next/link';
 import { Section } from '@/components/ui/Section';
+import { TripCatalogDisclosure } from '@/components/ui/TripCatalogDisclosure';
 import { SectionNav } from '@/components/ui/SectionNav';
 import { TripCard, tripCardProps } from '@/components/ui/TripCard';
 import { getAllSpecialtyTypes, getAllTrips, imageUrl } from '@/lib/sanity';
@@ -157,24 +158,7 @@ export default async function SpecialtyPage() {
                 /trips. Native <details> keeps it zero-JS and accessible. */}
             {allTrips.length > 0 && (
                 <Section background='white' className='pb-20 pt-4 md:pb-24'>
-                    <details className='group'>
-                        <summary className='mx-auto block w-fit cursor-pointer list-none border-2 border-holiday-red px-8 py-3 text-center font-alt-gothic text-[18px] font-semibold uppercase tracking-wide text-holiday-red transition-colors hover:bg-holiday-red hover:text-holiday-white [&::-webkit-details-marker]:hidden'>
-                            <span className='group-open:hidden'>
-                                View All Trips
-                            </span>
-                            <span className='hidden group-open:inline'>
-                                Hide All Trips
-                            </span>
-                        </summary>
-                        <div className='mt-12 grid gap-10 sm:grid-cols-2 lg:grid-cols-3'>
-                            {allTrips.map((trip) => (
-                                <TripCard
-                                    key={trip._id}
-                                    {...tripCardProps(trip)}
-                                />
-                            ))}
-                        </div>
-                    </details>
+                    <TripCatalogDisclosure trips={allTrips} />
                 </Section>
             )}
 

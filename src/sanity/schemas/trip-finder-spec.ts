@@ -380,6 +380,15 @@ export const tripFinderSpec = defineType({
             initialValue: 3,
             validation: (rule) => rule.required().integer().min(1).max(6),
         }),
+        defineField({
+            name: 'fallbackTrip',
+            title: 'Go-to trip',
+            type: 'reference',
+            group: 'tuning',
+            to: [{ type: 'trip' }],
+            description:
+                'When the answers don’t add up to a confident Best Match, this trip leads the results as "a good place to start" and the top-scoring trips follow it. Leave empty to lead with the call-us line instead.',
+        }),
     ],
     preview: {
         prepare: () => ({ title: 'Trip Finder' }),

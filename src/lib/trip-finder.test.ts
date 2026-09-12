@@ -10,8 +10,11 @@ import {
     isApplicable,
     lastAnsweredQuestion,
     parseTripFinderParams,
+    isConfidentMatch,
     resolveMonthValue,
     scoreTrips,
+    selectMatches,
+    shortfallReason,
     stepInfo,
     type TripFinderAnswers,
     type TripFinderSpec,
@@ -542,6 +545,122 @@ describe('scoreTrips', () => {
         expect(
             match.breakdown.find((b) => b.kind === 'activity')?.rawScore,
         ).toBe(0.2);
+    });
+});
+
+describe('selectMatches', () => {
+    const westwater = trip({
+        _id: 'trip-westwater',
+        name: 'Westwater Canyon',
+        slug: { _type: 'slug', current: 'westwater-canyon' },
+        maxRapidClass: 4,
+        duration: 3,
+        seasonMonths: [5, 6, 7, 8, 9],
+        minAge: 12,
+    });
+    const lodore = trip({
+        _id: 'trip-lodore',
+        name: 'Gates of Lodore',
+        slug: { _type: 'slug', current: 'gates-of-lodore' },
+        maxRapidClass: 3,
+        duration: 4,
+        seasonMonths: [5, 6, 7, 8, 9],
+        minAge: 7,
+    });
+    const goTo: TripFinderSpec = {
+        ...spec,
+        tuning: { ...spec.tuning, fallbackTripSlug: 'westwater-canyon' },
+    };
+
+    test('a confident ranking is shown as scored', () => {
+        const full = answers({
+            who: 'kids',
+            age: '8-12',
+            month: '7',
+            days: 'classic',
+            thrill: 'splash',
+            activity: 'raft',
+        });
+        const ranking = scoreTrips(goTo, [westwater, lodore], full);
+        expect(isConfidentMatch(goTo, ranking[0], full)).toBe(true);
+        const { matches, fallbackApplied } = selectMatches(goTo, ranking, full);
+        expect(fallbackApplied).toBe(false);
+        expect(matches[0].trip.name).toBe('Gates of Lodore');
+    });
+
+    test('one answer is not enough for a Best Match, so the go-to trip leads', () => {
+        const thin = answers({ who: 'adults' });
+        const ranking = scoreTrips(goTo, [lodore, westwater], thin);
+        expect(isConfidentMatch(goTo, ranking[0], thin)).toBe(false);
+        const { matches, fallbackApplied } = selectMatches(goTo, ranking, thin);
+        expect(fallbackApplied).toBe(true);
+        expect(matches[0].trip.name).toBe('Westwater Canyon');
+        // The top scorer still follows it; nothing is duplicated.
+        expect(matches.map((m) => m.trip.name)).toEqual([
+            'Westwater Canyon',
+            'Gates of Lodore',
+        ]);
+    });
+
+    test('an age conflict is reported as such and keeps the scored order', () => {
+        const young = answers({
+            who: 'kids',
+            age: 'u5',
+            activity: 'raft',
+            month: '7',
+            days: 'classic',
+            thrill: 'splash',
+        });
+        const ranking = scoreTrips(goTo, [lodore, westwater], young);
+        expect(ranking[0].ageConflict).toBe(true);
+        expect(shortfallReason(goTo, ranking[0], young)).toBe('age');
+        expect(selectMatches(goTo, ranking, young).fallbackApplied).toBe(false);
+    });
+
+    test('a full answer set that scores low keeps the scored order', () => {
+        const full = answers({
+            who: 'adults',
+            activity: 'bike',
+            month: '10',
+            days: 'epic',
+        });
+        // Two rafting trips for a biker in October: nothing confident.
+        const ranking = scoreTrips(goTo, [lodore, westwater], full);
+        expect(isConfidentMatch(goTo, ranking[0], full)).toBe(false);
+        expect(shortfallReason(goTo, ranking[0], full)).toBe('low');
+        const result = selectMatches(goTo, ranking, full);
+        expect(result.fallbackApplied).toBe(false);
+        expect(result.matches[0]).toBe(ranking[0]);
+    });
+
+    test('no go-to trip, or one the visitor is too young for, keeps the scored order', () => {
+        const thin = answers({ who: 'adults' });
+        const noGoTo: TripFinderSpec = {
+            ...spec,
+            tuning: { ...spec.tuning, fallbackTripSlug: undefined },
+        };
+        const none = selectMatches(
+            noGoTo,
+            scoreTrips(noGoTo, [lodore], thin),
+            thin,
+        );
+        expect(none.fallbackApplied).toBe(false);
+
+        const young = answers({ who: 'kids', age: '5-7' });
+        const ranking = scoreTrips(goTo, [lodore, westwater], young);
+        const result = selectMatches(goTo, ranking, young);
+        expect(result.fallbackApplied).toBe(false);
+        expect(result.matches[0].trip.name).toBe('Gates of Lodore');
+    });
+
+    test('respects the results limit', () => {
+        const thin = answers({ who: 'adults' });
+        const tight: TripFinderSpec = {
+            ...goTo,
+            tuning: { ...goTo.tuning, resultsShown: 1 },
+        };
+        const ranking = scoreTrips(tight, [lodore, westwater], thin);
+        expect(selectMatches(tight, ranking, thin).matches).toHaveLength(1);
     });
 });
 

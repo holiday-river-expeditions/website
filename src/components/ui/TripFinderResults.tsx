@@ -1,4 +1,5 @@
 import Image from 'next/image';
+import { AnniversaryBadge } from '@/components/ui/AnniversaryBadge';
 import Link from 'next/link';
 import { Button, buttonClasses } from '@/components/ui/Button';
 import { Section } from '@/components/ui/Section';
@@ -6,7 +7,9 @@ import { TripCard, tripCardProps } from '@/components/ui/TripCard';
 import { imageUrl } from '@/lib/sanity';
 import {
     answerLabel,
-    answeredQuestionCount,
+    isConfidentMatch,
+    type ShortfallReason,
+    shortfallReason,
     answeredQuestions,
     answersToParams,
     type TripFinderSpec,
@@ -26,6 +29,8 @@ export interface ResultAvailability {
 interface TripFinderResultsProps {
     spec: TripFinderSpec;
     matches: TripMatch[];
+    /** The go-to trip leads because no match was confident. */
+    fallbackApplied?: boolean;
     answers: TripFinderAnswers;
     availabilityBySlug: ReadonlyMap<string, ResultAvailability>;
     /** Arctic was unreachable — cards render without dates, phone leads. */
@@ -34,6 +39,31 @@ interface TripFinderResultsProps {
 
 /** Seat counts only add urgency when they're actually scarce. */
 const SEAT_URGENCY_MAX = 10;
+
+type RevealOutcome = 'confident' | 'fallback' | ShortfallReason;
+
+/** Heading and lead-in per outcome; the call line follows every body.
+    The confident heading is built from the river name at render time. */
+const REVEAL: Record<RevealOutcome, { heading: string; body: string | null }> =
+    {
+        confident: { heading: 'Your river is calling', body: null },
+        fallback: {
+            heading: 'A good place to start',
+            body: 'Not enough yet to call a Best Match, so here’s the trip we point most first-timers to. Tell us one or two more things and the match gets sharper — or skip the quiz entirely:',
+        },
+        age: {
+            heading: 'The littlest one needs a few more birthdays',
+            body: 'Every trip we run has a minimum age, and your youngest is under all of them. The closest fit is below with its age rule — and guides know which dates and rivers work best for families with small kids:',
+        },
+        thin: {
+            heading: 'Close — this is what guides are for',
+            body: 'Tell us one or two more things and the match gets sharper — or skip the quiz entirely:',
+        },
+        low: {
+            heading: 'Close — this is what guides are for',
+            body: 'Nothing lines up on every count, so this is the nearest fit — a guide can usually find the middle ground:',
+        },
+    };
 
 const CALL_LINE = (
     <>
@@ -101,19 +131,23 @@ function AvailabilityLine({
 export function TripFinderResults({
     spec,
     matches,
+    fallbackApplied = false,
     answers,
     availabilityBySlug,
     arcticDown,
 }: TripFinderResultsProps) {
     const [best, ...alternates] = matches;
-    // A "Best Match" claim must be earned: a real score, no age conflict,
-    // and at least two actual answers — never an alphabetical accident
-    // dressed up in a ribbon.
-    const confident =
-        best !== undefined &&
-        best.score >= spec.tuning.minConfidentScore &&
-        !best.ageConflict &&
-        answeredQuestionCount(spec, answers) >= 2;
+    // One outcome drives every line of the reveal. A "Best Match" claim
+    // must be earned (see isConfidentMatch); otherwise the copy names the
+    // real reason — "tell us more" is wrong for someone who answered
+    // everything and hit a minimum age.
+    const outcome: RevealOutcome = fallbackApplied
+        ? 'fallback'
+        : isConfidentMatch(spec, best, answers)
+          ? 'confident'
+          : shortfallReason(spec, best, answers);
+    const confident = outcome === 'confident';
+    const reveal = REVEAL[outcome];
 
     const riverName = best?.trip.river?.name ?? null;
     const heroImage = best?.trip.image
@@ -170,13 +204,7 @@ export function TripFinderResults({
                     />
 
                     {/* The 60-years seal stamps in last. */}
-                    <Image
-                        src='/badge-60-years.svg'
-                        alt='60 years of going with the flow'
-                        width={164}
-                        height={164}
-                        className='absolute right-6 top-6 h-24 w-24 md:right-10 md:top-10 md:h-36 md:w-36 motion-safe:animate-finder-stamp motion-safe:[animation-delay:1.5s]'
-                    />
+                    <AnniversaryBadge className='absolute right-6 top-6 h-24 w-24 md:right-10 md:top-10 md:h-36 md:w-36 motion-safe:animate-finder-stamp motion-safe:[animation-delay:1.5s]' />
 
                     <div className='relative mx-auto w-full max-w-5xl px-4 py-24 md:px-10'>
                         {/* Teal glass panel: the reveal reads over any photo
@@ -193,13 +221,11 @@ export function TripFinderResults({
                                     ? riverName
                                         ? `The ${riverName} is calling`
                                         : 'Your river is calling'
-                                    : 'Close — this is what guides are for'}
+                                    : reveal.heading}
                             </h1>
-                            {!confident && (
+                            {reveal.body && (
                                 <p className='mt-3 max-w-2xl text-paragraph leading-paragraph text-holiday-white motion-safe:animate-finder-rise motion-safe:[animation-delay:0.7s]'>
-                                    Tell us one or two more things and the match
-                                    gets sharper — or skip the quiz entirely:{' '}
-                                    {CALL_LINE}
+                                    {reveal.body} {CALL_LINE}
                                 </p>
                             )}
 
@@ -207,6 +233,11 @@ export function TripFinderResults({
                                 {confident && (
                                     <span className='inline-block bg-holiday-red px-3.5 py-1.5 text-[14px] font-bold uppercase leading-tight text-holiday-white'>
                                         Best Match
+                                    </span>
+                                )}
+                                {fallbackApplied && (
+                                    <span className='inline-block bg-sand px-3.5 py-1.5 text-[14px] font-bold uppercase leading-tight text-onyx'>
+                                        Our Go-To Trip
                                     </span>
                                 )}
                                 <h2 className='mt-2 font-alt-gothic text-section font-black uppercase text-holiday-white'>

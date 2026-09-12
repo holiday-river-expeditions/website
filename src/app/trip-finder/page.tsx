@@ -20,6 +20,7 @@ import {
     parseTripFinderParams,
     resolveMonthValue,
     scoreTrips,
+    selectMatches,
 } from '@/lib/trip-finder';
 import { resolveTripFinderSpec } from '@/lib/trip-finder-spec';
 
@@ -72,7 +73,7 @@ export default async function TripFinderPage({
     ]);
 
     const ranking = scoreTrips(spec, trips, answers);
-    const matches = ranking.slice(0, spec.tuning.resultsShown);
+    const { matches, fallbackApplied } = selectMatches(spec, ranking, answers);
     const arcticDown = departures === null || tripTypes === null;
 
     const month = chosenMonth(spec, answers);
@@ -114,6 +115,7 @@ export default async function TripFinderPage({
             <TripFinderResults
                 spec={spec}
                 matches={matches}
+                fallbackApplied={fallbackApplied}
                 answers={answers}
                 availabilityBySlug={availabilityBySlug}
                 arcticDown={arcticDown}
@@ -122,6 +124,8 @@ export default async function TripFinderPage({
                 spec={spec}
                 answers={answers}
                 ranking={ranking}
+                matches={matches}
+                fallbackApplied={fallbackApplied}
                 availabilityBySlug={availabilityBySlug}
                 arctic={{
                     down: arcticDown,

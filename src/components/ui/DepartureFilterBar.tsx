@@ -2,6 +2,7 @@
 
 import Link from 'next/link';
 import { useEffect, useState } from 'react';
+import { FLOATING_BAR_CHROME, floatingBarClasses } from '@/lib/floating-bar';
 import { useDemoFlag } from '@/lib/use-demo-flag';
 import type { MonthOption } from '@/lib/departures';
 
@@ -54,13 +55,11 @@ export function DepartureFilterBar({
     return (
         <nav
             aria-label='Filter departures'
-            className={`fixed bottom-4 left-1/2 z-40 w-max max-w-[calc(100vw-2rem)] -translate-x-1/2 transition-opacity duration-200 ${
-                visible
-                    ? 'opacity-100'
-                    : 'pointer-events-none invisible opacity-0'
-            }`}
+            className={`w-max max-w-[calc(100vw-2rem)] ${floatingBarClasses(visible)}`}
         >
-            <div className='flex items-center gap-3 border border-holiday-grey/40 bg-holiday-white p-1.5 pl-3 shadow-lg'>
+            <div
+                className={`flex items-center gap-3 p-1.5 pl-3 ${FLOATING_BAR_CHROME}`}
+            >
                 <ul className='flex gap-1 overflow-x-auto'>
                     <li className='shrink-0'>
                         <Link

@@ -1,8 +1,12 @@
 import { PortableText } from '@portabletext/react';
 import type { Metadata } from 'next';
-import Image from 'next/image';
 import { notFound } from 'next/navigation';
 import { Button } from '@/components/ui/Button';
+import {
+    PAGE_BANNER_HEIGHT,
+    PAGE_BANNER_WIDTH,
+    PageBanner,
+} from '@/components/ui/PageBanner';
 import { Section } from '@/components/ui/Section';
 import { getPostBySlug, imageUrl } from '@/lib/sanity';
 
@@ -42,42 +46,30 @@ export default async function PostPage({ params }: PostPageProps) {
     const post = await getPostBySlug(slug);
     if (!post) notFound();
 
-    const heroPhoto = imageUrl(post.mainImage, 2560, 900);
+    const heroPhoto = imageUrl(
+        post.mainImage,
+        PAGE_BANNER_WIDTH,
+        PAGE_BANNER_HEIGHT,
+    );
     const category = post.category ? categoryLabels[post.category] : null;
 
     return (
         <>
-            {/* Banner — inset like the homepage hero */}
-            <section>
-                <div className='relative flex h-[320px] items-end overflow-hidden bg-evergreen md:h-[440px]'>
-                    {heroPhoto && (
-                        <Image
-                            src={heroPhoto}
-                            alt={post.title ?? ''}
-                            fill
-                            priority
-                            className='object-cover'
-                            sizes='100vw'
-                        />
-                    )}
-                    <div className='absolute inset-0 bg-gradient-to-t from-onyx/70 via-onyx/10 to-transparent' />
-                    <div className='relative z-10 w-full px-6 pb-10 md:px-12'>
-                        {category && (
-                            <span className='inline-block bg-teal px-3.5 py-1.5 text-[14px] font-bold leading-tight text-holiday-white'>
-                                {category}
-                            </span>
-                        )}
-                        <h1 className='mt-3 font-alt-gothic text-h2 font-black uppercase leading-h2 text-holiday-white md:text-h1 md:leading-h1'>
-                            {post.title}
-                        </h1>
-                        {post.publishedAt && (
-                            <p className='mt-2 text-[13px] uppercase tracking-wider text-holiday-white/80'>
-                                {dateFormat.format(new Date(post.publishedAt))}
-                            </p>
-                        )}
-                    </div>
-                </div>
-            </section>
+            <PageBanner image={heroPhoto} imageAlt={post.title ?? ''}>
+                {category && (
+                    <span className='inline-block bg-teal px-3.5 py-1.5 text-[14px] font-bold leading-tight text-holiday-white'>
+                        {category}
+                    </span>
+                )}
+                <h1 className='mt-3 font-alt-gothic text-h2 font-black uppercase leading-h2 text-holiday-white md:text-h1 md:leading-h1'>
+                    {post.title}
+                </h1>
+                {post.publishedAt && (
+                    <p className='mt-2 text-[13px] uppercase tracking-wider text-holiday-white/80'>
+                        {dateFormat.format(new Date(post.publishedAt))}
+                    </p>
+                )}
+            </PageBanner>
 
             <Section background='white' className='py-12 md:py-16'>
                 <div className='mx-auto max-w-3xl'>
