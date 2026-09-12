@@ -4,7 +4,7 @@
    outside the document flow; next/image's layout machinery buys nothing
    for a fixed 56px medallion and fights the marker transform. */
 
-import { useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import Map, {
     Marker,
     NavigationControl,
@@ -12,7 +12,14 @@ import Map, {
     type MapRef,
 } from 'react-map-gl/maplibre';
 import 'maplibre-gl/dist/maplibre-gl.css';
+import { MapLayers } from '@/components/ui/MapLayers';
+import { configureMapLibreWorker } from '@/lib/maplibre-worker';
+import { MAP_STYLES, type MapStyleKey, riverKey } from '@/lib/map-style';
+import { useHoverCard } from '@/lib/use-hover-card';
 import type { TripMapMarker } from '@/lib/trip-map-data';
+
+// Must run before the first Map mounts (see maplibre-worker.ts).
+configureMapLibreWorker();
 
 /**
  * The homepage trips map (Aug 20 decision) — replaced the river-selector
@@ -29,54 +36,6 @@ import type { TripMapMarker } from '@/lib/trip-map-data';
  * real <a> elements, keyboard-focusable, and the card opens on focus
  * too, so the detail layer isn't pointer-only.
  */
-
-/** Builds a MapLibre raster style from one or more USGS National Map
-    services, layered in order — all public domain, no API key. */
-function usgsStyle(services: string[]) {
-    return {
-        version: 8 as const,
-        sources: Object.fromEntries(
-            services.map((service) => [
-                service,
-                {
-                    type: 'raster' as const,
-                    tiles: [
-                        `https://basemap.nationalmap.gov/arcgis/rest/services/${service}/MapServer/tile/{z}/{y}/{x}`,
-                    ],
-                    tileSize: 256,
-                    attribution: 'USGS The National Map',
-                },
-            ]),
-        ),
-        layers: services.map((service) => ({
-            id: service,
-            type: 'raster' as const,
-            source: service,
-        })),
-    };
-}
-
-/** Prototype style options for Darius/Holiday to compare live. Tint is
-    per-style: the warm duotone flatters line maps but muddies imagery.
-    Relief first — Darius picked it as the default. */
-const MAP_STYLES = {
-    relief: {
-        label: 'Relief',
-        style: usgsStyle(['USGSShadedReliefOnly', 'USGSHydroCached']),
-        tint: '[&_canvas]:contrast-[1.05] [&_canvas]:sepia-[0.45] [&_canvas]:saturate-[0.9]',
-    },
-    topo: {
-        label: 'Topo',
-        style: usgsStyle(['USGSTopo']),
-        tint: '[&_canvas]:contrast-[1.02] [&_canvas]:sepia-[0.35] [&_canvas]:saturate-[0.65]',
-    },
-    satellite: {
-        label: 'Satellite',
-        style: usgsStyle(['USGSImageryTopo']),
-        tint: '',
-    },
-} as const;
-type MapStyleKey = keyof typeof MAP_STYLES;
 
 /** Named sub-regions for the fly-to targeting, grouping the marker
     clusters the way guests think about the geography. */
@@ -147,7 +106,6 @@ function markerChip(kind: TripMapMarker['kind']): string {
 }
 
 export default function TripsMap({ markers }: { markers: TripMapMarker[] }) {
-    const [active, setActive] = useState<TripMapMarker | null>(null);
     // Prototype comparison controls: basemap style + scale preset,
     // flippable live so Holiday can judge options side by side.
     const [styleKey, setStyleKey] = useState<MapStyleKey>('relief');
@@ -192,35 +150,11 @@ export default function TripsMap({ markers }: { markers: TripMapMarker[] }) {
             document.body.style.overflow = '';
         };
     }, [expanded]);
-    // Hoverable-card contract (WCAG 1.4.13): the card must survive the
-    // pointer travelling from marker to card, so closing is delayed and
-    // cancelled when the pointer (or focus) lands on the card itself.
-    const closeTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
-    const show = (marker: TripMapMarker) => {
-        if (closeTimer.current) clearTimeout(closeTimer.current);
-        setActive(marker);
-    };
-    const scheduleHide = () => {
-        if (closeTimer.current) clearTimeout(closeTimer.current);
-        closeTimer.current = setTimeout(() => setActive(null), 200);
-    };
-    const holdOpen = () => {
-        if (closeTimer.current) clearTimeout(closeTimer.current);
-    };
-    useEffect(() => {
-        // Dismissible without moving the pointer (WCAG 1.4.13).
-        const onKey = (event: KeyboardEvent) => {
-            if (event.key === 'Escape') {
-                setActive(null);
-                setExpanded(false);
-            }
-        };
-        window.addEventListener('keydown', onKey);
-        return () => {
-            window.removeEventListener('keydown', onKey);
-            if (closeTimer.current) clearTimeout(closeTimer.current);
-        };
-    }, []);
+    // Hoverable context cards (WCAG 1.4.13); Escape also collapses the
+    // expanded map.
+    const collapse = useCallback(() => setExpanded(false), []);
+    const { active, show, scheduleHide, holdOpen } =
+        useHoverCard<TripMapMarker>({ onEscape: collapse });
 
     return (
         <div className='relative'>
@@ -258,6 +192,9 @@ export default function TripsMap({ markers }: { markers: TripMapMarker[] }) {
                         position='top-right'
                         showCompass={false}
                     />
+                    {/* The stretches themselves, keyed by river, over the
+                        rough plateau outline (Sep 3 feedback). */}
+                    <MapLayers />
                     {markers.map((marker) => (
                         // Bike areas hang BELOW their point while everything
                         // else stacks above — de-collides the Cataract / Maze /
@@ -445,6 +382,42 @@ export default function TripsMap({ markers }: { markers: TripMapMarker[] }) {
                     container so it survives expansion. */}
                     <div className='pointer-events-none absolute left-3 top-3 z-10 border border-holiday-grey/40 bg-holiday-white/95 px-3 py-2 shadow-md'>
                         <ul className='space-y-1.5'>
+                            {riverKey().map(({ river, swatch }) => (
+                                <li
+                                    key={river}
+                                    className='flex items-center gap-2'
+                                >
+                                    <span
+                                        aria-hidden
+                                        className={`h-[3px] w-4 rounded-full ${swatch}`}
+                                    />
+                                    <span className='font-alt-gothic text-[12px] font-semibold uppercase tracking-[0.05em] text-onyx'>
+                                        {river}
+                                    </span>
+                                </li>
+                            ))}
+                            <li className='flex items-center gap-2'>
+                                <span
+                                    aria-hidden
+                                    className='h-0 w-4 border-t-2 border-dashed border-onyx'
+                                />
+                                <span className='font-alt-gothic text-[12px] font-semibold uppercase tracking-[0.05em] text-onyx'>
+                                    Bike route
+                                </span>
+                            </li>
+                            <li className='flex items-center gap-2'>
+                                <span
+                                    aria-hidden
+                                    className='h-0 w-4 border-t border-dashed border-onyx/60'
+                                />
+                                <span className='font-alt-gothic text-[12px] font-semibold uppercase tracking-[0.05em] text-onyx'>
+                                    Colorado Plateau
+                                </span>
+                            </li>
+                            <li
+                                aria-hidden
+                                className='my-1 border-t border-holiday-grey/40'
+                            />
                             <li className='flex items-center gap-2'>
                                 <span
                                     aria-hidden

@@ -70,6 +70,63 @@ export const river = defineType({
             type: 'image',
             options: { hotspot: true },
         }),
+        defineField({
+            name: 'mapPoints',
+            title: 'Map Photo Points',
+            type: 'array',
+            description:
+                'Photos pinned to places along this stretch — a rapid, a camp, a side canyon. Every trip on this section shows them on its trip-page map. For the location, right-click the spot in Google Maps, click the coordinates to copy them, and paste latitude and longitude here.',
+            of: [
+                {
+                    type: 'object',
+                    name: 'mapPoint',
+                    fields: [
+                        defineField({
+                            name: 'title',
+                            title: 'Place',
+                            type: 'string',
+                            description:
+                                'e.g. "Skull Rapid" or "Camp at Rattlesnake"',
+                            validation: (rule) => rule.required().max(48),
+                        }),
+                        defineField({
+                            name: 'location',
+                            title: 'Location',
+                            type: 'geopoint',
+                            validation: (rule) => rule.required(),
+                        }),
+                        defineField({
+                            name: 'image',
+                            title: 'Photo',
+                            type: 'image',
+                            options: { hotspot: true },
+                            fields: [
+                                defineField({
+                                    name: 'alt',
+                                    title: 'Alt Text',
+                                    type: 'string',
+                                }),
+                            ],
+                        }),
+                        defineField({
+                            name: 'caption',
+                            title: 'Caption',
+                            type: 'text',
+                            rows: 2,
+                            description:
+                                'One or two sentences shown with the photo.',
+                        }),
+                    ],
+                    preview: {
+                        select: {
+                            title: 'title',
+                            subtitle: 'caption',
+                            media: 'image',
+                        },
+                    },
+                },
+            ],
+        }),
     ],
     preview: {
         select: { title: 'name', subtitle: 'riverName', media: 'image' },

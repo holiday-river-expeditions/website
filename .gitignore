@@ -48,5 +48,8 @@ next-env.d.ts
 # sanity
 schema.json
 
+# maplibre worker bundle, copied from node_modules by scripts/copy-maplibre-worker.mjs
+/public/maplibre/
+
 # claude code worktrees
 /.claude/worktrees/

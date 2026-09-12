@@ -158,6 +158,28 @@ async function main() {
         minConfidentScore: DEFAULT_TRIP_FINDER_SPEC.tuning.minConfidentScore,
         resultsShown: DEFAULT_TRIP_FINDER_SPEC.tuning.resultsShown,
     };
+    // Go-to trip — resolved by slug so the document id doesn't have to be
+    // known here. Only applied when the document has none, so a Studio
+    // pick survives a re-seed.
+    const fallbackSlug = DEFAULT_TRIP_FINDER_SPEC.tuning.fallbackTripSlug;
+    if (fallbackSlug) {
+        const fallbackId = await client.fetch(
+            `*[_type == "trip" && slug.current == $slug][0]._id`,
+            { slug: fallbackSlug },
+        );
+        const existing = await client.fetch(
+            `*[_id == "tripFinderSpec"][0].fallbackTrip`,
+        );
+        if (existing) {
+            doc.fallbackTrip = existing;
+        } else if (fallbackId) {
+            doc.fallbackTrip = { _type: 'reference', _ref: fallbackId };
+        } else {
+            console.warn(
+                `   ! no trip with slug ${fallbackSlug}; go-to trip left empty`,
+            );
+        }
+    }
 
     console.log(`\n2. Trip Finder document — ${questions.length} questions:`);
     for (const q of questions) {

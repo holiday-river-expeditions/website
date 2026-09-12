@@ -3,11 +3,12 @@ import Link from 'next/link';
 import { ExternalLink } from '@/components/ui/ExternalLink';
 import { Logo } from '@/components/ui/Logo';
 import { NewsletterSignup } from '@/components/ui/NewsletterSignup';
+import { contactPhone } from '@/lib/contact-defaults';
 import { getSiteSettings } from '@/lib/sanity';
 
 // Fallbacks if the Site Settings singleton hasn't been seeded/edited yet.
+// Phone and email live in lib/contact-defaults so every page agrees.
 const defaults = {
-    phone: '801-266-2087',
     address: '544 East 3900 South\nSalt Lake City, Utah 84107',
     socialLinks: {
         instagram: 'https://www.instagram.com/holidayriverexpeditions',
@@ -29,7 +30,7 @@ const resourceLinks = [
 
 export async function Footer() {
     const settings = await getSiteSettings();
-    const phone = settings?.phone ?? defaults.phone;
+    const phone = contactPhone(settings);
     const address = settings?.address ?? defaults.address;
     const social = { ...defaults.socialLinks, ...settings?.socialLinks };
     const followLinks = [

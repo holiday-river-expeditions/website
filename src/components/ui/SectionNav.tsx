@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import { FLOATING_BAR_CHROME, floatingBarClasses } from '@/lib/floating-bar';
 import { useDemoFlag } from '@/lib/use-demo-flag';
 
 export interface SectionNavItem {
@@ -71,15 +72,10 @@ export function SectionNav({
     if (items.length === 0) return null;
 
     return (
-        <nav
-            aria-label={ariaLabel}
-            className={`fixed bottom-4 left-1/2 z-40 -translate-x-1/2 transition-opacity duration-200 ${
-                visible
-                    ? 'opacity-100'
-                    : 'pointer-events-none invisible opacity-0'
-            }`}
-        >
-            <ul className='flex max-w-[calc(100vw-2rem)] gap-1 overflow-x-auto border border-holiday-grey/40 bg-holiday-white p-1 shadow-lg'>
+        <nav aria-label={ariaLabel} className={floatingBarClasses(visible)}>
+            <ul
+                className={`flex max-w-[calc(100vw-2rem)] gap-1 overflow-x-auto p-1 ${FLOATING_BAR_CHROME}`}
+            >
                 {items.map((item) => (
                     <li key={item.id} className='shrink-0'>
                         <a

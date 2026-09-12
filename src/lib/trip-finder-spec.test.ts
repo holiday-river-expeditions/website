@@ -55,6 +55,7 @@ function doc(
     return {
         minConfidentScore: null,
         resultsShown: null,
+        fallbackTripSlug: null,
         ...tuning,
         questions,
     };
@@ -87,6 +88,17 @@ describe('normalizeTripFinderSpec', () => {
             minConfidentScore: 0.35,
             resultsShown: 3,
         });
+    });
+
+    test('the go-to trip comes from the Studio reference, and an empty one means none', () => {
+        const withTrip = normalizeTripFinderSpec(
+            doc([question()], { fallbackTripSlug: 'westwater-canyon' }),
+        );
+        expect(withTrip.spec?.tuning.fallbackTripSlug).toBe('westwater-canyon');
+        // Clearing the reference is an editorial choice, so it must not
+        // fall through to the code default.
+        const cleared = normalizeTripFinderSpec(doc([question()]));
+        expect(cleared.spec?.tuning.fallbackTripSlug).toBeUndefined();
     });
 
     test('who questions weigh nothing regardless of the field', () => {

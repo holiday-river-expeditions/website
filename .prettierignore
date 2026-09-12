@@ -7,3 +7,5 @@ coverage
 pnpm-lock.yaml
 playwright-report
 test-results
+public/maplibre
+src/lib/river-stretches.json

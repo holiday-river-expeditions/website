@@ -96,6 +96,7 @@ const questionSchema = z
 const specSchema = z.object({
     minConfidentScore: z.number().min(0).max(1).nullish(),
     resultsShown: z.number().int().min(1).max(6).nullish(),
+    fallbackTripSlug: z.string().nullish(),
     questions: z
         .array(questionSchema)
         .min(1)
@@ -163,6 +164,9 @@ export function normalizeTripFinderSpec(
                     DEFAULT_TUNING.minConfidentScore,
                 resultsShown:
                     parsed.data.resultsShown ?? DEFAULT_TUNING.resultsShown,
+                // An empty Studio reference means "no go-to trip", not
+                // "use the code default" — editors clear it on purpose.
+                fallbackTripSlug: parsed.data.fallbackTripSlug ?? undefined,
             },
         },
     };

@@ -1,4 +1,5 @@
 import Image from 'next/image';
+import { AnniversaryBadge } from '@/components/ui/AnniversaryBadge';
 import { Button } from '@/components/ui/Button';
 
 interface HeroProps {
@@ -85,20 +86,14 @@ export function Hero({
                     )}
                 </div>
 
-                {/* 60-years anniversary seal — straddles the bottom-left
-                    edge. Same artwork always; the badge-live demo flag adds
-                    the one-time stamp-in settle (motion-safe only). The
-                    wrapper owns positioning so the animation's transform
-                    can't fight the translate. */}
+                {/* Anniversary seal — straddles the bottom-left edge. Same
+                    artwork, with the year count computed from 1966 so it
+                    never goes stale; the badge-live demo flag adds the
+                    one-time stamp-in settle (motion-safe only). The wrapper
+                    owns positioning so the animation's transform can't
+                    fight the translate. */}
                 <span className='absolute bottom-0 left-6 z-20 block h-32 w-32 translate-y-[15%] md:left-10 md:h-48 md:w-48'>
-                    <Image
-                        src='/badge-60-years.svg'
-                        alt='60 years of going with the flow'
-                        width={164}
-                        height={164}
-                        preload
-                        className='h-full w-full motion-safe:[[data-demo-badge-live=on]_&]:animate-badge-stamp'
-                    />
+                    <AnniversaryBadge className='h-full w-full motion-safe:[[data-demo-badge-live=on]_&]:animate-badge-stamp' />
                 </span>
             </div>
         </section>

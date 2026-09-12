@@ -291,7 +291,7 @@ const siteSettings = {
     _type: 'siteSettings',
     _id: 'siteSettings',
     phone: '801-266-2087',
-    email: 'Info@HolidayExpeditions.com',
+    email: 'info@holidayriver.com',
     address: '544 East 3900 South\nSalt Lake City, Utah 84107',
     socialLinks: {
         instagram: 'https://www.instagram.com/holidayriverexpeditions',

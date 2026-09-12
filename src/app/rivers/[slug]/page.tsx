@@ -1,7 +1,11 @@
 import type { Metadata } from 'next';
-import Image from 'next/image';
 import { notFound } from 'next/navigation';
 import { Button } from '@/components/ui/Button';
+import {
+    PAGE_BANNER_HEIGHT,
+    PAGE_BANNER_WIDTH,
+    PageBanner,
+} from '@/components/ui/PageBanner';
 import { RiverFlow } from '@/components/ui/RiverFlow';
 import { Section } from '@/components/ui/Section';
 import { TripCard, tripCardProps } from '@/components/ui/TripCard';
@@ -33,41 +37,28 @@ export default async function RiverPage({ params }: RiverPageProps) {
     const river = await getRiverBySlug(slug);
     if (!river) notFound();
 
-    const heroPhoto = imageUrl(river.image, 2560, 900);
+    const heroPhoto = imageUrl(
+        river.image,
+        PAGE_BANNER_WIDTH,
+        PAGE_BANNER_HEIGHT,
+    );
     const trips = river.trips ?? [];
 
     return (
         <>
-            {/* Banner — inset like the homepage hero */}
-            <section>
-                <div className='relative flex h-[320px] items-end overflow-hidden bg-evergreen md:h-[440px]'>
-                    {heroPhoto && (
-                        <Image
-                            src={heroPhoto}
-                            alt={river.name ?? ''}
-                            fill
-                            priority
-                            className='object-cover'
-                            sizes='100vw'
-                        />
-                    )}
-                    <div className='absolute inset-0 bg-gradient-to-t from-onyx/70 via-onyx/10 to-transparent' />
-                    <div className='relative z-10 w-full px-6 pb-10 md:px-12'>
-                        <h1 className='font-alt-gothic text-h2 font-black uppercase leading-h2 text-holiday-white md:text-h1 md:leading-h1'>
-                            {river.name}
-                        </h1>
-                        {/* Cards link here labelled by river ("Colorado
-                            River") while the page is titled by section
-                            ("Westwater"); naming both closes that gap. */}
-                        {river.riverLabel &&
-                            river.riverLabel !== river.name && (
-                                <p className='mt-2 font-alt-gothic text-subheading font-black uppercase leading-[0.95] text-holiday-white/80'>
-                                    {river.riverLabel}
-                                </p>
-                            )}
-                    </div>
-                </div>
-            </section>
+            <PageBanner image={heroPhoto} imageAlt={river.name ?? ''}>
+                <h1 className='font-alt-gothic text-h2 font-black uppercase leading-h2 text-holiday-white md:text-h1 md:leading-h1'>
+                    {river.name}
+                </h1>
+                {/* Cards link here labelled by river ("Colorado River")
+                    while the page is titled by section ("Westwater");
+                    naming both closes that gap. */}
+                {river.riverLabel && river.riverLabel !== river.name && (
+                    <p className='mt-2 font-alt-gothic text-subheading font-black uppercase leading-[0.95] text-holiday-white/80'>
+                        {river.riverLabel}
+                    </p>
+                )}
+            </PageBanner>
 
             {/* Description */}
             <Section background='white' className='py-12 md:py-16'>

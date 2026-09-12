@@ -48,6 +48,11 @@ interface TripFinderLogicPanelProps {
     answers: TripFinderAnswers;
     /** The whole ranked catalog, not just the top results. */
     ranking: TripMatch[];
+    /** What the results page actually showed (selectMatches). Defaults to
+        the top of the ranking, which is the wizard-step case. */
+    matches?: TripMatch[];
+    /** The go-to trip led because the answers were too thin to rank on. */
+    fallbackApplied?: boolean;
     availabilityBySlug?: ReadonlyMap<string, ResultAvailability>;
     arctic: LogicPanelArctic | null;
 }
@@ -140,7 +145,15 @@ export function TripFinderLogicPanel({
     ranking,
     availabilityBySlug,
     arctic,
+    matches,
+    fallbackApplied = false,
 }: TripFinderLogicPanelProps) {
+    // Availability is looked up only for the trips the results page shows.
+    const shownSlugs = new Set(
+        (matches ?? ranking.slice(0, spec.tuning.resultsShown)).map(
+            (m) => m.trip.slug?.current ?? '',
+        ),
+    );
     const step = currentStep(spec, answers);
     const month = chosenMonth(spec, answers);
     const query = answersToParams(spec, answers);
@@ -295,9 +308,13 @@ export function TripFinderLogicPanel({
                             Skipped questions don&rsquo;t count. A failed
                             minimum age sinks a trip below every clean fit.{' '}
                             {top &&
-                                (top.score >= gate && !top.ageConflict
-                                    ? `Top score ${pct(top.score)} clears the ${pct(gate)} Best Match threshold.`
-                                    : `Top score ${pct(top.score)} is under the ${pct(gate)} Best Match threshold, so the page leads with call-us.`)}
+                                (fallbackApplied
+                                    ? `Fewer than two real answers, so the page leads with the go-to trip (${spec.tuning.fallbackTripSlug ?? 'none'}) and the top scorers follow it.`
+                                    : top.score >= gate && !top.ageConflict
+                                      ? `Top score ${pct(top.score)} clears the ${pct(gate)} Best Match threshold.`
+                                      : top.ageConflict
+                                        ? `Top trip fails the youngest guest's minimum age, so the page says so and shows it as the nearest fit.`
+                                        : `Top score ${pct(top.score)} is under the ${pct(gate)} Best Match threshold, so the page shows it as a close fit, not a Best Match.`)}
                         </p>
                         <ol aria-label='Ranking' className='mt-3 grid gap-2'>
                             {ranking.map((match, index) => {
@@ -312,9 +329,7 @@ export function TripFinderLogicPanel({
                                                 </span>{' '}
                                                 <span className='text-onyx/70'>
                                                     — {pct(match.score)}
-                                                    {index <
-                                                        spec.tuning
-                                                            .resultsShown &&
+                                                    {shownSlugs.has(slug) &&
                                                         ' · shown'}
                                                     {match.ageConflict &&
                                                         ' · age conflict'}
@@ -534,12 +549,7 @@ export function TripFinderLogicPanel({
                                                       ? `${availability.dateLabel}${availability.remaining !== null ? `, ${availability.remaining} seats` : ''}`
                                                       : arctic.down
                                                         ? 'unreachable'
-                                                        : isShown(
-                                                                ranking,
-                                                                slug,
-                                                                spec.tuning
-                                                                    .resultsShown,
-                                                            )
+                                                        : shownSlugs.has(slug)
                                                           ? 'no open dates'
                                                           : 'not looked up (not shown)'}
                                             </td>
@@ -601,6 +611,12 @@ export function TripFinderLogicPanel({
                                 {spec.tuning.resultsShown} (Studio → Trip Finder
                                 → Tuning)
                             </dd>
+                            <dt className='font-bold'>Go-to trip</dt>
+                            <dd>
+                                {spec.tuning.fallbackTripSlug ?? 'none'} — leads
+                                the results when there is no confident match
+                                (Studio → Trip Finder → Tuning)
+                            </dd>
                             <dt className='font-bold'>Unknown fact scores</dt>
                             <dd>{SCORING.unknownScore} (code)</dd>
                             <dt className='font-bold'>Craft-variety bonus</dt>
@@ -629,9 +645,4 @@ export function TripFinderLogicPanel({
             </Section>
         </div>
     );
-}
-
-/** Availability is looked up only for the trips the results page shows. */
-function isShown(ranking: TripMatch[], slug: string, shown: number) {
-    return ranking.findIndex((m) => m.trip.slug?.current === slug) < shown;
 }

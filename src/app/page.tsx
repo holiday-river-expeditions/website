@@ -3,6 +3,10 @@ import Link from 'next/link';
 import { Button } from '@/components/ui/Button';
 import { ContentCard } from '@/components/ui/ContentCard';
 import { Hero } from '@/components/ui/Hero';
+import {
+    PAGE_BANNER_HEIGHT,
+    PAGE_BANNER_WIDTH,
+} from '@/components/ui/PageBanner';
 import { Section } from '@/components/ui/Section';
 import {
     TripCard,
@@ -16,6 +20,7 @@ import {
     TRIP_MAP_COORDS,
     type TripMapMarker,
 } from '@/lib/trip-map-data';
+import { contactEmail, contactPhone } from '@/lib/contact-defaults';
 import { getHomepage, getSiteSettings, imageUrl } from '@/lib/sanity';
 import { resolveTripFinderSpec } from '@/lib/trip-finder-spec';
 
@@ -81,7 +86,11 @@ export default async function Home() {
     // Wide banner crop for the full-bleed hero; the editor-set hotspot in
     // Studio controls which part of the photo shows at every viewport. The
     // 1440:523 box matches the Hero's display aspect (from the mock) at 2x DPR.
-    const heroImage = imageUrl(homepage.heroImage, 2880, 1046);
+    const heroImage = imageUrl(
+        homepage.heroImage,
+        PAGE_BANNER_WIDTH,
+        PAGE_BANNER_HEIGHT,
+    );
     const storyImageLeft = imageUrl(homepage.storyImageLeft, 940, 1058);
     const storyImagePortrait = imageUrl(homepage.storyImagePortrait, 940, 1410);
 
@@ -98,8 +107,8 @@ export default async function Home() {
                     href: homepage.heroCtaLink ?? '/trips',
                 }}
                 contact={{
-                    phone: settings?.phone ?? '801-266-2087',
-                    email: settings?.email ?? 'Info@HolidayExpeditions.com',
+                    phone: contactPhone(settings),
+                    email: contactEmail(settings),
                 }}
             />
 

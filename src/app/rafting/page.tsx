@@ -1,7 +1,7 @@
 import type { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 import { TripTypeLanding } from '@/components/ui/TripTypeLanding';
-import { getTripTypeBySlug } from '@/lib/sanity';
+import { getAllTrips, getTripTypeBySlug } from '@/lib/sanity';
 
 // Same ISR window as the homepage: Studio edits go live within a minute.
 export const revalidate = 60;
@@ -16,7 +16,10 @@ export async function generateMetadata(): Promise<Metadata> {
 }
 
 export default async function RaftingPage() {
-    const tripType = await getTripTypeBySlug('rafting');
+    const [tripType, allTrips] = await Promise.all([
+        getTripTypeBySlug('rafting'),
+        getAllTrips(),
+    ]);
     if (!tripType) notFound();
-    return <TripTypeLanding tripType={tripType} />;
+    return <TripTypeLanding tripType={tripType} allTrips={allTrips} />;
 }

@@ -100,6 +100,11 @@ export interface TripFinderTuning {
     minConfidentScore: number;
     /** One best match plus this many minus one alternates. */
     resultsShown: number;
+    /** Leads the results when the visitor has answered too little to rank
+        on. Darius set it to Gates of Lodore in the Studio (2026-09-11);
+        this default only covers a missing document. Undefined = call-us
+        line only. */
+    fallbackTripSlug?: string;
 }
 
 export interface TripFinderSpec {
@@ -131,6 +136,7 @@ export const MONTH_NAMES = [
 export const DEFAULT_TUNING: TripFinderTuning = {
     minConfidentScore: 0.35,
     resultsShown: 3,
+    fallbackTripSlug: 'gates-of-lodore',
 };
 
 /**
@@ -578,6 +584,72 @@ export function completedStepCount(
 }
 
 /** Questions answered with a real preference (skips carry no signal). */
+/**
+ * A "Best Match" claim must be earned: a real score, no age conflict, and
+ * at least two actual answers — never an alphabetical accident dressed up
+ * in a ribbon.
+ */
+export function isConfidentMatch(
+    spec: TripFinderSpec,
+    match: TripMatch | undefined,
+    answers: TripFinderAnswers,
+): boolean {
+    return (
+        match !== undefined &&
+        match.score >= spec.tuning.minConfidentScore &&
+        !match.ageConflict &&
+        answeredQuestionCount(spec, answers) >= 2
+    );
+}
+
+/** Why a ranking isn't a Best Match — drives the results copy. */
+export type ShortfallReason = 'age' | 'thin' | 'low';
+
+export function shortfallReason(
+    spec: TripFinderSpec,
+    match: TripMatch | undefined,
+    answers: TripFinderAnswers,
+): ShortfallReason {
+    if (match?.ageConflict) return 'age';
+    if (answeredQuestionCount(spec, answers) < 2) return 'thin';
+    return 'low';
+}
+
+/**
+ * The results to show. A confident ranking is shown as scored. When the
+ * visitor has answered too little to rank on (fewer than two real
+ * answers), the spec's go-to trip leads and the top scorers follow it —
+ * Holiday's standing recommendation rather than an alphabetical accident.
+ * A full set of answers that scores low, or an age conflict, keeps the
+ * scored order: the nearest real fit is more honest than a default.
+ */
+export function selectMatches(
+    spec: TripFinderSpec,
+    ranking: readonly TripMatch[],
+    answers: TripFinderAnswers,
+): { matches: TripMatch[]; fallbackApplied: boolean } {
+    const limit = spec.tuning.resultsShown;
+    // Only thin answers earn the go-to trip; a confident ranking is never
+    // 'thin' (confidence needs two real answers), so one check covers both.
+    if (shortfallReason(spec, ranking[0], answers) !== 'thin') {
+        return { matches: ranking.slice(0, limit), fallbackApplied: false };
+    }
+    const slug = spec.tuning.fallbackTripSlug;
+    const fallback = slug
+        ? ranking.find((match) => match.trip.slug?.current === slug)
+        : undefined;
+    if (!fallback || fallback.ageConflict) {
+        return { matches: ranking.slice(0, limit), fallbackApplied: false };
+    }
+    return {
+        matches: [
+            fallback,
+            ...ranking.filter((match) => match !== fallback),
+        ].slice(0, limit),
+        fallbackApplied: true,
+    };
+}
+
 export function answeredQuestionCount(
     spec: TripFinderSpec,
     answers: TripFinderAnswers,
