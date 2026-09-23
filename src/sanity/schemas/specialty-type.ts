@@ -1,4 +1,5 @@
 import { defineField, defineType } from 'sanity';
+import { richTextOf } from './blocks/divider';
 
 /**
  * A family of specialty trips — Canyon Concerts, Dark Sky Stargazing,
@@ -39,7 +40,7 @@ export const specialtyType = defineType({
             name: 'description',
             title: 'Description',
             type: 'array',
-            of: [{ type: 'block' }],
+            of: richTextOf,
             description: 'Body copy for the parent page.',
         }),
         defineField({

@@ -1,4 +1,5 @@
 import { defineField, defineType } from 'sanity';
+import { richTextOf } from './blocks/divider';
 
 export const MONTHS = [
     { title: 'January', value: 1 },
@@ -184,7 +185,7 @@ export const trip = defineType({
             title: 'Trip Description',
             type: 'array',
             group: 'details',
-            of: [{ type: 'block' }],
+            of: richTextOf,
             description:
                 'Main copy in the Trip Details section of this trip’s page, at /trips/<slug>. This is the trip’s own story — the stretch of river it runs is described on the Section document instead.',
         }),
@@ -199,12 +200,21 @@ export const trip = defineType({
         }),
         defineField({
             name: 'whatsIncluded',
-            title: 'What’s Included',
+            title: 'What’s Included (override)',
             type: 'array',
             group: 'details',
             of: [{ type: 'string' }],
             description:
-                'One line per item — meals, guides, gear, shuttles. Listed as a checklist on the trip page.',
+                'Leave empty to show the shared list from Site Settings, which is the same for every trip. Anything here replaces it on this trip only (Desolation is the one that differs).',
+        }),
+        defineField({
+            name: 'landAcknowledgement',
+            title: 'Land Acknowledgement',
+            type: 'array',
+            group: 'details',
+            of: richTextOf,
+            description:
+                'One per trip: the Indigenous homelands this trip travels through, with a link to the full acknowledgement. Shown in its own box under the description.',
         }),
         defineField({
             name: 'videoUrl',
@@ -273,7 +283,7 @@ export const trip = defineType({
                             name: 'overrideBody',
                             title: 'Override for This Trip',
                             type: 'array',
-                            of: [{ type: 'block' }],
+                            of: richTextOf,
                             description:
                                 'Leave empty to use the shared text. Anything here replaces it on this trip only.',
                         }),

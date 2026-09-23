@@ -49,7 +49,7 @@ export async function RiverFlow({
                 {/* "Now" is load-bearing: the dates below are future trips,
                     and this reading is today's conditions, not a forecast
                     for those dates. */}
-                <dt className='font-alt-gothic text-[12px] font-medium uppercase tracking-[0.05em] text-onyx/70'>
+                <dt className='font-alt-gothic text-[12px] font-medium uppercase leading-[1.3] tracking-[0.05em] text-onyx/70'>
                     River Flow Now
                 </dt>
                 <dd className='mt-1 flex items-center gap-2.5 font-alt-gothic text-h3 font-semibold uppercase leading-h3 text-holiday-red'>
