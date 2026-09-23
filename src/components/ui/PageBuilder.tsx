@@ -7,6 +7,7 @@ import {
     PAGE_BANNER_WIDTH,
     PageBanner,
 } from '@/components/ui/PageBanner';
+import { richTextComponents } from '@/components/ui/RichText';
 import { Section } from '@/components/ui/Section';
 import { imageUrl } from '@/lib/sanity';
 import type { PageBySlugQueryResult } from '@/sanity/types';
@@ -14,9 +15,11 @@ import type { PageBySlugQueryResult } from '@/sanity/types';
 type PageContent = NonNullable<NonNullable<PageBySlugQueryResult>['content']>;
 type PageBlock = PageContent[number];
 
-// Inline images inside a content block's body render at reading width.
+// Inline images inside a content block's body render at reading width;
+// the horizontal rule comes from the shared rich text renderers.
 const portableComponents: PortableTextComponents = {
     types: {
+        ...richTextComponents.types,
         image: ({ value }) => {
             const src = imageUrl(value, 1400, 900);
             if (!src) return null;

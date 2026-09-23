@@ -1,4 +1,5 @@
 import { defineField, defineType } from 'sanity';
+import { richTextOf } from './divider';
 
 export const contentBlock = defineType({
     name: 'contentBlock',
@@ -30,7 +31,7 @@ export const contentBlock = defineType({
             title: 'Body',
             type: 'array',
             of: [
-                { type: 'block' },
+                ...richTextOf,
                 {
                     type: 'image',
                     fields: [

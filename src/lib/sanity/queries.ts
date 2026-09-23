@@ -91,6 +91,7 @@ export const tripBySlugQuery = defineQuery(`
     description,
     highlights,
     whatsIncluded,
+    landAcknowledgement,
     videoUrl,
     photos,
     pricingNotes,
@@ -216,7 +217,8 @@ export const siteSettingsQuery = defineQuery(`
     email,
     address,
     socialLinks,
-    reviews
+    reviews,
+    whatsIncluded
   }
 `);
 

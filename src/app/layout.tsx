@@ -1,6 +1,7 @@
 import type { Metadata } from 'next';
 import { PT_Sans, Oswald } from 'next/font/google';
 import { Header } from '@/components/layout/Header';
+import { SiteFrame } from '@/components/layout/SiteFrame';
 import { RevealObserver } from '@/components/ui/RevealObserver';
 import { DemoFlagsPanel } from '@/components/ui/DemoFlagsPanel';
 import { TripFinderFab } from '@/components/ui/TripFinderFab';
@@ -88,12 +89,21 @@ export default function RootLayout({
             <body
                 className={`${oswald.variable} ${ptSans.variable} antialiased`}
             >
-                <RevealObserver />
-                <TripFinderFab />
-                <DemoFlagsPanel />
-                <Header />
-                <main className='min-h-screen'>{children}</main>
-                <Footer />
+                {/* The Studio route opts out of the header and footer; see
+                    SiteFrame. */}
+                <SiteFrame
+                    chrome={
+                        <>
+                            <RevealObserver />
+                            <TripFinderFab />
+                            <DemoFlagsPanel />
+                        </>
+                    }
+                    header={<Header />}
+                    footer={<Footer />}
+                >
+                    {children}
+                </SiteFrame>
             </body>
         </html>
     );

@@ -1,4 +1,5 @@
 import { defineField, defineType } from 'sanity';
+import { richTextOf } from './blocks/divider';
 
 export const faq = defineType({
     name: 'faq',
@@ -15,7 +16,7 @@ export const faq = defineType({
             name: 'answer',
             title: 'Answer',
             type: 'array',
-            of: [{ type: 'block' }],
+            of: richTextOf,
             validation: (rule) => rule.required(),
         }),
         defineField({

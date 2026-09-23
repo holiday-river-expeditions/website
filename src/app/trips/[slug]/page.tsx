@@ -8,6 +8,7 @@ import {
 } from '@/components/ui/AvailabilitySection';
 import { buttonClasses } from '@/components/ui/Button';
 import { ItinerarySection } from '@/components/ui/ItinerarySection';
+import { LandAcknowledgement } from '@/components/ui/LandAcknowledgement';
 import {
     PAGE_BANNER_HEIGHT,
     PAGE_BANNER_WIDTH,
@@ -15,6 +16,7 @@ import {
 } from '@/components/ui/PageBanner';
 import { PhotoGallery } from '@/components/ui/PhotoGallery';
 import { RelatedTrips } from '@/components/ui/RelatedTrips';
+import { richTextComponents } from '@/components/ui/RichText';
 import {
     type GuestReview,
     ReviewsSection,
@@ -24,6 +26,7 @@ import { Section } from '@/components/ui/Section';
 import { SectionNav } from '@/components/ui/SectionNav';
 import type { TripMapPoint } from '@/components/ui/TripMap';
 import { TripMapSection } from '@/components/ui/TripMapSection';
+import { WhatsIncluded } from '@/components/ui/WhatsIncluded';
 import { stretchBySlug } from '@/lib/map-style';
 import { getSiteSettings, getTripBySlug, imageUrl } from '@/lib/sanity';
 import { TRIP_MAP_COORDS } from '@/lib/trip-map-data';
@@ -104,10 +107,10 @@ export default async function TripPage({ params }: TripPageProps) {
                 : undefined,
         });
 
-    // Trip map beside the facts: the section's drawn stretch (from the
-    // National Hydrography Dataset) and/or the photo points authored on
-    // the Section document. A section with neither has nothing to map,
-    // so the facts column stands alone.
+    // Trip map under the highlights: the section's drawn stretch (from
+    // the National Hydrography Dataset) and/or the photo points authored
+    // on the Section document. A section with neither has nothing to map,
+    // so the page goes straight from highlights to the itinerary.
     const mapPoints: TripMapPoint[] = (trip.river?.mapPoints ?? [])
         .filter(
             (point) =>
@@ -150,6 +153,17 @@ export default async function TripPage({ params }: TripPageProps) {
         return [{ key: entry._key, title: entry.section.title, body }];
     });
 
+    // What's Included is the same on every trip except Desolation (Sep 10
+    // decision), so the shared list lives on Site Settings and a trip's
+    // own list, when it has one, replaces it outright.
+    const includedItems =
+        trip.whatsIncluded && trip.whatsIncluded.length > 0
+            ? trip.whatsIncluded
+            : (settings?.whatsIncluded ?? []);
+    const hasHighlights = Boolean(
+        trip.highlights && trip.highlights.length > 0,
+    );
+
     // Lead review first, then the rest, for the carousel.
     const reviews: GuestReview[] = [
         trip.featuredReview,
@@ -185,68 +199,56 @@ export default async function TripPage({ params }: TripPageProps) {
                 )}
             </PageBanner>
 
-            {/* Quick facts — vertical, beside the trip map (Justin's
-                build-out doc). */}
+            {/* Info bar across the top (Riley, Sep 17: trip info, then
+                highlights, then map). Justin, Sep 10: 12px labels at a 1.3
+                line height with a rule above the bar; the sizing is fixed. */}
             <Section
                 id='trip-details'
                 background='white'
                 className='scroll-mt-6 [[data-demo-sticky-header=on]_&]:scroll-mt-28 py-10 md:py-14'
             >
-                <div
-                    className={`grid gap-10 ${
-                        mapSection
-                            ? 'lg:grid-cols-[minmax(0,2fr)_minmax(0,3fr)] lg:items-stretch'
-                            : ''
-                    }`}
-                >
-                    <div className='flex max-w-xl flex-col'>
-                        <dl className='divide-y divide-holiday-grey/40 border-y border-holiday-grey/40'>
-                            {facts.map((fact) => (
-                                <div
-                                    key={fact.label}
-                                    className='flex items-baseline justify-between gap-6 py-3'
-                                >
-                                    <dt className='font-alt-gothic text-[13px] font-medium uppercase tracking-[0.05em] text-onyx/70'>
-                                        {fact.label}
-                                    </dt>
-                                    <dd className='text-right font-alt-gothic text-h3 font-semibold uppercase leading-h3 text-holiday-red'>
-                                        {fact.href ? (
-                                            <Link
-                                                href={fact.href}
-                                                className='transition-opacity hover:opacity-70'
-                                            >
-                                                {fact.value}
-                                            </Link>
-                                        ) : (
-                                            fact.value
-                                        )}
-                                    </dd>
-                                </div>
-                            ))}
-                            {/* Live CFS from USGS; renders nothing without a
-                                configured gauge or reading. */}
-                            <RiverFlow
-                                variant='fact'
-                                siteIds={trip.river?.usgsSiteId}
-                                href={trip.river?.flowLinkUrl}
-                            />
-                        </dl>
-                        {/* Book Now jumps to Dates & Availability on this page
-                            (Aug 20 decision). Plain anchor, not Link: a
-                            same-page fragment needs native scrolling, not a
-                            router navigation. */}
-                        <a
-                            href={`#${AVAILABILITY_ANCHOR}`}
-                            className={`${buttonClasses({
-                                variant: 'primary',
-                                size: 'lg',
-                            })} mt-6 w-full text-center`}
-                        >
-                            Book Now
-                        </a>
-                    </div>
-
-                    {mapSection}
+                <div className='flex flex-wrap items-end justify-between gap-6 border-t border-holiday-grey/40 pt-6'>
+                    <dl className='grid w-full grid-cols-2 gap-x-6 gap-y-5 sm:flex sm:w-auto sm:flex-wrap sm:gap-x-10 sm:gap-y-4'>
+                        {facts.map((fact) => (
+                            <div key={fact.label}>
+                                <dt className='font-alt-gothic text-[12px] font-medium uppercase leading-[1.3] tracking-[0.05em] text-onyx/70'>
+                                    {fact.label}
+                                </dt>
+                                <dd className='mt-1 font-alt-gothic text-h3 font-semibold uppercase leading-h3 text-holiday-red'>
+                                    {fact.href ? (
+                                        <Link
+                                            href={fact.href}
+                                            className='transition-opacity hover:opacity-70'
+                                        >
+                                            {fact.value}
+                                        </Link>
+                                    ) : (
+                                        fact.value
+                                    )}
+                                </dd>
+                            </div>
+                        ))}
+                        {/* Live CFS from USGS; renders nothing without a
+                            configured gauge or reading. */}
+                        <RiverFlow
+                            variant='fact'
+                            siteIds={trip.river?.usgsSiteId}
+                            href={trip.river?.flowLinkUrl}
+                        />
+                    </dl>
+                    {/* Book Now jumps to Dates & Availability on this page
+                        (Aug 20 decision). Plain anchor, not Link: a
+                        same-page fragment needs native scrolling, not a
+                        router navigation. */}
+                    <a
+                        href={`#${AVAILABILITY_ANCHOR}`}
+                        className={buttonClasses({
+                            variant: 'primary',
+                            size: 'lg',
+                        })}
+                    >
+                        Book Now
+                    </a>
                 </div>
 
                 {/* Description + highlights */}
@@ -262,54 +264,53 @@ export default async function TripPage({ params }: TripPageProps) {
                             a note to the editor. */}
                         {trip.description && (
                             <div className='mt-6 space-y-4 text-body leading-body text-onyx [&_a]:text-holiday-red [&_a]:underline'>
-                                <PortableText value={trip.description} />
+                                <PortableText
+                                    value={trip.description}
+                                    components={richTextComponents}
+                                />
                             </div>
                         )}
+                        {/* Boxed under the trip's own copy, where the current
+                            site keeps it. */}
+                        <LandAcknowledgement body={trip.landAcknowledgement} />
+                    </div>
 
-                        {trip.whatsIncluded &&
-                            trip.whatsIncluded.length > 0 && (
-                                <div className='mt-10'>
+                    {(hasHighlights || includedItems.length > 0) && (
+                        <aside>
+                            {hasHighlights && (
+                                <div>
                                     <h2 className='font-alt-gothic text-h3 font-black uppercase leading-h3 text-holiday-red'>
-                                        What’s Included
+                                        Highlights
                                     </h2>
-                                    <ul className='mt-4 grid gap-x-8 gap-y-2 sm:grid-cols-2'>
-                                        {trip.whatsIncluded.map((item) => (
+                                    <ul className='mt-4 space-y-3'>
+                                        {trip.highlights?.map((highlight) => (
                                             <li
-                                                key={item}
-                                                className='flex gap-3 text-body leading-body text-onyx'
+                                                key={highlight}
+                                                className='border-l-2 border-holiday-red pl-4 text-body leading-body text-onyx'
                                             >
-                                                <span
-                                                    aria-hidden
-                                                    className='text-holiday-red'
-                                                >
-                                                    ✓
-                                                </span>
-                                                {item}
+                                                {highlight}
                                             </li>
                                         ))}
                                     </ul>
                                 </div>
                             )}
-                    </div>
-
-                    {trip.highlights && trip.highlights.length > 0 && (
-                        <aside>
-                            <h2 className='font-alt-gothic text-h3 font-black uppercase leading-h3 text-holiday-red'>
-                                Highlights
-                            </h2>
-                            <ul className='mt-4 space-y-3'>
-                                {trip.highlights.map((highlight) => (
-                                    <li
-                                        key={highlight}
-                                        className='border-l-2 border-holiday-red pl-4 text-body leading-body text-onyx'
-                                    >
-                                        {highlight}
-                                    </li>
-                                ))}
-                            </ul>
+                            {includedItems.length > 0 && (
+                                <div
+                                    className={
+                                        hasHighlights ? 'mt-10' : undefined
+                                    }
+                                >
+                                    <WhatsIncluded items={includedItems} />
+                                </div>
+                            )}
                         </aside>
                     )}
                 </div>
+
+                {/* Trip map, third in the order (Sep 17). Full width so the
+                    stretch reads at a glance; the photo points come from
+                    the Section document. */}
+                {mapSection && <div className='mt-12'>{mapSection}</div>}
             </Section>
 
             {/* Day-by-day itinerary */}
@@ -339,7 +340,8 @@ export default async function TripPage({ params }: TripPageProps) {
             {/* Photo slideshow */}
             <PhotoGallery photos={galleryPhotos} />
 
-            {/* Trip-specific FAQs */}
+            {/* Trip-specific FAQs. Headed "FAQs", not "Good to Know" (Lauren,
+                Sep 22). */}
             {trip.faqs && trip.faqs.length > 0 && (
                 <Section
                     id='faqs'
@@ -348,7 +350,7 @@ export default async function TripPage({ params }: TripPageProps) {
                 >
                     <div className='max-w-3xl'>
                         <h2 className='font-alt-gothic text-section font-black uppercase text-holiday-red'>
-                            Good to Know
+                            FAQs
                         </h2>
                         <div className='mt-6 divide-y divide-holiday-grey/40 border-y border-holiday-grey/40'>
                             {trip.faqs.map((faq) => (
@@ -364,7 +366,10 @@ export default async function TripPage({ params }: TripPageProps) {
                                     </summary>
                                     {faq.answer && (
                                         <div className='mt-3 space-y-3 text-body leading-body text-onyx [&_a]:text-holiday-red [&_a]:underline'>
-                                            <PortableText value={faq.answer} />
+                                            <PortableText
+                                                value={faq.answer}
+                                                components={richTextComponents}
+                                            />
                                         </div>
                                     )}
                                 </details>
@@ -397,7 +402,10 @@ export default async function TripPage({ params }: TripPageProps) {
                                         </span>
                                     </summary>
                                     <div className='mt-3 space-y-3 text-body leading-body text-onyx [&_a]:text-holiday-red [&_a]:underline'>
-                                        <PortableText value={entry.body} />
+                                        <PortableText
+                                            value={entry.body}
+                                            components={richTextComponents}
+                                        />
                                     </div>
                                 </details>
                             ))}
