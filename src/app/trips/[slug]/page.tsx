@@ -340,7 +340,8 @@ export default async function TripPage({ params }: TripPageProps) {
             {/* Photo slideshow */}
             <PhotoGallery photos={galleryPhotos} />
 
-            {/* Trip-specific FAQs */}
+            {/* Trip-specific FAQs. Headed "FAQs", not "Good to Know" (Lauren,
+                Sep 22). */}
             {trip.faqs && trip.faqs.length > 0 && (
                 <Section
                     id='faqs'
@@ -349,7 +350,7 @@ export default async function TripPage({ params }: TripPageProps) {
                 >
                     <div className='max-w-3xl'>
                         <h2 className='font-alt-gothic text-section font-black uppercase text-holiday-red'>
-                            Good to Know
+                            FAQs
                         </h2>
                         <div className='mt-6 divide-y divide-holiday-grey/40 border-y border-holiday-grey/40'>
                             {trip.faqs.map((faq) => (

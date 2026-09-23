@@ -98,7 +98,9 @@ export const trip = defineType({
             name: 'subtitle',
             title: 'Specialty Subtitle',
             type: 'string',
-            group: 'card',
+            // On both tabs: it is a card setting, but an editor setting up a
+            // specialty trip looks for it under Specialty (Darius, Sep 22).
+            group: ['card', 'specialty'],
             description:
                 'Optional red second line under the name on specialty cards (e.g. "With The Pickpockets Bluegrass").',
         }),
@@ -106,7 +108,7 @@ export const trip = defineType({
             name: 'ribbon',
             title: 'Specialty Ribbon',
             type: 'string',
-            group: 'card',
+            group: ['card', 'specialty'],
             description:
                 'Optional ribbon label on the card image (e.g. "Specialty Music Trip"). Cards with a ribbon get the red feature frame. Falls back to the first Specialty Type’s ribbon.',
         }),
@@ -371,7 +373,7 @@ export const trip = defineType({
             type: 'array',
             group: 'details',
             description:
-                'FAQ entries shown under "Good to Know" on this trip page. These come from the shared FAQ collection, so they also appear on /faq.',
+                'FAQ entries shown under "FAQs" on this trip page. These come from the shared FAQ collection, so they also appear on /faq.',
             of: [{ type: 'reference', to: [{ type: 'faq' }] }],
         }),
         defineField({
