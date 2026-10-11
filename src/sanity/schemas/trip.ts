@@ -1,4 +1,5 @@
 import { defineField, defineType } from 'sanity';
+import { richTextOf } from './blocks/divider';
 
 export const MONTHS = [
     { title: 'January', value: 1 },
@@ -97,7 +98,9 @@ export const trip = defineType({
             name: 'subtitle',
             title: 'Specialty Subtitle',
             type: 'string',
-            group: 'card',
+            // On both tabs: it is a card setting, but an editor setting up a
+            // specialty trip looks for it under Specialty (Darius, Sep 22).
+            group: ['card', 'specialty'],
             description:
                 'Optional red second line under the name on specialty cards (e.g. "With The Pickpockets Bluegrass").',
         }),
@@ -105,7 +108,7 @@ export const trip = defineType({
             name: 'ribbon',
             title: 'Specialty Ribbon',
             type: 'string',
-            group: 'card',
+            group: ['card', 'specialty'],
             description:
                 'Optional ribbon label on the card image (e.g. "Specialty Music Trip"). Cards with a ribbon get the red feature frame. Falls back to the first Specialty Type’s ribbon.',
         }),
@@ -184,7 +187,7 @@ export const trip = defineType({
             title: 'Trip Description',
             type: 'array',
             group: 'details',
-            of: [{ type: 'block' }],
+            of: richTextOf,
             description:
                 'Main copy in the Trip Details section of this trip’s page, at /trips/<slug>. This is the trip’s own story — the stretch of river it runs is described on the Section document instead.',
         }),
@@ -199,12 +202,21 @@ export const trip = defineType({
         }),
         defineField({
             name: 'whatsIncluded',
-            title: 'What’s Included',
+            title: 'What’s Included (override)',
             type: 'array',
             group: 'details',
             of: [{ type: 'string' }],
             description:
-                'One line per item — meals, guides, gear, shuttles. Listed as a checklist on the trip page.',
+                'Leave empty to show the shared list from Site Settings, which is the same for every trip. Anything here replaces it on this trip only (Desolation is the one that differs).',
+        }),
+        defineField({
+            name: 'landAcknowledgement',
+            title: 'Land Acknowledgement',
+            type: 'array',
+            group: 'details',
+            of: richTextOf,
+            description:
+                'One per trip: the Indigenous homelands this trip travels through, with a link to the full acknowledgement. Shown in its own box under the description.',
         }),
         defineField({
             name: 'videoUrl',
@@ -273,7 +285,7 @@ export const trip = defineType({
                             name: 'overrideBody',
                             title: 'Override for This Trip',
                             type: 'array',
-                            of: [{ type: 'block' }],
+                            of: richTextOf,
                             description:
                                 'Leave empty to use the shared text. Anything here replaces it on this trip only.',
                         }),
@@ -361,7 +373,7 @@ export const trip = defineType({
             type: 'array',
             group: 'details',
             description:
-                'FAQ entries shown under "Good to Know" on this trip page. These come from the shared FAQ collection, so they also appear on /faq.',
+                'FAQ entries shown under "FAQs" on this trip page. These come from the shared FAQ collection, so they also appear on /faq.',
             of: [{ type: 'reference', to: [{ type: 'faq' }] }],
         }),
         defineField({

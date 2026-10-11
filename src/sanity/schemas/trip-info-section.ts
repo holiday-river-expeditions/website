@@ -1,4 +1,5 @@
 import { defineField, defineType } from 'sanity';
+import { richTextOf } from './blocks/divider';
 
 /**
  * Shared trip-page content that is near-identical across the catalogue —
@@ -33,7 +34,7 @@ export const tripInfoSection = defineType({
             name: 'body',
             title: 'Body',
             type: 'array',
-            of: [{ type: 'block' }],
+            of: richTextOf,
             description:
                 'The shared version, used by every trip that references this section unless that trip overrides it.',
             validation: (rule) => rule.required(),

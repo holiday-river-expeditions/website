@@ -1,4 +1,5 @@
 import { contentBlock } from './blocks/content-block';
+import { divider } from './blocks/divider';
 import { heroBlock } from './blocks/hero-block';
 import { contactSubmission } from './contact-submission';
 import { newsletterSubscriber } from './newsletter-subscriber';
@@ -44,6 +45,7 @@ export const schemaTypes = [
     // Object types (content blocks)
     heroBlock,
     contentBlock,
+    divider,
     tripFinderQuestion,
     tripFinderOption,
     tripFinderCondition,

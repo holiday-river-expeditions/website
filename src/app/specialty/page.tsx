@@ -1,4 +1,5 @@
 import { PortableText } from '@portabletext/react';
+import { richTextComponents } from '@/components/ui/RichText';
 import type { Metadata } from 'next';
 import Image from 'next/image';
 import Link from 'next/link';
@@ -107,6 +108,7 @@ export default async function SpecialtyPage() {
                                         <div className='max-w-3xl space-y-4 text-body leading-body text-onyx [&_a]:text-holiday-red [&_a]:underline'>
                                             <PortableText
                                                 value={type.description}
+                                                components={richTextComponents}
                                             />
                                         </div>
                                     )}

@@ -74,6 +74,11 @@ export type TripFinderQuestion = {
     >;
 };
 
+export type Divider = {
+    _type: 'divider';
+    style?: 'line';
+};
+
 export type ContentBlock = {
     _type: 'contentBlock';
     heading?: string;
@@ -105,6 +110,9 @@ export type ContentBlock = {
               _type: 'block';
               _key: string;
           }
+        | ({
+              _key: string;
+          } & Divider)
         | {
               asset?: SanityImageAssetReference;
               media?: unknown;
@@ -185,6 +193,7 @@ export type SiteSettings = {
         tripadvisorUrl?: string;
         googleUrl?: string;
     };
+    whatsIncluded?: Array<string>;
     socialLinks?: {
         facebook?: string;
         instagram?: string;
@@ -327,6 +336,9 @@ export type Post = {
               _type: 'block';
               _key: string;
           }
+        | ({
+              _key: string;
+          } & Divider)
         | {
               asset?: SanityImageAssetReference;
               media?: unknown;
@@ -369,25 +381,37 @@ export type Faq = {
     _updatedAt: string;
     _rev: string;
     question?: string;
-    answer?: Array<{
-        children?: Array<{
-            marks?: Array<string>;
-            text?: string;
-            _type: 'span';
-            _key: string;
-        }>;
-        style?:
-            'normal' | 'h1' | 'h2' | 'h3' | 'h4' | 'h5' | 'h6' | 'blockquote';
-        listItem?: 'bullet' | 'number';
-        markDefs?: Array<{
-            href?: string;
-            _type: 'link';
-            _key: string;
-        }>;
-        level?: number;
-        _type: 'block';
-        _key: string;
-    }>;
+    answer?: Array<
+        | {
+              children?: Array<{
+                  marks?: Array<string>;
+                  text?: string;
+                  _type: 'span';
+                  _key: string;
+              }>;
+              style?:
+                  | 'normal'
+                  | 'h1'
+                  | 'h2'
+                  | 'h3'
+                  | 'h4'
+                  | 'h5'
+                  | 'h6'
+                  | 'blockquote';
+              listItem?: 'bullet' | 'number';
+              markDefs?: Array<{
+                  href?: string;
+                  _type: 'link';
+                  _key: string;
+              }>;
+              level?: number;
+              _type: 'block';
+              _key: string;
+          }
+        | ({
+              _key: string;
+          } & Divider)
+    >;
     category?:
         'general' | 'booking' | 'trip-preparation' | 'safety' | 'cancellation';
     order?: number;
@@ -444,27 +468,70 @@ export type Trip = {
     deposit?: string;
     minAge?: number;
     season?: string;
-    description?: Array<{
-        children?: Array<{
-            marks?: Array<string>;
-            text?: string;
-            _type: 'span';
-            _key: string;
-        }>;
-        style?:
-            'normal' | 'h1' | 'h2' | 'h3' | 'h4' | 'h5' | 'h6' | 'blockquote';
-        listItem?: 'bullet' | 'number';
-        markDefs?: Array<{
-            href?: string;
-            _type: 'link';
-            _key: string;
-        }>;
-        level?: number;
-        _type: 'block';
-        _key: string;
-    }>;
+    description?: Array<
+        | {
+              children?: Array<{
+                  marks?: Array<string>;
+                  text?: string;
+                  _type: 'span';
+                  _key: string;
+              }>;
+              style?:
+                  | 'normal'
+                  | 'h1'
+                  | 'h2'
+                  | 'h3'
+                  | 'h4'
+                  | 'h5'
+                  | 'h6'
+                  | 'blockquote';
+              listItem?: 'bullet' | 'number';
+              markDefs?: Array<{
+                  href?: string;
+                  _type: 'link';
+                  _key: string;
+              }>;
+              level?: number;
+              _type: 'block';
+              _key: string;
+          }
+        | ({
+              _key: string;
+          } & Divider)
+    >;
     highlights?: Array<string>;
     whatsIncluded?: Array<string>;
+    landAcknowledgement?: Array<
+        | {
+              children?: Array<{
+                  marks?: Array<string>;
+                  text?: string;
+                  _type: 'span';
+                  _key: string;
+              }>;
+              style?:
+                  | 'normal'
+                  | 'h1'
+                  | 'h2'
+                  | 'h3'
+                  | 'h4'
+                  | 'h5'
+                  | 'h6'
+                  | 'blockquote';
+              listItem?: 'bullet' | 'number';
+              markDefs?: Array<{
+                  href?: string;
+                  _type: 'link';
+                  _key: string;
+              }>;
+              level?: number;
+              _type: 'block';
+              _key: string;
+          }
+        | ({
+              _key: string;
+          } & Divider)
+    >;
     videoUrl?: string;
     itinerary?: Array<{
         day?: string;
@@ -475,32 +542,37 @@ export type Trip = {
     }>;
     infoSections?: Array<{
         section?: TripInfoSectionReference;
-        overrideBody?: Array<{
-            children?: Array<{
-                marks?: Array<string>;
-                text?: string;
-                _type: 'span';
-                _key: string;
-            }>;
-            style?:
-                | 'normal'
-                | 'h1'
-                | 'h2'
-                | 'h3'
-                | 'h4'
-                | 'h5'
-                | 'h6'
-                | 'blockquote';
-            listItem?: 'bullet' | 'number';
-            markDefs?: Array<{
-                href?: string;
-                _type: 'link';
-                _key: string;
-            }>;
-            level?: number;
-            _type: 'block';
-            _key: string;
-        }>;
+        overrideBody?: Array<
+            | {
+                  children?: Array<{
+                      marks?: Array<string>;
+                      text?: string;
+                      _type: 'span';
+                      _key: string;
+                  }>;
+                  style?:
+                      | 'normal'
+                      | 'h1'
+                      | 'h2'
+                      | 'h3'
+                      | 'h4'
+                      | 'h5'
+                      | 'h6'
+                      | 'blockquote';
+                  listItem?: 'bullet' | 'number';
+                  markDefs?: Array<{
+                      href?: string;
+                      _type: 'link';
+                      _key: string;
+                  }>;
+                  level?: number;
+                  _type: 'block';
+                  _key: string;
+              }
+            | ({
+                  _key: string;
+              } & Divider)
+        >;
         _type: 'tripInfoSectionRef';
         _key: string;
     }>;
@@ -562,25 +634,37 @@ export type TripInfoSection = {
     _rev: string;
     title?: string;
     slug?: Slug;
-    body?: Array<{
-        children?: Array<{
-            marks?: Array<string>;
-            text?: string;
-            _type: 'span';
-            _key: string;
-        }>;
-        style?:
-            'normal' | 'h1' | 'h2' | 'h3' | 'h4' | 'h5' | 'h6' | 'blockquote';
-        listItem?: 'bullet' | 'number';
-        markDefs?: Array<{
-            href?: string;
-            _type: 'link';
-            _key: string;
-        }>;
-        level?: number;
-        _type: 'block';
-        _key: string;
-    }>;
+    body?: Array<
+        | {
+              children?: Array<{
+                  marks?: Array<string>;
+                  text?: string;
+                  _type: 'span';
+                  _key: string;
+              }>;
+              style?:
+                  | 'normal'
+                  | 'h1'
+                  | 'h2'
+                  | 'h3'
+                  | 'h4'
+                  | 'h5'
+                  | 'h6'
+                  | 'blockquote';
+              listItem?: 'bullet' | 'number';
+              markDefs?: Array<{
+                  href?: string;
+                  _type: 'link';
+                  _key: string;
+              }>;
+              level?: number;
+              _type: 'block';
+              _key: string;
+          }
+        | ({
+              _key: string;
+          } & Divider)
+    >;
     order?: number;
 };
 
@@ -593,25 +677,37 @@ export type SpecialtyType = {
     name?: string;
     slug?: Slug;
     tagline?: string;
-    description?: Array<{
-        children?: Array<{
-            marks?: Array<string>;
-            text?: string;
-            _type: 'span';
-            _key: string;
-        }>;
-        style?:
-            'normal' | 'h1' | 'h2' | 'h3' | 'h4' | 'h5' | 'h6' | 'blockquote';
-        listItem?: 'bullet' | 'number';
-        markDefs?: Array<{
-            href?: string;
-            _type: 'link';
-            _key: string;
-        }>;
-        level?: number;
-        _type: 'block';
-        _key: string;
-    }>;
+    description?: Array<
+        | {
+              children?: Array<{
+                  marks?: Array<string>;
+                  text?: string;
+                  _type: 'span';
+                  _key: string;
+              }>;
+              style?:
+                  | 'normal'
+                  | 'h1'
+                  | 'h2'
+                  | 'h3'
+                  | 'h4'
+                  | 'h5'
+                  | 'h6'
+                  | 'blockquote';
+              listItem?: 'bullet' | 'number';
+              markDefs?: Array<{
+                  href?: string;
+                  _type: 'link';
+                  _key: string;
+              }>;
+              level?: number;
+              _type: 'block';
+              _key: string;
+          }
+        | ({
+              _key: string;
+          } & Divider)
+    >;
     image?: {
         asset?: SanityImageAssetReference;
         media?: unknown;
@@ -784,6 +880,7 @@ export type AllSanitySchemaTypes =
     | TripFinderOption
     | SanityImageAssetReference
     | TripFinderQuestion
+    | Divider
     | ContentBlock
     | HeroBlock
     | TripReference
@@ -957,7 +1054,7 @@ export type TripFinderSpecQueryResult = {
 
 // Source: src/lib/sanity/queries.ts
 // Variable: tripBySlugQuery
-// Query: *[_type == "trip" && slug.current == $slug][0] {      _id,  name,  slug,  tagline,  subtitle,  "ribbon": coalesce(ribbon, specialtyTypes[0]->ribbonLabel),  startingPrice,  durationLabel,  "river": river->{ "name": coalesce(riverName, name), slug },  "tripType": tripType->{ name, cardLabel, tagColor, slug },  "image": photos[0],    description,    highlights,    whatsIncluded,    videoUrl,    photos,    pricingNotes,    arcticTripId,    whoIsThisFor,    meetingPlace,    deposit,    minAge,    season,    maxRapidClass,    duration,    "river": river->{      _id,      name,      "riverLabel": coalesce(riverName, name),      slug,      description,      image,      usgsSiteId,      flowLinkUrl,      "mapPoints": mapPoints[]{ _key, title, location, image, caption }    },    "infoSections": infoSections[]{      _key,      overrideBody,      "section": section->{ _id, title, slug, body }    },    "specialtyTypes": specialtyTypes[]->{ _id, name, slug, ribbonLabel },    "specialtyDepartures": specialtyDepartures[]{      _key,      startDate,      label,      note,      "specialtyType": specialtyType->{ name, slug }    },    featuredReview,    "reviews": reviews[]{ _key, quote, author, source },    itinerary,    "faqs": faqs[]->{ _id, question, answer, category },    "relatedTrips": select(      count(relatedTrips) > 0 => relatedTrips[]->{   _id,  name,  slug,  tagline,  subtitle,  "ribbon": coalesce(ribbon, specialtyTypes[0]->ribbonLabel),  startingPrice,  durationLabel,  "river": river->{ "name": coalesce(riverName, name), slug },  "tripType": tripType->{ name, cardLabel, tagColor, slug },  "image": photos[0] },      *[_type == "trip" && slug.current != $slug &&        (river._ref == ^.river._ref || tripType._ref == ^.tripType._ref)      ] | order(name asc) [0...3] {   _id,  name,  slug,  tagline,  subtitle,  "ribbon": coalesce(ribbon, specialtyTypes[0]->ribbonLabel),  startingPrice,  durationLabel,  "river": river->{ "name": coalesce(riverName, name), slug },  "tripType": tripType->{ name, cardLabel, tagColor, slug },  "image": photos[0] }    )  }
+// Query: *[_type == "trip" && slug.current == $slug][0] {      _id,  name,  slug,  tagline,  subtitle,  "ribbon": coalesce(ribbon, specialtyTypes[0]->ribbonLabel),  startingPrice,  durationLabel,  "river": river->{ "name": coalesce(riverName, name), slug },  "tripType": tripType->{ name, cardLabel, tagColor, slug },  "image": photos[0],    description,    highlights,    whatsIncluded,    landAcknowledgement,    videoUrl,    photos,    pricingNotes,    arcticTripId,    whoIsThisFor,    meetingPlace,    deposit,    minAge,    season,    maxRapidClass,    duration,    "river": river->{      _id,      name,      "riverLabel": coalesce(riverName, name),      slug,      description,      image,      usgsSiteId,      flowLinkUrl,      "mapPoints": mapPoints[]{ _key, title, location, image, caption }    },    "infoSections": infoSections[]{      _key,      overrideBody,      "section": section->{ _id, title, slug, body }    },    "specialtyTypes": specialtyTypes[]->{ _id, name, slug, ribbonLabel },    "specialtyDepartures": specialtyDepartures[]{      _key,      startDate,      label,      note,      "specialtyType": specialtyType->{ name, slug }    },    featuredReview,    "reviews": reviews[]{ _key, quote, author, source },    itinerary,    "faqs": faqs[]->{ _id, question, answer, category },    "relatedTrips": select(      count(relatedTrips) > 0 => relatedTrips[]->{   _id,  name,  slug,  tagline,  subtitle,  "ribbon": coalesce(ribbon, specialtyTypes[0]->ribbonLabel),  startingPrice,  durationLabel,  "river": river->{ "name": coalesce(riverName, name), slug },  "tripType": tripType->{ name, cardLabel, tagColor, slug },  "image": photos[0] },      *[_type == "trip" && slug.current != $slug &&        (river._ref == ^.river._ref || tripType._ref == ^.tripType._ref)      ] | order(name asc) [0...3] {   _id,  name,  slug,  tagline,  subtitle,  "ribbon": coalesce(ribbon, specialtyTypes[0]->ribbonLabel),  startingPrice,  durationLabel,  "river": river->{ "name": coalesce(riverName, name), slug },  "tripType": tripType->{ name, cardLabel, tagColor, slug },  "image": photos[0] }    )  }
 export type TripBySlugQueryResult = {
     _id: string;
     name: string | null;
@@ -1013,27 +1110,70 @@ export type TripBySlugQueryResult = {
         _type: 'image';
         _key: string;
     } | null;
-    description: Array<{
-        children?: Array<{
-            marks?: Array<string>;
-            text?: string;
-            _type: 'span';
-            _key: string;
-        }>;
-        style?:
-            'blockquote' | 'h1' | 'h2' | 'h3' | 'h4' | 'h5' | 'h6' | 'normal';
-        listItem?: 'bullet' | 'number';
-        markDefs?: Array<{
-            href?: string;
-            _type: 'link';
-            _key: string;
-        }>;
-        level?: number;
-        _type: 'block';
-        _key: string;
-    }> | null;
+    description: Array<
+        | ({
+              _key: string;
+          } & Divider)
+        | {
+              children?: Array<{
+                  marks?: Array<string>;
+                  text?: string;
+                  _type: 'span';
+                  _key: string;
+              }>;
+              style?:
+                  | 'blockquote'
+                  | 'h1'
+                  | 'h2'
+                  | 'h3'
+                  | 'h4'
+                  | 'h5'
+                  | 'h6'
+                  | 'normal';
+              listItem?: 'bullet' | 'number';
+              markDefs?: Array<{
+                  href?: string;
+                  _type: 'link';
+                  _key: string;
+              }>;
+              level?: number;
+              _type: 'block';
+              _key: string;
+          }
+    > | null;
     highlights: Array<string> | null;
     whatsIncluded: Array<string> | null;
+    landAcknowledgement: Array<
+        | ({
+              _key: string;
+          } & Divider)
+        | {
+              children?: Array<{
+                  marks?: Array<string>;
+                  text?: string;
+                  _type: 'span';
+                  _key: string;
+              }>;
+              style?:
+                  | 'blockquote'
+                  | 'h1'
+                  | 'h2'
+                  | 'h3'
+                  | 'h4'
+                  | 'h5'
+                  | 'h6'
+                  | 'normal';
+              listItem?: 'bullet' | 'number';
+              markDefs?: Array<{
+                  href?: string;
+                  _type: 'link';
+                  _key: string;
+              }>;
+              level?: number;
+              _type: 'block';
+              _key: string;
+          }
+    > | null;
     videoUrl: string | null;
     photos: Array<{
         asset?: SanityImageAssetReference;
@@ -1056,62 +1196,72 @@ export type TripBySlugQueryResult = {
     duration: number | null;
     infoSections: Array<{
         _key: string;
-        overrideBody: Array<{
-            children?: Array<{
-                marks?: Array<string>;
-                text?: string;
-                _type: 'span';
-                _key: string;
-            }>;
-            style?:
-                | 'blockquote'
-                | 'h1'
-                | 'h2'
-                | 'h3'
-                | 'h4'
-                | 'h5'
-                | 'h6'
-                | 'normal';
-            listItem?: 'bullet' | 'number';
-            markDefs?: Array<{
-                href?: string;
-                _type: 'link';
-                _key: string;
-            }>;
-            level?: number;
-            _type: 'block';
-            _key: string;
-        }> | null;
+        overrideBody: Array<
+            | ({
+                  _key: string;
+              } & Divider)
+            | {
+                  children?: Array<{
+                      marks?: Array<string>;
+                      text?: string;
+                      _type: 'span';
+                      _key: string;
+                  }>;
+                  style?:
+                      | 'blockquote'
+                      | 'h1'
+                      | 'h2'
+                      | 'h3'
+                      | 'h4'
+                      | 'h5'
+                      | 'h6'
+                      | 'normal';
+                  listItem?: 'bullet' | 'number';
+                  markDefs?: Array<{
+                      href?: string;
+                      _type: 'link';
+                      _key: string;
+                  }>;
+                  level?: number;
+                  _type: 'block';
+                  _key: string;
+              }
+        > | null;
         section: {
             _id: string;
             title: string | null;
             slug: Slug | null;
-            body: Array<{
-                children?: Array<{
-                    marks?: Array<string>;
-                    text?: string;
-                    _type: 'span';
-                    _key: string;
-                }>;
-                style?:
-                    | 'blockquote'
-                    | 'h1'
-                    | 'h2'
-                    | 'h3'
-                    | 'h4'
-                    | 'h5'
-                    | 'h6'
-                    | 'normal';
-                listItem?: 'bullet' | 'number';
-                markDefs?: Array<{
-                    href?: string;
-                    _type: 'link';
-                    _key: string;
-                }>;
-                level?: number;
-                _type: 'block';
-                _key: string;
-            }> | null;
+            body: Array<
+                | ({
+                      _key: string;
+                  } & Divider)
+                | {
+                      children?: Array<{
+                          marks?: Array<string>;
+                          text?: string;
+                          _type: 'span';
+                          _key: string;
+                      }>;
+                      style?:
+                          | 'blockquote'
+                          | 'h1'
+                          | 'h2'
+                          | 'h3'
+                          | 'h4'
+                          | 'h5'
+                          | 'h6'
+                          | 'normal';
+                      listItem?: 'bullet' | 'number';
+                      markDefs?: Array<{
+                          href?: string;
+                          _type: 'link';
+                          _key: string;
+                      }>;
+                      level?: number;
+                      _type: 'block';
+                      _key: string;
+                  }
+            > | null;
         } | null;
     }> | null;
     specialtyTypes: Array<{
@@ -1151,32 +1301,37 @@ export type TripBySlugQueryResult = {
     faqs: Array<{
         _id: string;
         question: string | null;
-        answer: Array<{
-            children?: Array<{
-                marks?: Array<string>;
-                text?: string;
-                _type: 'span';
-                _key: string;
-            }>;
-            style?:
-                | 'blockquote'
-                | 'h1'
-                | 'h2'
-                | 'h3'
-                | 'h4'
-                | 'h5'
-                | 'h6'
-                | 'normal';
-            listItem?: 'bullet' | 'number';
-            markDefs?: Array<{
-                href?: string;
-                _type: 'link';
-                _key: string;
-            }>;
-            level?: number;
-            _type: 'block';
-            _key: string;
-        }> | null;
+        answer: Array<
+            | ({
+                  _key: string;
+              } & Divider)
+            | {
+                  children?: Array<{
+                      marks?: Array<string>;
+                      text?: string;
+                      _type: 'span';
+                      _key: string;
+                  }>;
+                  style?:
+                      | 'blockquote'
+                      | 'h1'
+                      | 'h2'
+                      | 'h3'
+                      | 'h4'
+                      | 'h5'
+                      | 'h6'
+                      | 'normal';
+                  listItem?: 'bullet' | 'number';
+                  markDefs?: Array<{
+                      href?: string;
+                      _type: 'link';
+                      _key: string;
+                  }>;
+                  level?: number;
+                  _type: 'block';
+                  _key: string;
+              }
+        > | null;
         category:
             | 'booking'
             | 'cancellation'
@@ -1334,25 +1489,37 @@ export type AllSpecialtyTypesQueryResult = Array<{
     name: string | null;
     slug: Slug | null;
     tagline: string | null;
-    description: Array<{
-        children?: Array<{
-            marks?: Array<string>;
-            text?: string;
-            _type: 'span';
-            _key: string;
-        }>;
-        style?:
-            'blockquote' | 'h1' | 'h2' | 'h3' | 'h4' | 'h5' | 'h6' | 'normal';
-        listItem?: 'bullet' | 'number';
-        markDefs?: Array<{
-            href?: string;
-            _type: 'link';
-            _key: string;
-        }>;
-        level?: number;
-        _type: 'block';
-        _key: string;
-    }> | null;
+    description: Array<
+        | ({
+              _key: string;
+          } & Divider)
+        | {
+              children?: Array<{
+                  marks?: Array<string>;
+                  text?: string;
+                  _type: 'span';
+                  _key: string;
+              }>;
+              style?:
+                  | 'blockquote'
+                  | 'h1'
+                  | 'h2'
+                  | 'h3'
+                  | 'h4'
+                  | 'h5'
+                  | 'h6'
+                  | 'normal';
+              listItem?: 'bullet' | 'number';
+              markDefs?: Array<{
+                  href?: string;
+                  _type: 'link';
+                  _key: string;
+              }>;
+              level?: number;
+              _type: 'block';
+              _key: string;
+          }
+    > | null;
     image: {
         asset?: SanityImageAssetReference;
         media?: unknown;
@@ -1399,25 +1566,37 @@ export type AllSpecialtyTypesQueryResult = Array<{
 export type AllFaqsQueryResult = Array<{
     _id: string;
     question: string | null;
-    answer: Array<{
-        children?: Array<{
-            marks?: Array<string>;
-            text?: string;
-            _type: 'span';
-            _key: string;
-        }>;
-        style?:
-            'blockquote' | 'h1' | 'h2' | 'h3' | 'h4' | 'h5' | 'h6' | 'normal';
-        listItem?: 'bullet' | 'number';
-        markDefs?: Array<{
-            href?: string;
-            _type: 'link';
-            _key: string;
-        }>;
-        level?: number;
-        _type: 'block';
-        _key: string;
-    }> | null;
+    answer: Array<
+        | ({
+              _key: string;
+          } & Divider)
+        | {
+              children?: Array<{
+                  marks?: Array<string>;
+                  text?: string;
+                  _type: 'span';
+                  _key: string;
+              }>;
+              style?:
+                  | 'blockquote'
+                  | 'h1'
+                  | 'h2'
+                  | 'h3'
+                  | 'h4'
+                  | 'h5'
+                  | 'h6'
+                  | 'normal';
+              listItem?: 'bullet' | 'number';
+              markDefs?: Array<{
+                  href?: string;
+                  _type: 'link';
+                  _key: string;
+              }>;
+              level?: number;
+              _type: 'block';
+              _key: string;
+          }
+    > | null;
     category:
         | 'booking'
         | 'cancellation'
@@ -1429,7 +1608,7 @@ export type AllFaqsQueryResult = Array<{
 
 // Source: src/lib/sanity/queries.ts
 // Variable: siteSettingsQuery
-// Query: *[_type == "siteSettings"][0] {    phone,    email,    address,    socialLinks,    reviews  }
+// Query: *[_type == "siteSettings"][0] {    phone,    email,    address,    socialLinks,    reviews,    whatsIncluded  }
 export type SiteSettingsQueryResult = {
     phone: string | null;
     email: string | null;
@@ -1445,6 +1624,7 @@ export type SiteSettingsQueryResult = {
         tripadvisorUrl?: string;
         googleUrl?: string;
     } | null;
+    whatsIncluded: Array<string> | null;
 } | null;
 
 // Source: src/lib/sanity/queries.ts
@@ -1484,6 +1664,9 @@ export type PostBySlugQueryResult = {
     publishedAt: string | null;
     category: 'conservation' | 'culture-history' | 'trip-prep' | null;
     body: Array<
+        | ({
+              _key: string;
+          } & Divider)
         | {
               children?: Array<{
                   marks?: Array<string>;
@@ -1636,13 +1819,13 @@ declare module '@sanity/client' {
         '\n  *[_type == "trip"] | order(name asc) {\n    \n  _id,\n  name,\n  slug,\n  tagline,\n  subtitle,\n  "ribbon": coalesce(ribbon, specialtyTypes[0]->ribbonLabel),\n  startingPrice,\n  durationLabel,\n  "river": river->{ "name": coalesce(riverName, name), slug },\n  "tripType": tripType->{ name, cardLabel, tagColor, slug },\n  "image": photos[0]\n,\n    arcticTripId,\n    "specialtyDepartures": specialtyDepartures[]{\n      _key,\n      startDate,\n      label,\n      note,\n      "specialtyType": specialtyType->{ name, slug }\n    }\n  }\n': AllTripsQueryResult;
         '\n  *[_type == "trip"] | order(name asc) {\n    \n  _id,\n  name,\n  slug,\n  tagline,\n  subtitle,\n  "ribbon": coalesce(ribbon, specialtyTypes[0]->ribbonLabel),\n  startingPrice,\n  durationLabel,\n  "river": river->{ "name": coalesce(riverName, name), slug },\n  "tripType": tripType->{ name, cardLabel, tagColor, slug },\n  "image": photos[0]\n,\n    duration,\n    minAge,\n    "minAgeOverrides": minAgeOverrides[]{ months, minAge, reason },\n    maxRapidClass,\n    seasonMonths,\n    craftTypes,\n    arcticTripId\n  }\n': TripFinderTripsQueryResult;
         '\n  *[_type == "tripFinderSpec"][0] {\n    minConfidentScore,\n    resultsShown,\n    "fallbackTripSlug": fallbackTrip->slug.current,\n    "questions": questions[] {\n      _key,\n      kind,\n      title,\n      subline,\n      shortLabel,\n      skipLabel,\n      ethos,\n      weight,\n      image,\n      "onlyWhen": onlyWhen { question, answer },\n      "skipWhen": skipWhen { question, answer },\n      "options": options[] {\n        _key,\n        label,\n        value,\n        sublabel,\n        bikeSublabel,\n        targetClass,\n        floorAge,\n        centerDays,\n        month,\n        "tripTypeSlug": tripType->slug.current\n      }\n    }\n  }\n': TripFinderSpecQueryResult;
-        '\n  *[_type == "trip" && slug.current == $slug][0] {\n    \n  _id,\n  name,\n  slug,\n  tagline,\n  subtitle,\n  "ribbon": coalesce(ribbon, specialtyTypes[0]->ribbonLabel),\n  startingPrice,\n  durationLabel,\n  "river": river->{ "name": coalesce(riverName, name), slug },\n  "tripType": tripType->{ name, cardLabel, tagColor, slug },\n  "image": photos[0]\n,\n    description,\n    highlights,\n    whatsIncluded,\n    videoUrl,\n    photos,\n    pricingNotes,\n    arcticTripId,\n    whoIsThisFor,\n    meetingPlace,\n    deposit,\n    minAge,\n    season,\n    maxRapidClass,\n    duration,\n    "river": river->{\n      _id,\n      name,\n      "riverLabel": coalesce(riverName, name),\n      slug,\n      description,\n      image,\n      usgsSiteId,\n      flowLinkUrl,\n      "mapPoints": mapPoints[]{ _key, title, location, image, caption }\n    },\n    "infoSections": infoSections[]{\n      _key,\n      overrideBody,\n      "section": section->{ _id, title, slug, body }\n    },\n    "specialtyTypes": specialtyTypes[]->{ _id, name, slug, ribbonLabel },\n    "specialtyDepartures": specialtyDepartures[]{\n      _key,\n      startDate,\n      label,\n      note,\n      "specialtyType": specialtyType->{ name, slug }\n    },\n    featuredReview,\n    "reviews": reviews[]{ _key, quote, author, source },\n    itinerary,\n    "faqs": faqs[]->{ _id, question, answer, category },\n    "relatedTrips": select(\n      count(relatedTrips) > 0 => relatedTrips[]->{ \n  _id,\n  name,\n  slug,\n  tagline,\n  subtitle,\n  "ribbon": coalesce(ribbon, specialtyTypes[0]->ribbonLabel),\n  startingPrice,\n  durationLabel,\n  "river": river->{ "name": coalesce(riverName, name), slug },\n  "tripType": tripType->{ name, cardLabel, tagColor, slug },\n  "image": photos[0]\n },\n      *[_type == "trip" && slug.current != $slug &&\n        (river._ref == ^.river._ref || tripType._ref == ^.tripType._ref)\n      ] | order(name asc) [0...3] { \n  _id,\n  name,\n  slug,\n  tagline,\n  subtitle,\n  "ribbon": coalesce(ribbon, specialtyTypes[0]->ribbonLabel),\n  startingPrice,\n  durationLabel,\n  "river": river->{ "name": coalesce(riverName, name), slug },\n  "tripType": tripType->{ name, cardLabel, tagColor, slug },\n  "image": photos[0]\n }\n    )\n  }\n': TripBySlugQueryResult;
+        '\n  *[_type == "trip" && slug.current == $slug][0] {\n    \n  _id,\n  name,\n  slug,\n  tagline,\n  subtitle,\n  "ribbon": coalesce(ribbon, specialtyTypes[0]->ribbonLabel),\n  startingPrice,\n  durationLabel,\n  "river": river->{ "name": coalesce(riverName, name), slug },\n  "tripType": tripType->{ name, cardLabel, tagColor, slug },\n  "image": photos[0]\n,\n    description,\n    highlights,\n    whatsIncluded,\n    landAcknowledgement,\n    videoUrl,\n    photos,\n    pricingNotes,\n    arcticTripId,\n    whoIsThisFor,\n    meetingPlace,\n    deposit,\n    minAge,\n    season,\n    maxRapidClass,\n    duration,\n    "river": river->{\n      _id,\n      name,\n      "riverLabel": coalesce(riverName, name),\n      slug,\n      description,\n      image,\n      usgsSiteId,\n      flowLinkUrl,\n      "mapPoints": mapPoints[]{ _key, title, location, image, caption }\n    },\n    "infoSections": infoSections[]{\n      _key,\n      overrideBody,\n      "section": section->{ _id, title, slug, body }\n    },\n    "specialtyTypes": specialtyTypes[]->{ _id, name, slug, ribbonLabel },\n    "specialtyDepartures": specialtyDepartures[]{\n      _key,\n      startDate,\n      label,\n      note,\n      "specialtyType": specialtyType->{ name, slug }\n    },\n    featuredReview,\n    "reviews": reviews[]{ _key, quote, author, source },\n    itinerary,\n    "faqs": faqs[]->{ _id, question, answer, category },\n    "relatedTrips": select(\n      count(relatedTrips) > 0 => relatedTrips[]->{ \n  _id,\n  name,\n  slug,\n  tagline,\n  subtitle,\n  "ribbon": coalesce(ribbon, specialtyTypes[0]->ribbonLabel),\n  startingPrice,\n  durationLabel,\n  "river": river->{ "name": coalesce(riverName, name), slug },\n  "tripType": tripType->{ name, cardLabel, tagColor, slug },\n  "image": photos[0]\n },\n      *[_type == "trip" && slug.current != $slug &&\n        (river._ref == ^.river._ref || tripType._ref == ^.tripType._ref)\n      ] | order(name asc) [0...3] { \n  _id,\n  name,\n  slug,\n  tagline,\n  subtitle,\n  "ribbon": coalesce(ribbon, specialtyTypes[0]->ribbonLabel),\n  startingPrice,\n  durationLabel,\n  "river": river->{ "name": coalesce(riverName, name), slug },\n  "tripType": tripType->{ name, cardLabel, tagColor, slug },\n  "image": photos[0]\n }\n    )\n  }\n': TripBySlugQueryResult;
         '\n  *[_type == "river" && slug.current == $slug][0] {\n    _id,\n    name,\n    "riverLabel": coalesce(riverName, name),\n    slug,\n    description,\n    image,\n    usgsSiteId,\n    flowLinkUrl,\n    "trips": *[_type == "trip" && river._ref == ^._id] | order(name asc) {\n      \n  _id,\n  name,\n  slug,\n  tagline,\n  subtitle,\n  "ribbon": coalesce(ribbon, specialtyTypes[0]->ribbonLabel),\n  startingPrice,\n  durationLabel,\n  "river": river->{ "name": coalesce(riverName, name), slug },\n  "tripType": tripType->{ name, cardLabel, tagColor, slug },\n  "image": photos[0]\n\n    }\n  }\n': RiverBySlugQueryResult;
         '\n  *[_type == "tripType" && slug.current == $slug][0] {\n    _id,\n    name,\n    slug,\n    description,\n    image,\n    "trips": *[\n      _type == "trip" &&\n      (tripType._ref == ^._id || tripType->listsWith._ref == ^._id)\n    ] | order(name asc) {\n      \n  _id,\n  name,\n  slug,\n  tagline,\n  subtitle,\n  "ribbon": coalesce(ribbon, specialtyTypes[0]->ribbonLabel),\n  startingPrice,\n  durationLabel,\n  "river": river->{ "name": coalesce(riverName, name), slug },\n  "tripType": tripType->{ name, cardLabel, tagColor, slug },\n  "image": photos[0]\n\n    }\n  }\n': TripTypeBySlugQueryResult;
         '\n  *[_type == "tripType"] | order(order asc, name asc) {\n    _id,\n    name,\n    slug,\n    cardLabel,\n    tagColor,\n    "listsWith": listsWith->slug.current\n  }\n': AllTripTypesQueryResult;
         '\n  *[_type == "specialtyType"] | order(order asc, name asc) {\n    _id,\n    name,\n    slug,\n    tagline,\n    description,\n    image,\n    ribbonLabel,\n    "trips": *[_type == "trip" && references(^._id)] | order(name asc) {\n      \n  _id,\n  name,\n  slug,\n  tagline,\n  subtitle,\n  "ribbon": coalesce(ribbon, specialtyTypes[0]->ribbonLabel),\n  startingPrice,\n  durationLabel,\n  "river": river->{ "name": coalesce(riverName, name), slug },\n  "tripType": tripType->{ name, cardLabel, tagColor, slug },\n  "image": photos[0]\n\n    }\n  }\n': AllSpecialtyTypesQueryResult;
         '\n  *[_type == "faq"] | order(category asc, order asc) {\n    _id,\n    question,\n    answer,\n    category\n  }\n': AllFaqsQueryResult;
-        '\n  *[_type == "siteSettings"][0] {\n    phone,\n    email,\n    address,\n    socialLinks,\n    reviews\n  }\n': SiteSettingsQueryResult;
+        '\n  *[_type == "siteSettings"][0] {\n    phone,\n    email,\n    address,\n    socialLinks,\n    reviews,\n    whatsIncluded\n  }\n': SiteSettingsQueryResult;
         '\n  *[_type == "post"] | order(publishedAt desc) {\n    _id,\n    title,\n    slug,\n    excerpt,\n    mainImage,\n    publishedAt,\n    category\n  }\n': AllPostsQueryResult;
         '\n  *[_type == "post" && slug.current == $slug][0] {\n    _id,\n    title,\n    slug,\n    excerpt,\n    mainImage,\n    publishedAt,\n    category,\n    body\n  }\n': PostBySlugQueryResult;
         '\n  *[_type == "page" && slug.current == $slug][0] {\n    _id,\n    title,\n    slug,\n    content\n  }\n': PageBySlugQueryResult;

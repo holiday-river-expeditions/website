@@ -1,4 +1,5 @@
 import { PortableText } from '@portabletext/react';
+import { richTextComponents } from '@/components/ui/RichText';
 import type { Metadata } from 'next';
 import { Section } from '@/components/ui/Section';
 import { getAllFaqs } from '@/lib/sanity';
@@ -106,6 +107,9 @@ export default async function FaqPage() {
                                                     <div className='mt-3 space-y-3 text-body leading-body text-onyx [&_a]:text-holiday-red [&_a]:underline'>
                                                         <PortableText
                                                             value={faq.answer}
+                                                            components={
+                                                                richTextComponents
+                                                            }
                                                         />
                                                     </div>
                                                 )}

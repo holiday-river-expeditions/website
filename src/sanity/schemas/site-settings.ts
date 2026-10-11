@@ -47,6 +47,14 @@ export const siteSettings = defineType({
             ],
         }),
         defineField({
+            name: 'whatsIncluded',
+            title: 'What’s Included (every trip)',
+            type: 'array',
+            of: [{ type: 'string' }],
+            description:
+                'The checklist under Highlights on every trip page: meals, guides, gear, shuttles, one line per item. Edit it once here. A trip that differs (Desolation) overrides it on its own document under Trip Details.',
+        }),
+        defineField({
             name: 'socialLinks',
             title: 'Social Links',
             type: 'object',

@@ -1,4 +1,5 @@
 import { PortableText } from '@portabletext/react';
+import { richTextComponents } from '@/components/ui/RichText';
 import type { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 import { Button } from '@/components/ui/Button';
@@ -77,7 +78,10 @@ export default async function PostPage({ params }: PostPageProps) {
                         read as a shorter page, not as a note to the editor. */}
                     {post.body && (
                         <div className='space-y-4 text-body leading-body text-onyx [&_a]:text-holiday-red [&_a]:underline [&_h2]:font-alt-gothic [&_h2]:text-section [&_h2]:font-black [&_h2]:uppercase [&_h2]:text-holiday-red [&_h3]:font-alt-gothic [&_h3]:text-h3 [&_h3]:font-black [&_h3]:uppercase [&_h3]:leading-h3 [&_h3]:text-onyx [&_li]:ml-5 [&_ul]:list-disc'>
-                            <PortableText value={post.body} />
+                            <PortableText
+                                value={post.body}
+                                components={richTextComponents}
+                            />
                         </div>
                     )}
                     <div className='mt-12'>
