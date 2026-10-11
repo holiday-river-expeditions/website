@@ -1,6 +1,11 @@
 import { NextResponse } from 'next/server';
 import { z } from 'zod';
-import { BookingError, createCartItem, getDeparture } from '@/lib/arctic';
+import {
+    BookingError,
+    createCartItem,
+    getDeparture,
+    isPrivateCharter,
+} from '@/lib/arctic';
 import {
     type CartCookie,
     readCartCookie,
@@ -62,6 +67,14 @@ export async function POST(req: Request) {
         if (departure.canceled) {
             return NextResponse.json(
                 { error: 'This departure is no longer running.' },
+                { status: 409 },
+            );
+        }
+        if (isPrivateCharter(departure)) {
+            return NextResponse.json(
+                {
+                    error: 'This date is a private trip. Call 801-266-2087 to book.',
+                },
                 { status: 409 },
             );
         }

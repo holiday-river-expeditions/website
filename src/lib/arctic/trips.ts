@@ -24,9 +24,19 @@ function todayISO(): string {
     }).format(new Date());
 }
 
+/**
+ * Private charters are booked by one group and must never show as open
+ * seats. Most carry orenable = false, but some are left bookable online in
+ * Arctic (eight in 2027, e.g. "Desolation Canyon Shriners Charter"), so the
+ * departure name is checked as well.
+ */
+export function isPrivateCharter(departure: Pick<ArcticDeparture, 'name'>) {
+    return /\bcharter\b/i.test(departure.name ?? '');
+}
+
 function upcoming(departures: ArcticDeparture[]): ArcticDeparture[] {
     return departures
-        .filter((d) => !d.canceled)
+        .filter((d) => !d.canceled && !isPrivateCharter(d))
         .sort((a, b) => a.start.localeCompare(b.start));
 }
 
