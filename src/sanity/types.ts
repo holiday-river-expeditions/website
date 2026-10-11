@@ -1813,8 +1813,7 @@ export type HomepageQueryResult = {
 } | null;
 
 // Query TypeMap
-import '@sanity/client';
-declare module '@sanity/client' {
+declare global {
     interface SanityQueries {
         '\n  *[_type == "trip"] | order(name asc) {\n    \n  _id,\n  name,\n  slug,\n  tagline,\n  subtitle,\n  "ribbon": coalesce(ribbon, specialtyTypes[0]->ribbonLabel),\n  startingPrice,\n  durationLabel,\n  "river": river->{ "name": coalesce(riverName, name), slug },\n  "tripType": tripType->{ name, cardLabel, tagColor, slug },\n  "image": photos[0]\n,\n    arcticTripId,\n    "specialtyDepartures": specialtyDepartures[]{\n      _key,\n      startDate,\n      label,\n      note,\n      "specialtyType": specialtyType->{ name, slug }\n    }\n  }\n': AllTripsQueryResult;
         '\n  *[_type == "trip"] | order(name asc) {\n    \n  _id,\n  name,\n  slug,\n  tagline,\n  subtitle,\n  "ribbon": coalesce(ribbon, specialtyTypes[0]->ribbonLabel),\n  startingPrice,\n  durationLabel,\n  "river": river->{ "name": coalesce(riverName, name), slug },\n  "tripType": tripType->{ name, cardLabel, tagColor, slug },\n  "image": photos[0]\n,\n    duration,\n    minAge,\n    "minAgeOverrides": minAgeOverrides[]{ months, minAge, reason },\n    maxRapidClass,\n    seasonMonths,\n    craftTypes,\n    arcticTripId\n  }\n': TripFinderTripsQueryResult;
@@ -1831,4 +1830,8 @@ declare module '@sanity/client' {
         '\n  *[_type == "page" && slug.current == $slug][0] {\n    _id,\n    title,\n    slug,\n    content\n  }\n': PageBySlugQueryResult;
         '\n  *[_type == "homepage"][0] {\n    heroHeading,\n    heroImage,\n    "heroImageAlt": heroImage.alt,\n    heroCtaText,\n    heroCtaLink,\n    "featuredTrips": featuredTrips[]->{ \n  _id,\n  name,\n  slug,\n  tagline,\n  subtitle,\n  "ribbon": coalesce(ribbon, specialtyTypes[0]->ribbonLabel),\n  startingPrice,\n  durationLabel,\n  "river": river->{ "name": coalesce(riverName, name), slug },\n  "tripType": tripType->{ name, cardLabel, tagColor, slug },\n  "image": photos[0]\n },\n    storyBody,\n    storyImageLeft,\n    storyImagePortrait,\n    storyCtaText,\n    storyCtaLink,\n    "rivers": rivers[]->{\n      _id,\n      name,\n      slug,\n      image,\n      description\n    },\n    learnContent[]{\n      _key,\n      title,\n      image,\n      link,\n      isVideo\n    }\n  }\n': HomepageQueryResult;
     }
+}
+// Lets @sanity/client releases that predate the global registry read it too
+declare module '@sanity/client' {
+    interface SanityQueries extends globalThis.SanityQueries {}
 }
