@@ -13,6 +13,7 @@ const TRIP_CARD = `
   subtitle,
   "ribbon": coalesce(ribbon, specialtyTypes[0]->ribbonLabel),
   startingPrice,
+  arcticTripId,
   durationLabel,
   "river": river->{ "name": coalesce(riverName, name), slug },
   "tripType": tripType->{ name, cardLabel, tagColor, slug },
@@ -22,7 +23,6 @@ const TRIP_CARD = `
 export const allTripsQuery = defineQuery(`
   *[_type == "trip"] | order(name asc) {
     ${TRIP_CARD},
-    arcticTripId,
     "specialtyDepartures": specialtyDepartures[]{
       _key,
       startDate,
@@ -44,8 +44,7 @@ export const tripFinderTripsQuery = defineQuery(`
     "minAgeOverrides": minAgeOverrides[]{ months, minAge, reason },
     maxRapidClass,
     seasonMonths,
-    craftTypes,
-    arcticTripId
+    craftTypes
   }
 `);
 
@@ -95,7 +94,6 @@ export const tripBySlugQuery = defineQuery(`
     videoUrl,
     photos,
     pricingNotes,
-    arcticTripId,
     whoIsThisFor,
     meetingPlace,
     deposit,

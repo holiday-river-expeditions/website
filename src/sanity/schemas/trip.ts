@@ -80,11 +80,11 @@ export const trip = defineType({
         }),
         defineField({
             name: 'startingPrice',
-            title: 'Starting Price (display)',
+            title: 'Starting Price (backup)',
             type: 'string',
             group: 'card',
             description:
-                'Shown as "Starts at …" on cards, e.g. "$1,630". Typed by hand — live per-departure pricing comes from Arctic, so keep this in step with the season’s lowest price.',
+                'The site shows the adult price from Arctic when this trip has Arctic Trip Type IDs (Booking tab). This is only used for trips without Arctic IDs, or if Arctic is down. Example: "$1,435".',
         }),
         defineField({
             name: 'durationLabel',

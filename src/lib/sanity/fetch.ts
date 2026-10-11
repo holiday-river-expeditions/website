@@ -1,3 +1,4 @@
+import { withArcticPrices } from '@/lib/arctic/prices';
 import { client } from './client';
 import {
     allFaqsQuery,
@@ -16,12 +17,16 @@ import {
     tripTypeBySlugQuery,
 } from './queries';
 
+// Every fetch that returns trip cards swaps the Sanity startingPrice for
+// Arctic's live price (see withArcticPrices). Arctic is where Holiday sets
+// prices; the Sanity field is the fallback.
+
 export async function getAllTrips() {
-    return client.fetch(allTripsQuery);
+    return withArcticPrices(await client.fetch(allTripsQuery));
 }
 
 export async function getTripFinderTrips() {
-    return client.fetch(tripFinderTripsQuery);
+    return withArcticPrices(await client.fetch(tripFinderTripsQuery));
 }
 
 export async function getTripFinderSpec() {
@@ -29,15 +34,28 @@ export async function getTripFinderSpec() {
 }
 
 export async function getTripBySlug(slug: string) {
-    return client.fetch(tripBySlugQuery, { slug });
+    const trip = await client.fetch(tripBySlugQuery, { slug });
+    if (!trip) return trip;
+    const [[priced], relatedTrips] = await Promise.all([
+        withArcticPrices([trip]),
+        withArcticPrices(trip.relatedTrips),
+    ]);
+    return { ...priced, relatedTrips };
 }
 
 export async function getRiverBySlug(slug: string) {
-    return client.fetch(riverBySlugQuery, { slug });
+    const river = await client.fetch(riverBySlugQuery, { slug });
+    return river && { ...river, trips: await withArcticPrices(river.trips) };
 }
 
 export async function getTripTypeBySlug(slug: string) {
-    return client.fetch(tripTypeBySlugQuery, { slug });
+    const tripType = await client.fetch(tripTypeBySlugQuery, { slug });
+    return (
+        tripType && {
+            ...tripType,
+            trips: await withArcticPrices(tripType.trips),
+        }
+    );
 }
 
 export async function getAllTripTypes() {
@@ -45,7 +63,13 @@ export async function getAllTripTypes() {
 }
 
 export async function getAllSpecialtyTypes() {
-    return client.fetch(allSpecialtyTypesQuery);
+    const types = await client.fetch(allSpecialtyTypesQuery);
+    return Promise.all(
+        types.map(async (type) => ({
+            ...type,
+            trips: await withArcticPrices(type.trips),
+        })),
+    );
 }
 
 export async function getAllFaqs() {
@@ -69,5 +93,11 @@ export async function getPostBySlug(slug: string) {
 }
 
 export async function getHomepage() {
-    return client.fetch(homepageQuery);
+    const homepage = await client.fetch(homepageQuery);
+    return (
+        homepage && {
+            ...homepage,
+            featuredTrips: await withArcticPrices(homepage.featuredTrips),
+        }
+    );
 }
