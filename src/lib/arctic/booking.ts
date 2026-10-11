@@ -1,3 +1,4 @@
+import { unstable_rethrow } from 'next/navigation';
 import { arcticGet } from './client';
 import { isArcticConfigured } from './config';
 import {
@@ -90,6 +91,7 @@ export async function getTripPricingLevels(
         });
         return levels;
     } catch (error) {
+        unstable_rethrow(error);
         console.error(
             `[arctic] getTripPricingLevels(${triptypeid}) failed:`,
             error,

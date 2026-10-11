@@ -1,3 +1,4 @@
+import { unstable_rethrow } from 'next/navigation';
 import { arcticGet } from './client';
 import { isArcticConfigured } from './config';
 import {
@@ -38,6 +39,7 @@ export async function getDeparture(
     try {
         return await arcticGet(`trip/${id}`, departureSchema);
     } catch (error) {
+        unstable_rethrow(error);
         console.error(`[arctic] getDeparture(${id}) failed:`, error);
         return null;
     }
@@ -48,6 +50,7 @@ export async function getTripType(id: string | number) {
     try {
         return await arcticGet(`triptype/${id}`, tripTypeSchema);
     } catch (error) {
+        unstable_rethrow(error);
         console.error(`[arctic] getTripType(${id}) failed:`, error);
         return null;
     }
@@ -75,6 +78,7 @@ export async function getUpcomingDepartures(
         });
         return upcoming(res.entries);
     } catch (error) {
+        unstable_rethrow(error);
         console.error(
             `[arctic] getUpcomingDepartures(${arcticTripIds}) failed:`,
             error,
@@ -96,6 +100,7 @@ export async function getBookableTripTypes(): Promise<ArcticTripType[] | null> {
         });
         return res.entries;
     } catch (error) {
+        unstable_rethrow(error);
         console.error('[arctic] getBookableTripTypes failed:', error);
         return null;
     }
@@ -112,6 +117,7 @@ export async function getAllUpcomingDepartures(): Promise<
         });
         return upcoming(res.entries);
     } catch (error) {
+        unstable_rethrow(error);
         console.error('[arctic] getAllUpcomingDepartures failed:', error);
         return null;
     }
