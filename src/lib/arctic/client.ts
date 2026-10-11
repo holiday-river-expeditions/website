@@ -43,6 +43,11 @@ interface CachedToken {
 // Module-scope token cache; survives across requests within a server
 // instance, which is all the caching this traffic volume needs.
 let cachedToken: CachedToken | null = null;
+// One login at a time. A page renders many Arctic calls in parallel
+// (prices and availability for every trip on a grid); without this, an
+// expired token sends each of them to the token endpoint at once and
+// Arctic rejects the burst ("Arctic auth failed: Unknown Error").
+let tokenRequest: Promise<string> | null = null;
 
 const TOKEN_SAFETY_WINDOW_MS = 60_000;
 const DEFAULT_TOKEN_TTL_MS = 10 * 60_000;
@@ -50,12 +55,18 @@ const REQUEST_TIMEOUT_MS = 10_000;
 const RETRIES = 2;
 
 async function fetchToken(): Promise<string> {
-    const config = getArcticConfig();
-    if (!config) throw new ArcticError('Arctic is not configured');
-
     if (cachedToken && cachedToken.expiresAt > Date.now()) {
         return cachedToken.token;
     }
+    tokenRequest ??= requestToken().finally(() => {
+        tokenRequest = null;
+    });
+    return tokenRequest;
+}
+
+async function requestToken(): Promise<string> {
+    const config = getArcticConfig();
+    if (!config) throw new ArcticError('Arctic is not configured');
 
     const res = await fetch(
         `${config.baseUrl}/api/rest/oauth/application/token`,

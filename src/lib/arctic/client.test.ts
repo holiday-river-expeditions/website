@@ -97,6 +97,26 @@ test('reuses the cached token across requests', async () => {
     expect(tokenCalls).toHaveLength(1);
 });
 
+test('parallel requests share one login', async () => {
+    fetchMock.mockImplementation(async (url: string | URL) =>
+        String(url).includes('/oauth/')
+            ? tokenOk()
+            : jsonResponse({ ok: true }),
+    );
+
+    const { arcticGet } = await importClient();
+    await Promise.all(
+        Array.from({ length: 8 }, (_, i) =>
+            arcticGet(`triptype/${i}`, echoSchema),
+        ),
+    );
+
+    const tokenCalls = fetchMock.mock.calls.filter(([url]) =>
+        String(url).includes('/oauth/'),
+    );
+    expect(tokenCalls).toHaveLength(1);
+});
+
 test('re-authenticates once on 403 (expired token)', async () => {
     fetchMock
         .mockResolvedValueOnce(tokenOk('stale'))
