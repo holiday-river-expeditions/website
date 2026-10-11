@@ -144,3 +144,17 @@ test('throws when unconfigured', async () => {
     await expect(arcticGet('trip', echoSchema)).rejects.toThrow(ArcticError);
     expect(fetchMock).not.toHaveBeenCalled();
 });
+
+// Next throws DynamicServerError when a statically rendered page bails out.
+// It is a control-flow signal, so the client must not retry or wrap it.
+test("rethrows Next's internal errors without retrying", async () => {
+    const { DynamicServerError } =
+        await import('next/dist/client/components/hooks-server-context');
+    fetchMock.mockRejectedValueOnce(new DynamicServerError('bail out'));
+
+    const { arcticGet } = await importClient();
+    await expect(arcticGet('trip', echoSchema)).rejects.toBeInstanceOf(
+        DynamicServerError,
+    );
+    expect(fetchMock).toHaveBeenCalledTimes(1);
+});

@@ -127,3 +127,22 @@ test('getGuestSiteBase prefers the env override', async () => {
         'https://holidayriver-guest-site-1.arcticres.com',
     );
 });
+
+test("getTripPricingLevels rethrows Next's internal errors instead of logging them", async () => {
+    process.env.ARCTIC_API_BASE_URL = 'https://holidayriver.arcticres.com';
+    process.env.ARCTIC_CLIENT_ID = 'client-id';
+    process.env.ARCTIC_CLIENT_SECRET = 'client-secret';
+    process.env.ARCTIC_USERNAME = 'api-user';
+    process.env.ARCTIC_PASSWORD = 'api-pass';
+    const { DynamicServerError } =
+        await import('next/dist/client/components/hooks-server-context');
+    fetchMock.mockRejectedValueOnce(new DynamicServerError('bail out'));
+    const errorSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
+
+    const { getTripPricingLevels } = await import('./booking');
+    await expect(getTripPricingLevels(60)).rejects.toBeInstanceOf(
+        DynamicServerError,
+    );
+    expect(errorSpy).not.toHaveBeenCalled();
+    errorSpy.mockRestore();
+});

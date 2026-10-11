@@ -1,3 +1,4 @@
+import { unstable_rethrow } from 'next/navigation';
 import { z } from 'zod';
 import { getArcticConfig } from './config';
 
@@ -12,6 +13,13 @@ import { getArcticConfig } from './config';
  * Arctic does not support custom integrations, so every response is treated
  * as untrusted: callers Zod-parse payloads and this module retries transient
  * failures with backoff. See docs/project/arctic-api.md.
+ *
+ * Fetches carry no `cache` option on purpose. Pages that show Arctic data
+ * use ISR (`revalidate = 60`), and `cache: 'no-store'` would make them
+ * dynamic. With no option, Next fetches fresh on every ISR regeneration
+ * and on every request in route handlers, so nothing is served from the
+ * Data Cache at runtime. Catch blocks call unstable_rethrow so a
+ * framework signal is never logged and swallowed as an Arctic failure.
  */
 
 const tokenResponseSchema = z.object({
@@ -70,7 +78,6 @@ async function fetchToken(): Promise<string> {
                 password: config.password,
             }),
             signal: AbortSignal.timeout(REQUEST_TIMEOUT_MS),
-            cache: 'no-store',
         },
     );
 
@@ -146,7 +153,6 @@ export async function arcticGet<T>(
                     Authorization: `Bearer ${token}`,
                 },
                 signal: AbortSignal.timeout(REQUEST_TIMEOUT_MS),
-                cache: 'no-store',
             });
 
             // Expired token: clear and retry once without burning a
@@ -184,6 +190,7 @@ export async function arcticGet<T>(
 
             return schema.parse(json);
         } catch (error) {
+            unstable_rethrow(error);
             // Zod mismatches and explicit Arctic errors are not transient —
             // rethrow instead of hammering the API.
             if (error instanceof ArcticError || error instanceof z.ZodError) {
