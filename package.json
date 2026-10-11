@@ -21,14 +21,14 @@
         "@portabletext/react": "^6.2.0",
         "@sanity/client": "^7.26.2",
         "@sanity/image-url": "^2.1.1",
-        "@sanity/vision": "^5.31.1",
+        "@sanity/vision": "^6.18.0",
         "maplibre-gl": "^6.6.0",
         "next": "16.3.8",
-        "next-sanity": "^13.3.1",
-        "react": "19.2.3",
-        "react-dom": "19.2.3",
+        "next-sanity": "^13.3.4",
+        "react": "19.2.8",
+        "react-dom": "19.2.8",
         "react-map-gl": "^8.1.2",
-        "sanity": "^5.31.1",
+        "sanity": "^6.18.0",
         "zod": "^4.4.3"
     },
     "devDependencies": {
@@ -63,7 +63,13 @@
             "js-yaml@4": "^4.3.2",
             "adm-zip": ">=0.6.1",
             "undici@6": "^6.28.1",
-            "undici@7": "^7.29.1"
+            "undici@7": "^7.29.1",
+            "brace-expansion@1": "^1.1.21",
+            "brace-expansion@2": "^2.1.7",
+            "brace-expansion@5": "^5.0.12",
+            "dompurify@3": "^3.4.16",
+            "smol-toml@1": "^1.9.1",
+            "source-map-js@1": "^1.2.2"
         }
     },
     "lint-staged": {
