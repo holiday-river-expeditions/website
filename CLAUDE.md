@@ -31,6 +31,14 @@
 - Use Zod for runtime validation at API boundaries
 - Tailwind for all styling — no CSS modules or styled-components
 
+## Site copy
+
+Holiday doesn't want AI-written copy on their site, and Darius doesn't want copy that reads as AI. This applies to every word a visitor or a Holiday editor sees: Sanity content, seed and import scripts, hardcoded strings in components, alt text, metadata and placeholders.
+
+- Never write, paraphrase or tidy marketing or trip copy. Copy existing old-site text word for word, or leave a placeholder for Holiday to write.
+- Placeholders read `[Holiday to write: <what goes here>]`, so editors can find them by searching the Studio for "Holiday to write".
+- In UI strings you do write (labels, buttons, errors), use no em or en dashes and no semicolons, and avoid AI phrasing. Write short, plain sentences.
+
 ## Commands
 
 - `pnpm dev` — start dev server
