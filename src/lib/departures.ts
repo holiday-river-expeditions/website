@@ -194,6 +194,36 @@ export function detectVariants(
     return variants.sort((a, b) => a.label.localeCompare(b.label));
 }
 
+/**
+ * Short length label per trip type ("3-Day"), for row tags and the /book
+ * card header. Multi-type lists use detectVariants (which handles duration
+ * collisions); a single-type list gets its one duration label.
+ */
+export function variantLabelMap(
+    departures: ArcticDeparture[],
+    tripTypes?: Pick<ArcticTripType, 'id' | 'name' | 'orname' | 'duration'>[],
+): Map<number, string> {
+    const variants = detectVariants(departures, tripTypes);
+    if (variants.length > 0) {
+        return new Map(variants.map((v) => [v.triptypeid, v.label]));
+    }
+    const first = departures.find((d) => d.triptypeid);
+    const days = durationToDays(first?.duration);
+    return first?.triptypeid && days
+        ? new Map([[first.triptypeid, `${days}-Day`]])
+        : new Map();
+}
+
+/** Distinct labels from variantLabelMap, shortest trip first. */
+export function sortedVariantLabels(
+    labels: ReadonlyMap<number, string>,
+): string[] {
+    const days = (label: string) => Number.parseInt(label, 10) || Infinity;
+    return [...new Set(labels.values())].sort(
+        (a, b) => days(a) - days(b) || a.localeCompare(b),
+    );
+}
+
 export interface DepartureCallout {
     /** Short badge text, e.g. "With The Pickpockets". */
     label: string;

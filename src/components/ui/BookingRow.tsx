@@ -157,7 +157,7 @@ export function BookingRow({
     return (
         <>
             {dateSlot}
-            <div className='flex flex-wrap items-center gap-4 justify-self-start sm:justify-self-end'>
+            <div className='flex flex-wrap items-center justify-end gap-x-4 gap-y-2 justify-self-end'>
                 {badgeSlot}
                 <button
                     type='button'
@@ -170,7 +170,7 @@ export function BookingRow({
                     Book
                 </button>
             </div>
-            {expanded && <div className='sm:col-span-2'>{renderPanel()}</div>}
+            {expanded && <div className='col-span-2'>{renderPanel()}</div>}
         </>
     );
 

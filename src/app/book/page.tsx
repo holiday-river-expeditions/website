@@ -1,12 +1,8 @@
 import type { Metadata } from 'next';
-import Image from 'next/image';
 import Link from 'next/link';
+import { BookFilterPanel } from '@/components/ui/BookFilterPanel';
+import { BookTripCard } from '@/components/ui/BookTripCard';
 import { Button } from '@/components/ui/Button';
-import { DepartureList } from '@/components/ui/DepartureList';
-import {
-    DepartureFilterBar,
-    type FilterBarTrip,
-} from '@/components/ui/DepartureFilterBar';
 import { Section } from '@/components/ui/Section';
 import {
     type ArcticDeparture,
@@ -14,16 +10,26 @@ import {
     getBookableTripTypes,
 } from '@/lib/arctic';
 import {
+    type BookFilterOption,
+    type BookFilters,
+    bookHref,
+    departureLength,
+    facetCounts,
+    filterGroups,
+    isPlaceholderCopy,
+    LENGTH_OPTIONS,
+    parseBookFilters,
+    tripParam,
+} from '@/lib/book-filters';
+import {
     buildCalloutMap,
     cleanTypeName,
     type DepartureCalloutMap,
-    filterByMonth,
-    formatDateRange,
     formatDayLabel,
     groupAnchor,
     monthOptions,
-    nextAvailable,
-    parseMonthParam,
+    sortedVariantLabels,
+    variantLabelMap,
 } from '@/lib/departures';
 import { getAllTrips, imageUrl } from '@/lib/sanity';
 
@@ -37,12 +43,14 @@ export const metadata: Metadata = {
     alternates: { canonical: '/book' },
 };
 
-/** Compact identity for a Sanity-authored trip, shown at the group header
-    so bookers recognize what they're booking (recognition over recall). */
+/** Compact identity for a Sanity-authored trip, shown on its card so
+    bookers recognize what they're booking (recognition over recall). */
 interface TripSummary {
+    /** 16:9 crop for the photo on top of the card (below lg). */
     imageSrc: string;
+    /** 4:5 crop for the full-height panel beside the dates (lg up). */
+    panelImageSrc: string;
     startingPrice: string | null;
-    durationLabel: string | null;
     tagline: string | null;
 }
 
@@ -56,12 +64,86 @@ interface TripGroup {
     /** Present only for Sanity-mapped trips; unmapped Arctic types render
         name-only until they're authored (content phase). */
     summary?: TripSummary | null;
+    /** Length label per Arctic trip type, from the unfiltered list so tags
+        stay put while filters change. */
+    variantLabels: Map<number, string>;
+}
+
+const phoneLink = (
+    <a
+        href='tel:+18012662087'
+        className='font-bold text-holiday-red transition-opacity hover:opacity-70'
+    >
+        801-266-2087
+    </a>
+);
+
+function plural(count: number, word: string): string {
+    return `${count} ${word}${count === 1 ? '' : 's'}`;
+}
+
+/** Result count plus the active filters as removable chips (NN/g: show
+    applied filters above the results). */
+function ResultsSummary({
+    filters,
+    dates,
+    trips,
+    labels,
+}: {
+    filters: BookFilters;
+    dates: number;
+    trips: number;
+    labels: Partial<Record<keyof BookFilters, string>>;
+}) {
+    const active = (['month', 'days', 'trip'] as const).filter(
+        (facet) => filters[facet] !== null,
+    );
+    return (
+        <div className='flex flex-wrap items-center gap-x-4 gap-y-3'>
+            <p
+                aria-live='polite'
+                className='font-alt-gothic text-[17px] font-semibold uppercase tracking-[0.04em] text-onyx'
+            >
+                {plural(dates, 'date')} on {plural(trips, 'trip')}
+            </p>
+            {active.length > 0 && (
+                <ul className='flex flex-wrap items-center gap-2'>
+                    {active.map((facet) => (
+                        <li key={facet}>
+                            <Link
+                                href={bookHref({ ...filters, [facet]: null })}
+                                className='inline-flex items-center gap-2 bg-onyx/8 px-3 py-1.5 text-[14px] font-bold text-onyx transition-colors hover:bg-onyx/15'
+                            >
+                                {labels[facet] ?? filters[facet]}
+                                <span aria-hidden>×</span>
+                                <span className='sr-only'>(remove filter)</span>
+                            </Link>
+                        </li>
+                    ))}
+                    {active.length > 1 && (
+                        <li>
+                            <Link
+                                href='/book'
+                                className='px-1 text-[14px] font-bold text-holiday-red underline transition-opacity hover:opacity-70'
+                            >
+                                Clear all
+                            </Link>
+                        </li>
+                    )}
+                </ul>
+            )}
+        </div>
+    );
 }
 
 export default async function BookPage({
     searchParams,
 }: {
-    searchParams: Promise<{ month?: string | string[] }>;
+    searchParams: Promise<{
+        month?: string | string[];
+        days?: string | string[];
+        trip?: string | string[];
+    }>;
 }) {
     const [departures, tripTypes, sanityTrips, params] = await Promise.all([
         getAllUpcomingDepartures(),
@@ -69,7 +151,7 @@ export default async function BookPage({
         getAllTrips(),
         searchParams,
     ]);
-    const activeMonth = parseMonthParam(params.month);
+    const filters = parseBookFilters(params);
 
     let groups: TripGroup[] | null = null;
     if (departures !== null && tripTypes !== null) {
@@ -94,10 +176,13 @@ export default async function BookPage({
             // Built once per trip and shared across its trip-type ids.
             const callouts = buildCalloutMap(trip.specialtyDepartures);
             const summary: TripSummary = {
-                imageSrc: imageUrl(trip.image, 320, 320),
+                // One crop per frame shape, so Sanity's hotspot picks the
+                // framing. Several trip photos are 2250x600 banners, and a
+                // single landscape crop stretched up to a tall panel blurs.
+                imageSrc: imageUrl(trip.image, 1200, 675),
+                panelImageSrc: imageUrl(trip.image, 720, 900),
                 startingPrice: trip.startingPrice,
-                durationLabel: trip.durationLabel,
-                tagline: trip.tagline,
+                tagline: isPlaceholderCopy(trip.tagline) ? null : trip.tagline,
             };
             for (const raw of trip.arcticTripId.split(',')) {
                 const id = Number(raw.trim());
@@ -140,63 +225,104 @@ export default async function BookPage({
                     departures: [],
                     callouts: sanityTrip?.callouts,
                     summary: sanityTrip?.summary ?? null,
+                    variantLabels: new Map(),
                 };
                 byGroup.set(key, group);
             }
             group.departures.push(departure);
         }
 
-        groups = [...byGroup.values()].sort((a, b) =>
-            (a.departures[0]?.start ?? '').localeCompare(
-                b.departures[0]?.start ?? '',
-            ),
-        );
+        groups = [...byGroup.values()]
+            .map((group) => ({
+                ...group,
+                variantLabels: variantLabelMap(group.departures, tripTypes),
+            }))
+            .sort((a, b) =>
+                (a.departures[0]?.start ?? '').localeCompare(
+                    b.departures[0]?.start ?? '',
+                ),
+            );
     }
 
-    // Filter-bar data comes from the UNfiltered groups so the month chips
-    // and trip jumper stay stable while a filter is active.
-    const months = groups
-        ? monthOptions(groups.flatMap((group) => group.departures)).map(
-              (month) => ({
-                  ...month,
-                  count: groups!.reduce(
-                      (sum, group) =>
-                          sum +
-                          filterByMonth(group.departures, month.value).length,
-                      0,
-                  ),
-              }),
-          )
-        : [];
-    const visibleGroups =
-        groups === null || activeMonth === null
-            ? groups
-            : groups
-                  .map((group) => ({
-                      ...group,
-                      departures: filterByMonth(group.departures, activeMonth),
-                  }))
-                  .filter((group) => group.departures.length > 0);
+    const allGroups = groups ?? [];
+    const visibleGroups = filterGroups(allGroups, filters);
+    const visibleDates = visibleGroups.reduce(
+        (sum, group) => sum + group.departures.length,
+        0,
+    );
 
-    // The jumper offers only groups actually on the page — under a month
-    // filter, absent groups have no anchor to jump to.
+    // Filter options come from the UNfiltered list so they stay put while
+    // a filter is active. Counts apply the other two filters.
+    const allDepartures = allGroups.flatMap((group) => group.departures);
+    const monthChoices = monthOptions(allDepartures);
+    const monthCounts = facetCounts(
+        allGroups,
+        filters,
+        'month',
+        monthChoices.map((month) => month.value),
+    );
+    const months: BookFilterOption[] = monthChoices.map((month) => ({
+        ...month,
+        count: monthCounts.get(month.value) ?? 0,
+    }));
+
+    const presentLengths = new Set(allDepartures.map(departureLength));
+    const lengthChoices = LENGTH_OPTIONS.filter((option) =>
+        presentLengths.has(option.value),
+    );
+    const lengthCounts = facetCounts(
+        allGroups,
+        filters,
+        'days',
+        lengthChoices.map((option) => option.value),
+    );
+    const lengths: BookFilterOption[] = lengthChoices.map((option) => ({
+        value: option.value,
+        label: option.label,
+        count: lengthCounts.get(option.value) ?? 0,
+    }));
+
+    // Unmapped Arctic types can share a display name; the first date tells
+    // them apart in the select.
     const titleCounts = new Map<string, number>();
-    for (const group of visibleGroups ?? []) {
+    for (const group of allGroups) {
         titleCounts.set(group.title, (titleCounts.get(group.title) ?? 0) + 1);
     }
-    const jumpTrips: FilterBarTrip[] = (visibleGroups ?? []).map((group) => {
-        const next = nextAvailable(group.departures);
-        // Unmapped Arctic types can share a display name; the next date
-        // tells them apart in the jumper.
-        const ambiguous = (titleCounts.get(group.title) ?? 0) > 1;
-        return {
-            id: groupAnchor(group.key),
-            label:
-                ambiguous && next
-                    ? `${group.title} · ${formatDayLabel(next.start)}`
-                    : group.title,
-        };
-    });
+    const tripCounts = facetCounts(
+        allGroups,
+        filters,
+        'trip',
+        allGroups.map((group) => tripParam(group.key)),
+    );
+    const trips: BookFilterOption[] = allGroups
+        .map((group) => {
+            const first = group.departures[0];
+            const ambiguous = (titleCounts.get(group.title) ?? 0) > 1;
+            return {
+                value: tripParam(group.key),
+                label:
+                    ambiguous && first
+                        ? `${group.title} · ${formatDayLabel(first.start)}`
+                        : group.title,
+                count: tripCounts.get(tripParam(group.key)) ?? 0,
+            };
+        })
+        .sort((a, b) => a.label.localeCompare(b.label));
+
+    const activeLabels: Partial<Record<keyof BookFilters, string>> = {
+        month: months.find((m) => m.value === filters.month)?.label,
+        days: lengths.find((l) => l.value === filters.days)?.label,
+        trip: trips.find((t) => t.value === filters.trip)?.label,
+    };
+    const activeCount = Object.values(filters).filter(Boolean).length;
+    const panel = (
+        <BookFilterPanel
+            filters={filters}
+            months={months}
+            lengths={lengths}
+            trips={trips}
+        />
+    );
 
     return (
         <>
@@ -210,14 +336,8 @@ export default async function BookPage({
                     up fast.
                 </p>
                 <p className='mt-3 max-w-2xl text-body leading-body text-onyx'>
-                    Rather book with a human? Call{' '}
-                    <a
-                        href='tel:+18012662087'
-                        className='font-bold text-holiday-red transition-opacity hover:opacity-70'
-                    >
-                        801-266-2087
-                    </a>
-                    , Monday&ndash;Friday, 8am&ndash;5pm Mountain Time.
+                    Rather book with a human? Call {phoneLink},
+                    Monday&ndash;Friday, 8am&ndash;5pm Mountain Time.
                 </p>
             </Section>
 
@@ -225,164 +345,108 @@ export default async function BookPage({
                 {groups === null ? (
                     <p className='max-w-2xl text-body leading-body text-onyx'>
                         Live availability is momentarily unavailable. Call{' '}
-                        <a
-                            href='tel:+18012662087'
-                            className='font-bold text-holiday-red transition-opacity hover:opacity-70'
-                        >
-                            801-266-2087
-                        </a>{' '}
-                        and we&rsquo;ll find you a seat.
+                        {phoneLink} and we&rsquo;ll find you a seat.
                     </p>
-                ) : visibleGroups!.length === 0 ? (
-                    activeMonth !== null && groups.length > 0 ? (
-                        <p className='max-w-2xl text-body leading-body text-onyx'>
-                            No departures in that month.{' '}
-                            <Link
-                                href='/book'
-                                className='font-bold text-holiday-red underline'
-                            >
-                                See all dates
-                            </Link>
-                            .
-                        </p>
-                    ) : (
-                        <p className='max-w-2xl text-body leading-body text-onyx'>
-                            Nothing is listed online right now. Call{' '}
-                            <a
-                                href='tel:+18012662087'
-                                className='font-bold text-holiday-red transition-opacity hover:opacity-70'
-                            >
-                                801-266-2087
-                            </a>{' '}
-                            to ask about upcoming dates.
-                        </p>
-                    )
+                ) : groups.length === 0 ? (
+                    <p className='max-w-2xl text-body leading-body text-onyx'>
+                        Nothing is listed online right now. Call {phoneLink} to
+                        ask about upcoming dates.
+                    </p>
                 ) : (
-                    <div className='max-w-4xl space-y-14'>
-                        {visibleGroups!.map((group) => {
-                            const next = nextAvailable(group.departures);
-                            return (
-                                <div
-                                    key={group.key}
-                                    id={groupAnchor(group.key)}
-                                    className='scroll-mt-6 [[data-demo-sticky-header=on]_&]:scroll-mt-28'
-                                    data-availability
-                                >
-                                    {/* Group header: for authored trips a
-                                        compact identity card (photo, price,
-                                        duration, tagline, details link) so
-                                        bookers recognize what they're
-                                        booking; name-only otherwise. */}
-                                    <div className='flex items-start gap-5'>
-                                        {group.summary?.imageSrc &&
-                                            group.href && (
-                                                <Link
-                                                    href={group.href}
-                                                    tabIndex={-1}
-                                                    aria-hidden
-                                                    className='relative hidden h-24 w-24 shrink-0 overflow-hidden bg-holiday-grey/15 sm:block'
-                                                >
-                                                    <Image
-                                                        src={
-                                                            group.summary
-                                                                .imageSrc
-                                                        }
-                                                        alt=''
-                                                        fill
-                                                        className='object-cover'
-                                                        sizes='96px'
-                                                    />
-                                                </Link>
-                                            )}
-                                        <div className='min-w-0'>
-                                            <div className='flex flex-wrap items-center gap-x-5 gap-y-2'>
-                                                <h2 className='font-alt-gothic text-section font-black uppercase text-onyx'>
-                                                    {group.href ? (
-                                                        <Link
-                                                            href={group.href}
-                                                            className='transition-opacity hover:opacity-70'
-                                                        >
-                                                            {group.title}
-                                                        </Link>
-                                                    ) : (
-                                                        group.title
-                                                    )}
-                                                </h2>
-                                                {next && (
-                                                    <span className='inline-block bg-teal px-3.5 py-1.5 text-[14px] font-bold leading-tight text-holiday-white'>
-                                                        Next:{' '}
-                                                        {formatDateRange(
-                                                            next.start,
-                                                            next.duration,
-                                                        )}
-                                                    </span>
-                                                )}
-                                            </div>
-                                            {group.summary?.tagline && (
-                                                <p className='mt-1.5 max-w-prose text-body leading-body text-onyx'>
-                                                    {group.summary.tagline}
-                                                </p>
-                                            )}
-                                            {group.summary && (
-                                                <p className='mt-1.5 font-alt-gothic text-[15px] font-semibold uppercase tracking-[0.04em] text-onyx/75'>
-                                                    {[
-                                                        group.summary
-                                                            .startingPrice &&
-                                                            `Starts at ${group.summary.startingPrice}`,
-                                                        group.summary
-                                                            .durationLabel,
-                                                    ]
-                                                        .filter(Boolean)
-                                                        .join(' · ')}
-                                                    {group.href && (
-                                                        <>
-                                                            {' · '}
-                                                            <Link
-                                                                href={
-                                                                    group.href
-                                                                }
-                                                                className='text-holiday-red underline transition-opacity hover:opacity-70'
-                                                            >
-                                                                Trip details
-                                                            </Link>
-                                                        </>
-                                                    )}
-                                                </p>
-                                            )}
-                                        </div>
-                                    </div>
-                                    <div className='mt-5'>
-                                        <DepartureList
-                                            departures={group.departures}
-                                            callouts={group.callouts}
-                                            showTripName={group.departures.some(
-                                                (d) =>
-                                                    d.triptypeid !==
-                                                    group.departures[0]
-                                                        ?.triptypeid,
-                                            )}
-                                        />
-                                    </div>
+                    <div className='lg:grid lg:grid-cols-[220px_minmax(0,1fr)] lg:gap-10 xl:gap-12'>
+                        {/* Desktop: filters stay in view while 200+ dates
+                            scroll past. */}
+                        <aside
+                            aria-label='Filter dates'
+                            className='hidden lg:sticky lg:top-6 lg:block lg:max-h-[calc(100vh-3rem)] lg:self-start lg:overflow-y-auto [[data-demo-sticky-header=on]_&]:lg:top-28 [[data-demo-sticky-header=on]_&]:lg:max-h-[calc(100vh-8rem)]'
+                        >
+                            {panel}
+                        </aside>
+
+                        <div className='min-w-0'>
+                            {/* Smaller screens: the same filters behind one
+                                button, so the dates start near the top. */}
+                            <details className='group mb-5 border border-onyx/25 lg:hidden'>
+                                <summary className='flex cursor-pointer list-none items-center justify-between px-4 py-3 font-alt-gothic text-[17px] font-semibold uppercase tracking-[0.04em] text-onyx [&::-webkit-details-marker]:hidden'>
+                                    <span>
+                                        Filters
+                                        {activeCount > 0 && ` (${activeCount})`}
+                                    </span>
+                                    <span
+                                        aria-hidden
+                                        className='transition-transform group-open:rotate-180'
+                                    >
+                                        ↓
+                                    </span>
+                                </summary>
+                                <div className='border-t border-onyx/15 px-4 pb-5 pt-4'>
+                                    {panel}
                                 </div>
-                            );
-                        })}
+                            </details>
+
+                            <ResultsSummary
+                                filters={filters}
+                                dates={visibleDates}
+                                trips={visibleGroups.length}
+                                labels={activeLabels}
+                            />
+
+                            {visibleGroups.length === 0 ? (
+                                <p className='mt-6 max-w-2xl text-body leading-body text-onyx'>
+                                    No dates match these filters.{' '}
+                                    <Link
+                                        href='/book'
+                                        className='font-bold text-holiday-red underline'
+                                    >
+                                        See all dates
+                                    </Link>
+                                    .
+                                </p>
+                            ) : (
+                                <div className='mt-6 space-y-8'>
+                                    {visibleGroups.map((group, index) => (
+                                        <BookTripCard
+                                            key={group.key}
+                                            id={groupAnchor(group.key)}
+                                            title={group.title}
+                                            href={group.href}
+                                            imageSrc={
+                                                group.summary?.imageSrc || null
+                                            }
+                                            panelImageSrc={
+                                                group.summary?.panelImageSrc ||
+                                                null
+                                            }
+                                            startingPrice={
+                                                group.summary?.startingPrice ??
+                                                null
+                                            }
+                                            tagline={
+                                                group.summary?.tagline ?? null
+                                            }
+                                            lengthLabels={sortedVariantLabels(
+                                                group.variantLabels,
+                                            )}
+                                            departures={group.departures}
+                                            variantLabels={group.variantLabels}
+                                            callouts={group.callouts}
+                                            showAll={filters.trip !== null}
+                                            showAllHref={bookHref({
+                                                ...filters,
+                                                trip: tripParam(group.key),
+                                            })}
+                                            preloadImage={index === 0}
+                                        />
+                                    ))}
+                                </div>
+                            )}
+                        </div>
                     </div>
                 )}
             </Section>
 
-            {/* Floating filter bar, driven by whatever Arctic returned:
-                month chips filter server-side via ?month=, the select jumps
-                to a trip group. */}
-            {groups !== null && groups.length > 0 && (
-                <DepartureFilterBar
-                    months={months}
-                    activeMonth={activeMonth}
-                    trips={jumpTrips}
-                />
-            )}
-
-            {/* The Book Now CTA lands here now, so give browsers who don't
-                see their date a path into the full catalog. */}
+            {/* The Book Now CTA lands here, so give browsers who don't see
+                their date a path into the full catalog. */}
             <Section background='white' className='pb-20 md:pb-24'>
                 <div className='max-w-2xl border-t border-holiday-grey/30 pt-10'>
                     <h2 className='font-alt-gothic text-section font-black uppercase text-onyx'>
@@ -399,10 +463,6 @@ export default async function BookPage({
                     </div>
                 </div>
             </Section>
-
-            {/* Clearance so the floating filter bar never permanently
-                occludes the last row of content. */}
-            <div aria-hidden className='h-16' />
         </>
     );
 }

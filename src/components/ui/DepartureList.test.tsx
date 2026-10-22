@@ -93,3 +93,56 @@ test('a callout does not displace the seats badge', () => {
     expect(screen.getByText('New Moon')).toBeVisible();
     expect(row.textContent).toContain('3 seats left');
 });
+
+test('shows a seats badge only when seats are low', () => {
+    const { container } = render(
+        <DepartureList
+            departures={[
+                departure({ id: 1, start: '2026-09-12', remainingopenings: 6 }),
+                departure({ id: 2, start: '2026-09-19', remainingopenings: 7 }),
+            ]}
+        />,
+    );
+
+    expect(rowFor(container, 'Sep 12').textContent).toContain('6 seats left');
+    expect(rowFor(container, 'Sep 19').textContent).not.toContain('seats');
+});
+
+test('a variant label replaces the trip name on the row', () => {
+    const { container } = render(
+        <DepartureList
+            departures={[departure()]}
+            showTripName
+            variantLabels={new Map([[37, '5-Day']])}
+        />,
+    );
+
+    const row = rowFor(container, 'Sep 12');
+    expect(within(row).getByText('5-Day')).toBeVisible();
+    expect(row.textContent).not.toContain('Desolation Canyon');
+});
+
+test('a compact flat list hides extra rows below lg behind a link', () => {
+    const departures = Array.from({ length: 6 }, (_, i) =>
+        departure({ id: i + 1, start: `2026-09-${String(i + 10)}` }),
+    );
+    const { container } = render(
+        <DepartureList
+            departures={departures}
+            groupByMonth={false}
+            compactRows={4}
+            showAllHref='/book?trip=desolation-canyon'
+        />,
+    );
+
+    expect(container.querySelector('h3')).toBeNull();
+    // Every row stays in the DOM so lg can show them all.
+    const rows = container.querySelectorAll('li');
+    expect(rows).toHaveLength(6);
+    expect(
+        [...rows].map((row) => row.classList.contains('max-lg:hidden')),
+    ).toEqual([false, false, false, false, true, true]);
+    expect(
+        screen.getByRole('link', { name: /Show all 6 dates/ }),
+    ).toHaveAttribute('href', '/book?trip=desolation-canyon');
+});
