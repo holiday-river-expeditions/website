@@ -1,3 +1,4 @@
+import { parseArcticIds } from '@/lib/departures';
 import { getTripPricingLevels } from './booking';
 import { getUpcomingDepartures } from './trips';
 import type { ArcticPricingLevel } from './types';
@@ -35,14 +36,6 @@ async function isRunning(id: number): Promise<boolean> {
     return running;
 }
 
-function parseIds(raw: string | null | undefined): number[] {
-    if (!raw) return [];
-    return raw
-        .split(',')
-        .map((part) => Number(part.trim()))
-        .filter((id) => Number.isInteger(id) && id > 0);
-}
-
 /** Full adult fare for one trip type's pricing levels, or null. */
 export function fullFare(levels: ArcticPricingLevel[]): number | null {
     const priced = levels.filter(
@@ -62,12 +55,21 @@ export function formatPrice(amount: number): string {
     return `$${amount.toLocaleString('en-US', { maximumFractionDigits: 0 })}`;
 }
 
+/** One trip type's full fare, formatted, or null. Prices a single departure. */
+export async function getTripTypeFare(
+    triptypeid: number,
+): Promise<string | null> {
+    const levels = await getTripPricingLevels(triptypeid);
+    const fare = levels ? fullFare(levels) : null;
+    return fare === null ? null : formatPrice(fare);
+}
+
 /** Lowest full fare across a trip's running Arctic trip types, formatted, or null. */
 export async function getStartingPrice(
     arcticTripId: string | null | undefined,
 ): Promise<string | null> {
     const types = await Promise.all(
-        parseIds(arcticTripId).map(async (id) => {
+        parseArcticIds(arcticTripId).map(async (id) => {
             const [levels, running] = await Promise.all([
                 getTripPricingLevels(id),
                 isRunning(id),

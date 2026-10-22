@@ -146,3 +146,24 @@ test('a compact flat list hides extra rows below lg behind a link', () => {
         screen.getByRole('link', { name: /Show all 6 dates/ }),
     ).toHaveAttribute('href', '/book?trip=desolation-canyon');
 });
+
+test('gives the first row on a specialty date its anchor id', () => {
+    const callouts = buildCalloutMap([
+        { startDate: '2026-09-12', label: 'With The Pickpockets' },
+    ]);
+    const { container } = render(
+        <DepartureList
+            departures={[
+                departure({ id: 1, start: '2026-09-12', triptypeid: 37 }),
+                // A second variant starting the same day: no duplicate id.
+                departure({ id: 2, start: '2026-09-12', triptypeid: 38 }),
+                departure({ id: 3, start: '2026-09-20' }),
+            ]}
+            callouts={callouts}
+        />,
+    );
+    const anchored = container.querySelectorAll('#departure-2026-09-12');
+    expect(anchored).toHaveLength(1);
+    expect(anchored[0].getAttribute('data-triptype')).toBe('37');
+    expect(container.querySelectorAll('li[id]')).toHaveLength(1);
+});

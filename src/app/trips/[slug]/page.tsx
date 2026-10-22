@@ -25,13 +25,18 @@ import {
 import { RiverFlow } from '@/components/ui/RiverFlow';
 import { Section } from '@/components/ui/Section';
 import { SectionNav } from '@/components/ui/SectionNav';
+import { SpecialtyDatesCallout } from '@/components/ui/SpecialtyDatesCallout';
 import type { TripMapPoint } from '@/components/ui/TripMap';
 import { TripBar } from '@/components/ui/TripBar';
 import { TripMapSection } from '@/components/ui/TripMapSection';
 import { WhatsIncluded } from '@/components/ui/WhatsIncluded';
-import { getUpcomingDepartures } from '@/lib/arctic';
+import { getUpcomingDepartures, todayISO } from '@/lib/arctic';
 import { contactPhone } from '@/lib/contact-defaults';
-import { formatDateRange, openDepartures } from '@/lib/departures';
+import {
+    formatDateRange,
+    openDepartures,
+    upcomingSpecialtyDates,
+} from '@/lib/departures';
 import { stretchBySlug } from '@/lib/map-style';
 import { getSiteSettings, getTripBySlug, imageUrl } from '@/lib/sanity';
 import { openGraphFor } from '@/lib/seo';
@@ -332,6 +337,15 @@ export default async function TripPage({ params }: TripPageProps) {
                         ))}
                     </p>
                 )}
+
+                {/* Specialty dates otherwise only show as badges in Dates &
+                    Availability, the last section on the page. */}
+                <SpecialtyDatesCallout
+                    dates={upcomingSpecialtyDates(
+                        trip.specialtyDepartures,
+                        todayISO(),
+                    )}
+                />
 
                 {/* Description + highlights */}
                 <div className='mt-12 grid gap-12 md:grid-cols-[1.6fr_1fr]'>

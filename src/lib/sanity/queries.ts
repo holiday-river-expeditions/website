@@ -194,8 +194,23 @@ export const allSpecialtyTypesQuery = defineQuery(`
     description,
     image,
     ribbonLabel,
-    "trips": *[_type == "trip" && references(^._id)] | order(name asc) {
+    "trips": *[_type == "trip" && ^._id in specialtyTypes[]._ref] | order(name asc) {
       ${TRIP_CARD}
+    },
+    "datedTrips": *[_type == "trip" && ^._id in specialtyDepartures[].specialtyType._ref] {
+      _id,
+      name,
+      slug,
+      startingPrice,
+      arcticTripId,
+      "image": photos[0],
+      "entries": specialtyDepartures[specialtyType._ref == ^.^._id]{
+        _key,
+        startDate,
+        label,
+        note,
+        image
+      }
     }
   }
 `);

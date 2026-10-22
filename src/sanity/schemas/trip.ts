@@ -563,9 +563,28 @@ export const trip = defineType({
                             description:
                                 'Optional extra line shown under the date on this departure only.',
                         }),
+                        defineField({
+                            name: 'image',
+                            title: 'Photo',
+                            type: 'image',
+                            options: { hotspot: true },
+                            description:
+                                'Optional thumbnail for this date on /specialty, such as the band or a night sky. Leave empty to use this trip’s first photo.',
+                            fields: [
+                                defineField({
+                                    name: 'alt',
+                                    title: 'Alt Text',
+                                    type: 'string',
+                                }),
+                            ],
+                        }),
                     ],
                     preview: {
-                        select: { title: 'label', subtitle: 'startDate' },
+                        select: {
+                            title: 'label',
+                            subtitle: 'startDate',
+                            media: 'image',
+                        },
                     },
                 },
             ],
