@@ -5,40 +5,13 @@ import { Logo } from '@/components/ui/Logo';
 import { NewsletterSignup } from '@/components/ui/NewsletterSignup';
 import { contactPhone } from '@/lib/contact-defaults';
 import { getSiteSettings } from '@/lib/sanity';
-
-// Fallbacks if the Site Settings singleton hasn't been seeded/edited yet.
-// Phone and email live in lib/contact-defaults so every page agrees.
-const defaults = {
-    address: '544 East 3900 South\nSalt Lake City, Utah 84107',
-    socialLinks: {
-        instagram: 'https://www.instagram.com/holidayriverexpeditions',
-        facebook: 'https://www.facebook.com/HolidayRiverExpeditions',
-        youtube: 'https://www.youtube.com/@holidayriverexpeditions',
-    },
-};
-
-const resourceLinks = [
-    { label: 'Trip Dates', href: '/book' },
-    { label: 'F.A.Q.', href: '/faq' },
-    { label: 'Trip Insurance', href: '/trip-insurance' },
-    {
-        label: 'Online Store',
-        href: 'https://holiday-river-expeditions.square.site/',
-        external: true,
-    },
-] as const;
+import { followLinks, footerDefaults, resourceLinks } from './footer-links';
 
 export async function Footer() {
     const settings = await getSiteSettings();
     const phone = contactPhone(settings);
-    const address = settings?.address ?? defaults.address;
-    const social = { ...defaults.socialLinks, ...settings?.socialLinks };
-    const followLinks = [
-        { label: 'Instagram', href: social.instagram },
-        { label: 'Facebook', href: social.facebook },
-        { label: 'YouTube', href: social.youtube },
-        ...(social.tiktok ? [{ label: 'TikTok', href: social.tiktok }] : []),
-    ].filter((link) => Boolean(link.href));
+    const address = settings?.address ?? footerDefaults.address;
+    const follow = followLinks(settings?.socialLinks);
 
     return (
         <footer className='bg-[#F3F0EB] text-onyx'>
@@ -50,7 +23,7 @@ export async function Footer() {
                     {/* Follow Us */}
                     <FooterColumn
                         title='Follow Us'
-                        items={followLinks.map((link) => ({
+                        items={follow.map((link) => ({
                             label: link.label,
                             href: link.href,
                             external: true,

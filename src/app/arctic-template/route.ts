@@ -16,30 +16,48 @@
  *  - fonts come from the Typekit kit (guz5fen) — the Arctic guest domain
  *    must be on the kit's allowed-domains list
  *
+ * Nav and footer links come from the same lists as the site's Header and
+ * Footer. The footer leaves out the newsletter signup (it needs a form and
+ * JavaScript). Arctic only picks up changes when someone re-runs Import
+ * Design in the Arctic admin.
+ *
  * Not for humans: noindexed via header and meta.
  */
 
+import {
+    footerDefaults,
+    followLinks,
+    resourceLinks,
+} from '@/components/layout/footer-links';
+import { navItems } from '@/components/layout/Nav';
+import { contactPhone } from '@/lib/contact-defaults';
+import { getSiteSettings } from '@/lib/sanity';
 import { getSiteUrl } from '@/lib/site-url';
 
 // Absolute on purpose: relative links would break on the clone.
 const SITE = getSiteUrl();
 
-const NAV = [
-    { label: 'Rafting', href: `${SITE}/rafting` },
-    { label: 'Biking', href: `${SITE}/biking` },
-    { label: 'Specialty', href: `${SITE}/specialty` },
-    { label: 'About Us', href: `${SITE}/about` },
-    { label: 'Blog', href: `${SITE}/blog` },
-];
+const absolute = (href: string) =>
+    href.startsWith('/') ? `${SITE}${href}` : href;
 
-const FOOTER_LINKS = [
-    { label: 'Trip Dates', href: `${SITE}/book` },
-    { label: 'F.A.Q.', href: `${SITE}/faq` },
-    { label: 'Trip Insurance', href: `${SITE}/trip-insurance` },
-    { label: 'Contact', href: `${SITE}/contact` },
-];
+// Studio values go into raw HTML, so escape them.
+const escapeHtml = (value: string) =>
+    value
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;');
 
-export function GET() {
+const linkItem = (label: string, href: string, external = false) =>
+    `<li><a href="${escapeHtml(absolute(href))}"${external ? ' target="_blank" rel="noopener noreferrer"' : ''}>${escapeHtml(label)}</a></li>`;
+
+export async function GET() {
+    // A Sanity outage shouldn't take the checkout chrome down with it.
+    const settings = await getSiteSettings().catch(() => null);
+    const phone = contactPhone(settings);
+    const address = settings?.address ?? footerDefaults.address;
+    const follow = followLinks(settings?.socialLinks);
+
     const html = `<!doctype html>
 <html lang="en">
 <head>
@@ -76,33 +94,32 @@ export function GET() {
   header.hre nav ul { display: flex; gap: 32px; list-style: none; }
   header.hre nav a {
     font-family: alternate-gothic-atf, Oswald, Arial, sans-serif;
-    text-transform: uppercase; font-size: 19px; font-weight: 500;
-    color: var(--red); text-decoration: none; letter-spacing: 0.02em;
+    text-transform: uppercase; font-size: 20px; font-weight: 500;
+    line-height: 1; color: var(--red); text-decoration: none;
   }
   header.hre nav a:hover { opacity: 0.7; }
-  header.hre .logo {
-    justify-self: center; display: inline-flex; align-items: center;
-    gap: 10px; text-decoration: none;
-  }
-  header.hre .logo img { height: 32px; width: auto; display: block; }
-  header.hre .logo .wordmark {
-    font-family: alternate-gothic-atf, Oswald, Arial, sans-serif;
-    text-transform: uppercase; font-weight: 900; font-size: 42px;
-    line-height: 1; letter-spacing: -0.01em; color: var(--red);
-    white-space: nowrap;
-  }
+  header.hre .logo { justify-self: center; display: block; }
+  header.hre .logo img { height: 48px; width: auto; display: block; }
   header.hre .cta { justify-self: end; }
   header.hre .cta a {
     display: inline-block; background: var(--red); color: var(--white);
     font-family: alternate-gothic-atf, Oswald, Arial, sans-serif;
     text-transform: uppercase; font-size: 19px; font-weight: 500;
-    line-height: 1; letter-spacing: 0.02em; text-decoration: none;
-    padding: 10px 24px; border-radius: 999px;
+    line-height: 1; letter-spacing: 0.025em; text-decoration: none;
+    padding: 8px 24px; border-radius: 999px;
   }
   header.hre .cta a:hover { background: #b90909; }
+  /* The site swaps the nav for a hamburger below 1024px. The template has
+     no JavaScript, so the nav just drops out and the logo and Book Now
+     spread to the edges. */
+  @media (max-width: 1023px) {
+    header.hre { display: flex; justify-content: space-between; }
+    header.hre nav { display: none; }
+  }
   @media (max-width: 767px) {
     header.hre { padding: 16px 24px; }
-    header.hre nav { display: none; }
+    header.hre .logo img { height: 32px; }
+    header.hre .cta a { font-size: 16px; padding: 6px 16px; }
   }
 
   .hre-title { padding: 40px 48px 8px; background: var(--white); }
@@ -121,42 +138,44 @@ export function GET() {
   }
 
   footer.hre { background: var(--cream); color: var(--onyx); }
-  footer.hre .inner {
-    max-width: 1280px; margin: 0 auto; padding: 48px 24px;
-    display: flex; flex-wrap: wrap; gap: 40px; align-items: flex-start;
-    justify-content: space-between;
+  footer.hre .inner { max-width: 1280px; margin: 0 auto; padding: 40px 24px 64px; }
+  footer.hre .columns {
+    display: grid; gap: 48px; grid-template-columns: repeat(3, 1fr);
   }
-  footer.hre .logo {
-    display: inline-flex; align-items: center; gap: 10px;
-    text-decoration: none;
+  @media (max-width: 767px) {
+    footer.hre .columns { grid-template-columns: 1fr; }
   }
-  footer.hre .logo img { height: 34px; width: auto; display: block; }
-  footer.hre .logo .wordmark {
-    font-family: alternate-gothic-atf, Oswald, Arial, sans-serif;
-    text-transform: uppercase; font-weight: 900; font-size: 45px;
-    line-height: 1; letter-spacing: -0.01em; color: var(--red);
-    white-space: nowrap;
-  }
-  footer.hre address {
-    font-style: normal; font-size: 12px; letter-spacing: 0.05em;
-    line-height: 1.7; margin-top: 16px;
-  }
-  footer.hre address a { color: var(--red); font-weight: 700; text-decoration: none; }
   footer.hre h2 {
     font-family: alternate-gothic-atf, Oswald, Arial, sans-serif;
     text-transform: uppercase; font-size: 16px; font-weight: 400;
     letter-spacing: 0.05em;
   }
-  footer.hre ul { list-style: none; margin-top: 16px; }
-  footer.hre ul li { margin-bottom: 8px; }
-  footer.hre ul a {
+  footer.hre ul, footer.hre .find {
+    list-style: none; margin-top: 16px;
+    display: flex; flex-direction: column; gap: 8px;
+  }
+  footer.hre ul a, footer.hre .find a {
     font-family: alternate-gothic-atf, Oswald, Arial, sans-serif;
     text-transform: uppercase; font-size: 16px; font-weight: 600;
     letter-spacing: 0.05em; color: var(--onyx); text-decoration: none;
     display: inline-block; padding: 4px 0;
   }
-  footer.hre ul a:hover { opacity: 0.7; }
-  footer.hre .badge img { height: 64px; width: auto; }
+  footer.hre ul a:hover, footer.hre .find a:hover { opacity: 0.7; }
+  footer.hre .find address, footer.hre .find .phone {
+    font-family: alternate-gothic-atf, Oswald, Arial, sans-serif;
+    text-transform: uppercase; font-style: normal; font-weight: 600;
+    font-size: 11px; letter-spacing: 0.1em; white-space: pre-line;
+  }
+  footer.hre .bottom {
+    margin-top: 64px; display: flex; align-items: flex-end;
+    justify-content: space-between; gap: 32px;
+  }
+  footer.hre .bottom .logo img { height: 64px; width: auto; display: block; }
+  footer.hre .bottom .badge { height: 80px; width: auto; }
+  @media (max-width: 767px) {
+    footer.hre .bottom .logo img { height: 52px; }
+    footer.hre .bottom .badge { height: 64px; }
+  }
 
   /* --- Arctic widget skin: restyle the reservation UI injected into
          {SITE-BODY} (tabs, forms, buttons ship with Arctic's default
@@ -251,11 +270,11 @@ export function GET() {
 <header class="hre">
   <nav aria-label="Main">
     <ul>
-      ${NAV.map((l) => `<li><a href="${l.href}">${l.label}</a></li>`).join('\n      ')}
+      ${navItems.map((l) => linkItem(l.label, l.href)).join('\n      ')}
     </ul>
   </nav>
   <a class="logo" href="${SITE}" aria-label="Holiday River Expeditions home">
-    <img src="${SITE}/logo-icon-red.svg" alt="" width="119" height="200"><span class="wordmark">Holiday River Expeditions</span>
+    <img src="${SITE}/logo-horizontal-red.svg" alt="" width="2000" height="798">
   </a>
   <div class="cta"><a href="${SITE}/book">Book Now</a></div>
 </header>
@@ -268,24 +287,33 @@ export function GET() {
 
 <footer class="hre">
   <div class="inner">
-    <div>
+    <div class="columns">
+      <div>
+        <h2>Follow Us</h2>
+        <ul>
+          ${follow.map((l) => linkItem(l.label, l.href, true)).join('\n          ')}
+        </ul>
+      </div>
+      <div>
+        <h2>Resources</h2>
+        <ul>
+          ${resourceLinks.map((l) => linkItem(l.label, l.href, 'external' in l && l.external)).join('\n          ')}
+        </ul>
+      </div>
+      <div>
+        <h2>Find Us</h2>
+        <div class="find">
+          <a href="${SITE}/contact">Contact</a>
+          <address>${escapeHtml(address)}</address>
+          <a class="phone" href="tel:+1${phone.replace(/\D/g, '')}">${escapeHtml(phone)}</a>
+        </div>
+      </div>
+    </div>
+    <div class="bottom">
       <a class="logo" href="${SITE}" aria-label="Holiday River Expeditions home">
-        <img src="${SITE}/logo-icon-red.svg" alt="" width="119" height="200"><span class="wordmark">Holiday River Expeditions</span>
+        <img src="${SITE}/logo-horizontal-red.svg" alt="" width="2000" height="798">
       </a>
-      <address>
-        544 East 3900 South<br>
-        Salt Lake City, Utah 84107<br>
-        <a href="tel:+18012662087">801-266-2087</a>
-      </address>
-    </div>
-    <div>
-      <h2>Resources</h2>
-      <ul>
-        ${FOOTER_LINKS.map((l) => `<li><a href="${l.href}">${l.label}</a></li>`).join('\n        ')}
-      </ul>
-    </div>
-    <div class="badge">
-      <img src="${SITE}/nps-authorized-concessioner.png" alt="National Park Service Authorized Concessioner" width="120" height="150">
+      <img class="badge" src="${SITE}/nps-authorized-concessioner.png" alt="National Park Service Authorized Concessioner" width="120" height="150">
     </div>
   </div>
 </footer>
