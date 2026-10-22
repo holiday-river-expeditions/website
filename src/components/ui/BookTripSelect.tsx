@@ -39,36 +39,52 @@ export function BookTripSelect({
             <label htmlFor={selectId} className={labelClassName}>
                 Trip
             </label>
-            <select
-                id={selectId}
-                // Keyed on the filter state so the shown value resets
-                // when another filter navigates.
-                key={bookHref(filters)}
-                name='trip'
-                defaultValue={filters.trip ?? ''}
-                onChange={(event) =>
-                    router.push(
-                        bookHref({
-                            ...filters,
-                            trip: event.target.value || null,
-                        }),
-                    )
-                }
-                className='mt-2 w-full border border-onyx/25 bg-holiday-white px-3 py-2.5 text-body text-onyx'
-            >
-                <option value=''>All trips</option>
-                {trips.map((trip) => (
-                    <option
-                        key={trip.value}
-                        value={trip.value}
-                        disabled={
-                            trip.count === 0 && trip.value !== filters.trip
-                        }
-                    >
-                        {trip.label} ({trip.count})
-                    </option>
-                ))}
-            </select>
+            {/* Native chevrons sit flush against the right edge in some
+                browsers, so draw our own with room around it. */}
+            <div className='relative mt-2'>
+                <select
+                    id={selectId}
+                    // Keyed on the filter state so the shown value resets
+                    // when another filter navigates.
+                    key={bookHref(filters)}
+                    name='trip'
+                    defaultValue={filters.trip ?? ''}
+                    onChange={(event) =>
+                        router.push(
+                            bookHref({
+                                ...filters,
+                                trip: event.target.value || null,
+                            }),
+                        )
+                    }
+                    className='w-full appearance-none border border-onyx/25 bg-holiday-white py-2.5 pl-3 pr-10 text-body text-onyx'
+                >
+                    <option value=''>All trips</option>
+                    {trips.map((trip) => (
+                        <option
+                            key={trip.value}
+                            value={trip.value}
+                            disabled={
+                                trip.count === 0 && trip.value !== filters.trip
+                            }
+                        >
+                            {trip.label} ({trip.count})
+                        </option>
+                    ))}
+                </select>
+                <svg
+                    aria-hidden
+                    viewBox='0 0 12 8'
+                    className='pointer-events-none absolute right-3.5 top-1/2 h-2 w-3 -translate-y-1/2 text-onyx'
+                >
+                    <path
+                        d='M1 1.5 6 6.5 11 1.5'
+                        fill='none'
+                        stroke='currentColor'
+                        strokeWidth='1.75'
+                    />
+                </svg>
+            </div>
             <noscript>
                 <button
                     type='submit'
