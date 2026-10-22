@@ -124,14 +124,20 @@ export function groupDeparturesByMonth(
     return result;
 }
 
+/** Departures a guest can actually grab (has seats), soonest first. */
+export function openDepartures(
+    departures: ArcticDeparture[],
+): ArcticDeparture[] {
+    return departures.filter(
+        (d) => (d.remainingopenings ?? 0) > 0 && !d.canceled,
+    );
+}
+
 /** First departure a guest can actually grab (has seats). */
 export function nextAvailable(
     departures: ArcticDeparture[],
 ): ArcticDeparture | null {
-    return (
-        departures.find((d) => (d.remainingopenings ?? 0) > 0 && !d.canceled) ??
-        null
-    );
+    return openDepartures(departures)[0] ?? null;
 }
 
 export interface DepartureVariant {

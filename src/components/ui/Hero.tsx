@@ -56,7 +56,17 @@ export function Hero({
                     </h1>
                     {cta && (
                         <div className='mt-8'>
-                            <Button href={cta.href} size='lg'>
+                            {/* The trip finder is green site-wide. Red
+                                stays for booking. */}
+                            <Button
+                                href={cta.href}
+                                size='lg'
+                                variant={
+                                    cta.href.startsWith('/trip-finder')
+                                        ? 'evergreen'
+                                        : 'primary'
+                                }
+                            >
                                 {cta.text}
                             </Button>
                         </div>

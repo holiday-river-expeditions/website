@@ -1,4 +1,5 @@
 import { unstable_rethrow } from 'next/navigation';
+import { cache } from 'react';
 import { arcticGet } from './client';
 import { isArcticConfigured } from './config';
 import {
@@ -98,8 +99,14 @@ export async function getTripType(id: string | number) {
  * Upcoming departures for one Sanity trip. `arcticTripIds` is the Sanity
  * arcticTripId field: one or more Arctic trip-type ids, comma-separated
  * (a "5/6 Days" product spans two Arctic trip types).
+ *
+ * Wrapped in React `cache()` so a trip page and its AvailabilitySection
+ * share one Arctic request per render (the page reads the next open dates
+ * for the trip bar and facts strip).
  */
-export async function getUpcomingDepartures(
+export const getUpcomingDepartures = cache(fetchUpcomingDepartures);
+
+async function fetchUpcomingDepartures(
     arcticTripIds: string,
 ): Promise<ArcticDeparture[] | null> {
     if (!isArcticConfigured()) return null;

@@ -26,8 +26,12 @@ import { RiverFlow } from '@/components/ui/RiverFlow';
 import { Section } from '@/components/ui/Section';
 import { SectionNav } from '@/components/ui/SectionNav';
 import type { TripMapPoint } from '@/components/ui/TripMap';
+import { TripBar } from '@/components/ui/TripBar';
 import { TripMapSection } from '@/components/ui/TripMapSection';
 import { WhatsIncluded } from '@/components/ui/WhatsIncluded';
+import { getUpcomingDepartures } from '@/lib/arctic';
+import { contactPhone } from '@/lib/contact-defaults';
+import { formatDateRange, openDepartures } from '@/lib/departures';
 import { stretchBySlug } from '@/lib/map-style';
 import { getSiteSettings, getTripBySlug, imageUrl } from '@/lib/sanity';
 import { openGraphFor } from '@/lib/seo';
@@ -66,6 +70,20 @@ export default async function TripPage({ params }: TripPageProps) {
         getSiteSettings(),
     ]);
     if (!trip) notFound();
+
+    // Shared with AvailabilitySection through cache(), so one Arctic call.
+    // The page reads the next open dates for the trip bar and facts strip.
+    const departures = trip.arcticTripId
+        ? await getUpcomingDepartures(trip.arcticTripId)
+        : null;
+    const openDates = (departures ? openDepartures(departures) : [])
+        .slice(0, 3)
+        .map((departure) => formatDateRange(departure.start, null));
+    const phone = contactPhone(settings);
+    const phoneLink = {
+        href: `tel:+1${phone.replace(/\D/g, '')}`,
+        label: phone,
+    };
 
     const category = trip.tripType?.cardLabel ?? trip.tripType?.name ?? null;
     const heroPhoto = imageUrl(
@@ -159,6 +177,20 @@ export default async function TripPage({ params }: TripPageProps) {
         return [{ key: entry._key, title: entry.section.title, body }];
     });
 
+    // Section menu stops (Aug 20 decision), shared by SectionNav and the
+    // trip-bar flag's TripBar. Labels match the section headings.
+    const sectionItems = [
+        { id: 'trip-details', label: 'Trip Details' },
+        ...(trip.faqs && trip.faqs.length > 0
+            ? [{ id: 'faqs', label: 'FAQs' }]
+            : []),
+        ...(infoSections.length > 0
+            ? [{ id: 'trip-info', label: 'Before You Go' }]
+            : []),
+        { id: AVAILABILITY_ANCHOR, label: 'Dates & Availability' },
+    ];
+    const datesCta = { id: AVAILABILITY_ANCHOR, label: 'See dates' };
+
     // What's Included is the same on every trip except Desolation (Sep 10
     // decision), so the shared list lives on Site Settings and a trip's
     // own list, when it has one, replaces it outright.
@@ -214,6 +246,21 @@ export default async function TripPage({ params }: TripPageProps) {
                 )}
             </PageBanner>
 
+            {/* trip-bar demo flag: one sticky bar in the page, replacing
+                SectionNav's dock and tab row while the flag is on. */}
+            <TripBar
+                ariaLabel='Trip sections'
+                items={sectionItems}
+                cta={datesCta}
+                phone={phoneLink}
+                summary={[
+                    ...(trip.startingPrice
+                        ? [`From ${trip.startingPrice}`]
+                        : []),
+                    ...(openDates[0] ? [`Next open ${openDates[0]}`] : []),
+                ]}
+            />
+
             {/* Info bar across the top (Riley, Sep 17: trip info, then
                 highlights, then map). Justin, Sep 10: 12px labels at a 1.3
                 line height with a rule above the bar; the sizing is fixed. */}
@@ -265,6 +312,26 @@ export default async function TripPage({ params }: TripPageProps) {
                         Book Now
                     </a>
                 </div>
+
+                {/* facts-dates demo flag: the next open departures right
+                    under the facts, so dates are visible without any
+                    navigation. Nothing renders when Arctic has none. */}
+                {openDates.length > 0 && (
+                    <p className='mt-6 hidden flex-wrap items-baseline gap-x-3 gap-y-1 [[data-demo-facts-dates=on]_&]:flex'>
+                        <span className='font-alt-gothic text-[12px] font-medium uppercase leading-[1.3] tracking-[0.05em] text-onyx/70'>
+                            Next open
+                        </span>
+                        {openDates.map((date) => (
+                            <a
+                                key={date}
+                                href={`#${AVAILABILITY_ANCHOR}`}
+                                className='font-alt-gothic text-[20px] font-semibold uppercase text-onyx underline decoration-holiday-red decoration-2 underline-offset-4 transition-opacity hover:opacity-70'
+                            >
+                                {date}
+                            </a>
+                        ))}
+                    </p>
+                )}
 
                 {/* Description + highlights */}
                 <div className='mt-12 grid gap-12 md:grid-cols-[1.6fr_1fr]'>
@@ -446,28 +513,66 @@ export default async function TripPage({ params }: TripPageProps) {
                 googleUrl={settings?.reviews?.googleUrl}
             />
 
+            {/* end-cap demo flag: three ways forward at the end of the page,
+                so nobody has to scroll back up to act. */}
+            <Section
+                background='white'
+                className='hidden pb-4 pt-12 md:pt-16 [[data-demo-end-cap=on]_&]:block'
+            >
+                <div className='border-y border-holiday-grey/40 py-10'>
+                    <h2 className='font-alt-gothic text-section font-black uppercase text-holiday-red'>
+                        What next?
+                    </h2>
+                    <div className='mt-6 flex flex-wrap gap-3'>
+                        <a
+                            href={`#${AVAILABILITY_ANCHOR}`}
+                            className={buttonClasses()}
+                        >
+                            See dates
+                        </a>
+                        <a
+                            href={phoneLink.href}
+                            className={buttonClasses({ variant: 'outline' })}
+                        >
+                            Call {phone}
+                        </a>
+                        <Link
+                            href='/trip-finder'
+                            className={buttonClasses({ variant: 'evergreen' })}
+                        >
+                            Find a different trip
+                        </Link>
+                    </div>
+                </div>
+            </Section>
+
             {/* Cross-sell */}
             <RelatedTrips trips={trip.relatedTrips ?? []} />
 
-            {/* Clearance so the floating menu never permanently occludes
-                the last row of content. */}
-            <div aria-hidden className='h-16' />
-
-            {/* Floating section menu (Aug 20 decision). Reviews and related
-                trips stay on the page but out of the menu. */}
+            {/* Section menu (Aug 20 decision). Reviews and related trips
+                stay on the page but out of the menu. The label matches the
+                section heading. */}
             <SectionNav
                 ariaLabel='Trip sections'
-                showAfter={0}
-                items={[
-                    { id: 'trip-details', label: 'Trip Details' },
-                    ...(trip.faqs && trip.faqs.length > 0
-                        ? [{ id: 'faqs', label: 'FAQs' }]
-                        : []),
-                    ...(infoSections.length > 0
-                        ? [{ id: 'trip-info', label: 'Before You Go' }]
-                        : []),
-                    { id: AVAILABILITY_ANCHOR, label: 'Rates & Dates' },
-                ]}
+                cta={datesCta}
+                trips={(trip.relatedTrips ?? []).flatMap((related) =>
+                    related.slug?.current && related.name
+                        ? [
+                              {
+                                  href: `/trips/${related.slug.current}`,
+                                  label: related.name,
+                                  detail:
+                                      [
+                                          related.river?.name,
+                                          related.durationLabel,
+                                      ]
+                                          .filter(Boolean)
+                                          .join(' · ') || undefined,
+                              },
+                          ]
+                        : [],
+                )}
+                items={sectionItems}
             />
         </>
     );

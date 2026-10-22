@@ -17,11 +17,14 @@ export function TripFinderFab() {
     if (pathname === '/trip-finder') return null;
 
     return (
-        <div className='fixed left-6 z-40 bottom-[max(1.5rem,env(safe-area-inset-bottom))]'>
+        // Below lg on pages with a section menu, Find Your Trip lives in the
+        // menu (the dock's sheet, or both of the trip bar's menus), so the
+        // pill steps aside instead of covering the page.
+        <div className='fixed left-6 z-40 bottom-[max(1.5rem,env(safe-area-inset-bottom))] max-lg:[body:has([data-section-dock])_&]:hidden'>
             <Link
                 href='/trip-finder'
                 className={buttonClasses({
-                    variant: 'primary',
+                    variant: 'evergreen',
                     size: 'sm',
                     display: 'inline-block',
                     className: 'shadow-lg',

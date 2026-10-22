@@ -1,6 +1,6 @@
 import Link from 'next/link';
 
-export type ButtonVariant = 'primary' | 'outline' | 'onyx';
+export type ButtonVariant = 'primary' | 'outline' | 'onyx' | 'evergreen';
 export type ButtonSize = 'sm' | 'default' | 'compact' | 'lg' | 'xl';
 
 interface ButtonBaseProps {
@@ -31,6 +31,9 @@ const variantStyles: Record<ButtonVariant, string> = {
     outline:
         'border-2 border-holiday-red text-holiday-red hover:bg-holiday-red hover:text-holiday-white',
     onyx: 'bg-onyx text-holiday-white hover:bg-onyx/90',
+    // Find Your Trip (Oct 2026): red is for booking, so the trip finder
+    // gets its own colour. 13:1 on white text.
+    evergreen: 'bg-evergreen text-holiday-white hover:bg-evergreen/90',
 };
 
 // Uppercase condensed gothic needs a little tracking to stay legible at button
