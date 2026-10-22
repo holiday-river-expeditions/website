@@ -2,7 +2,9 @@ import { describe, expect, test } from 'vitest';
 import type { ArcticDeparture } from '@/lib/arctic';
 import {
     buildCalloutMap,
+    buildSpecialtyDateRows,
     cleanTypeName,
+    departureAnchor,
     departureMonth,
     detectVariants,
     durationToDays,
@@ -12,9 +14,11 @@ import {
     groupDeparturesByMonth,
     monthOptions,
     nextAvailable,
+    parseArcticIds,
     parseMonthParam,
     sortedVariantLabels,
     variantLabelMap,
+    upcomingSpecialtyDates,
 } from './departures';
 
 function departure(overrides: Partial<ArcticDeparture>): ArcticDeparture {
@@ -321,5 +325,166 @@ describe('variantLabelMap', () => {
                 ]),
             ),
         ).toEqual(['5-Day', '12-Day']);
+    });
+});
+
+describe('parseArcticIds', () => {
+    test('splits and trims comma-separated ids', () => {
+        expect(parseArcticIds('37, 38,63')).toEqual([37, 38, 63]);
+    });
+    test('drops blanks and junk', () => {
+        expect(parseArcticIds('37,,abc,-4,0')).toEqual([37]);
+        expect(parseArcticIds(null)).toEqual([]);
+    });
+});
+
+describe('upcomingSpecialtyDates', () => {
+    test('keeps today and later, sorted by date', () => {
+        expect(
+            upcomingSpecialtyDates(
+                [
+                    { startDate: '2027-06-21', label: 'The Pickpockets' },
+                    { startDate: '2026-09-01', label: 'Past' },
+                    { startDate: '2027-05-15', label: 'Pompe & Honey' },
+                    { startDate: '2026-10-21', label: 'Today' },
+                ],
+                '2026-10-21',
+            ).map((date) => date.label),
+        ).toEqual(['Today', 'Pompe & Honey', 'The Pickpockets']);
+    });
+
+    test('follows buildCalloutMap: needs date and label, first wins', () => {
+        expect(
+            upcomingSpecialtyDates(
+                [
+                    { startDate: '2027-06-21', label: 'First', note: 'n' },
+                    { startDate: '2027-06-21', label: 'Second' },
+                    { startDate: '2027-07-01' },
+                    { label: 'No date' },
+                ],
+                '2026-10-21',
+            ),
+        ).toEqual([
+            {
+                startDate: '2027-06-21',
+                label: 'First',
+                note: 'n',
+                image: null,
+            },
+        ]);
+    });
+});
+
+describe('buildSpecialtyDateRows', () => {
+    const yampa = {
+        _id: 'yampa',
+        name: 'Yampa River',
+        slug: { current: 'yampa-river' },
+        startingPrice: '$1,300',
+        arcticTripId: '59,60',
+        entries: [
+            { startDate: '2027-06-21', label: 'The Pickpockets' },
+            { startDate: '2027-05-15', label: 'Pompe & Honey' },
+        ],
+    };
+    const westwater = {
+        _id: 'westwater',
+        name: 'Westwater Canyon',
+        slug: { current: 'westwater-canyon' },
+        startingPrice: '$599',
+        arcticTripId: '55',
+        entries: [{ startDate: '2027-06-01', label: 'Theoretical Blonde' }],
+    };
+
+    test('merges every trip into one list by date, linking the row', () => {
+        const rows = buildSpecialtyDateRows(
+            [yampa, westwater],
+            null,
+            '2026-10-21',
+        );
+        expect(rows.map((row) => [row.startDate, row.tripName])).toEqual([
+            ['2027-05-15', 'Yampa River'],
+            ['2027-06-01', 'Westwater Canyon'],
+            ['2027-06-21', 'Yampa River'],
+        ]);
+        expect(rows[2].href).toBe(
+            `/trips/yampa-river#${departureAnchor('2027-06-21')}`,
+        );
+        expect(rows[2].departure).toBeNull();
+        expect(rows[2].startingPrice).toBe('$1,300');
+    });
+
+    test('matches the Arctic departure by trip type and date', () => {
+        const match = departure({
+            id: 9,
+            triptypeid: 60,
+            start: '2027-06-21',
+        });
+        const rows = buildSpecialtyDateRows(
+            [yampa],
+            [
+                // Same date on another trip's type: not this row's.
+                departure({ id: 8, triptypeid: 55, start: '2027-06-21' }),
+                match,
+            ],
+            '2026-10-21',
+        );
+        expect(
+            rows.find((row) => row.startDate === '2027-06-21')?.departure,
+        ).toBe(match);
+    });
+
+    test('drops past dates and omits href without a slug', () => {
+        const rows = buildSpecialtyDateRows(
+            [{ ...westwater, slug: null }],
+            null,
+            '2027-07-01',
+        );
+        expect(rows).toEqual([]);
+        const [row] = buildSpecialtyDateRows(
+            [{ ...westwater, slug: null }],
+            null,
+            '2026-10-21',
+        );
+        expect(row.href).toBeNull();
+    });
+
+    test('uses the date photo, else the trip photo', () => {
+        const tripPhoto = { asset: { _ref: 'image-trip' }, alt: 'Yampa' };
+        const bandPhoto = { asset: { _ref: 'image-band' }, alt: 'The band' };
+        const rows = buildSpecialtyDateRows(
+            [
+                {
+                    ...yampa,
+                    image: tripPhoto,
+                    entries: [
+                        {
+                            startDate: '2027-05-15',
+                            label: 'Pompe & Honey',
+                            image: bandPhoto,
+                        },
+                        // Alt text with no upload counts as no photo.
+                        {
+                            startDate: '2027-06-21',
+                            label: 'The Pickpockets',
+                            image: { alt: 'Unfinished' },
+                        },
+                        { startDate: '2027-06-05', label: 'Del Sol Quartet' },
+                    ],
+                },
+            ],
+            null,
+            '2026-10-21',
+        );
+        expect(rows.map((row) => row.image)).toEqual([
+            bandPhoto,
+            tripPhoto,
+            tripPhoto,
+        ]);
+    });
+
+    test('leaves the image null when neither has a photo', () => {
+        const [row] = buildSpecialtyDateRows([westwater], null, '2026-10-21');
+        expect(row.image).toBeNull();
     });
 });

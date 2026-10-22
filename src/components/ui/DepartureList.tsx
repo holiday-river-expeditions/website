@@ -6,6 +6,7 @@ import type { ArcticDeparture } from '@/lib/arctic';
 import {
     type DepartureCallout,
     type DepartureCalloutMap,
+    departureAnchor,
     durationToDays,
     formatDateRange,
     groupDeparturesByMonth,
@@ -60,7 +61,7 @@ function CalloutBadge({ callout }: { callout: DepartureCallout }) {
     return <span className={className}>{callout.label}</span>;
 }
 
-function SeatsBadge({ seats }: { seats: number | null }) {
+export function SeatsBadge({ seats }: { seats: number | null }) {
     if (seats === null) return null;
     if (seats <= 0) {
         return (
@@ -93,12 +94,15 @@ function DepartureRow({
     variantLabel,
     callout,
     hiddenBelowLg = false,
+    anchored = false,
 }: {
     departure: ArcticDeparture;
     showTripName: boolean;
     variantLabel?: string;
     callout?: DepartureCallout;
     hiddenBelowLg?: boolean;
+    /** Carries the date's anchor id (first row on a specialty date). */
+    anchored?: boolean;
 }) {
     const seats = departure.remainingopenings ?? null;
     const bookable = seats !== null && seats > 0 && departure.onlinebookingurl;
@@ -144,8 +148,12 @@ function DepartureRow({
 
     return (
         <li
+            id={anchored ? departureAnchor(departure.start) : undefined}
             data-triptype={departure.triptypeid ?? undefined}
-            className={`grid grid-cols-[minmax(0,1fr)_auto] items-center gap-x-4 gap-y-2 py-4 sm:gap-x-6 ${hiddenBelowLg ? 'max-lg:hidden' : ''}`}
+            // DepartureHashTarget sets data-highlighted on the row a
+            // specialty link lands on. The shadow extends the tint past the
+            // row edges so the text doesn't sit flush against it.
+            className={`grid scroll-mt-28 grid-cols-[minmax(0,1fr)_auto] items-center gap-x-4 gap-y-2 py-4 sm:gap-x-6 data-[highlighted=true]:bg-sand/30 data-[highlighted=true]:shadow-[0_0_0_12px_color-mix(in_srgb,var(--color-sand)_30%,transparent)] ${hiddenBelowLg ? 'max-lg:hidden' : ''}`}
         >
             {bookable && nativeBookingEnabled() && departure.triptypeid ? (
                 // BookingRow owns the row internals so its expanded panel can
@@ -215,6 +223,8 @@ interface RowOptions {
     showTripName: boolean;
     variantLabels?: ReadonlyMap<number, string>;
     callouts?: DepartureCalloutMap;
+    /** Departure ids whose row carries its date's anchor id. */
+    anchoredIds?: ReadonlySet<number>;
 }
 
 function DepartureRows({
@@ -222,6 +232,7 @@ function DepartureRows({
     showTripName,
     variantLabels,
     callouts,
+    anchoredIds,
     hideBelowLgFrom = Infinity,
 }: RowOptions & {
     departures: ArcticDeparture[];
@@ -242,6 +253,7 @@ function DepartureRows({
                             : undefined
                     }
                     callout={callouts?.get(departure.start)}
+                    anchored={anchoredIds?.has(departure.id) ?? false}
                 />
             ))}
         </ul>
@@ -311,7 +323,22 @@ export function DepartureList({
     compactRows = Infinity,
     showAllHref,
 }: DepartureListProps) {
-    const rowOptions: RowOptions = { showTripName, variantLabels, callouts };
+    // Only the first row on each specialty date gets the anchor id: two
+    // variants can start the same day, and ids must be unique.
+    const anchoredIds = new Set<number>();
+    const anchoredDates = new Set<string>();
+    for (const departure of departures) {
+        if (!callouts?.has(departure.start)) continue;
+        if (anchoredDates.has(departure.start)) continue;
+        anchoredDates.add(departure.start);
+        anchoredIds.add(departure.id);
+    }
+    const rowOptions: RowOptions = {
+        showTripName,
+        variantLabels,
+        callouts,
+        anchoredIds,
+    };
 
     if (!groupByMonth) {
         // One list in the DOM at every width. Hiding rows with CSS rather
@@ -369,7 +396,13 @@ export function DepartureList({
                 />
             ))}
             {collapsedGroups.length > 0 && (
-                <details data-departure-overflow className='group'>
+                // The browser opens this itself when the URL names a row
+                // inside it (a specialty date link), before hydration.
+                <details
+                    data-departure-overflow
+                    className='group'
+                    suppressHydrationWarning
+                >
                     <ShowAllSummary count={departures.length} />
                     <div className='space-y-8'>
                         {collapsedGroups.map((group) => (

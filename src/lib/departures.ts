@@ -233,11 +233,18 @@ export interface DepartureCallout {
  */
 export type DepartureCalloutMap = ReadonlyMap<string, DepartureCallout>;
 
+/** A Sanity image as our queries project it (hotspot and crop ride along). */
+export interface SpecialtyImage {
+    asset?: { _ref?: string };
+    alt?: string | null;
+}
+
 /** One trip.specialtyDepartures entry, as projected by any of our queries. */
 export interface SpecialtyDepartureEntry {
     startDate?: string | null;
     label?: string | null;
     note?: string | null;
+    image?: SpecialtyImage | null;
     specialtyType?: {
         slug?: { current?: string | null } | null;
     } | null;
@@ -274,6 +281,133 @@ export function buildCalloutMap(
         });
     }
     return map;
+}
+
+/**
+ * DOM id on a specialty departure row in Dates & Availability. The trip
+ * page callout and the /specialty date list both link to it.
+ */
+export function departureAnchor(startDate: string): string {
+    return `departure-${startDate}`;
+}
+
+/** Splits Sanity's comma-separated arcticTripId into trip-type ids. */
+export function parseArcticIds(raw: string | null | undefined): number[] {
+    if (!raw) return [];
+    return raw
+        .split(',')
+        .map((part) => Number(part.trim()))
+        .filter((id) => Number.isInteger(id) && id > 0);
+}
+
+export interface UpcomingSpecialtyDate {
+    startDate: string;
+    label: string;
+    note: string | null;
+    image: SpecialtyImage | null;
+}
+
+/**
+ * Specialty entries from today on, by date, one per date. Same rules as
+ * buildCalloutMap (date and label required, first entry for a date wins),
+ * so the trip page callout never names a date the departure list won't
+ * badge. `today` is YYYY-MM-DD, compared as a string.
+ */
+export function upcomingSpecialtyDates(
+    entries: readonly SpecialtyDepartureEntry[] | null | undefined,
+    today: string,
+): UpcomingSpecialtyDate[] {
+    const byDate = new Map<string, UpcomingSpecialtyDate>();
+    for (const entry of entries ?? []) {
+        const startDate = entry.startDate?.trim();
+        const label = entry.label?.trim();
+        if (!startDate || !label || byDate.has(startDate)) continue;
+        if (startDate < today) continue;
+        byDate.set(startDate, {
+            startDate,
+            label,
+            note: entry.note ?? null,
+            image: entry.image ?? null,
+        });
+    }
+    return [...byDate.values()].sort((a, b) =>
+        a.startDate.localeCompare(b.startDate),
+    );
+}
+
+/** A trip with specialty dates in one family, as the /specialty query projects it. */
+export interface SpecialtyDatedTrip {
+    _id: string;
+    name?: string | null;
+    slug?: { current?: string | null } | null;
+    startingPrice?: string | null;
+    arcticTripId?: string | null;
+    /** The trip's first photo, the thumbnail for dates without their own. */
+    image?: SpecialtyImage | null;
+    entries?: readonly SpecialtyDepartureEntry[] | null;
+}
+
+export interface SpecialtyDateRow {
+    key: string;
+    startDate: string;
+    label: string;
+    note: string | null;
+    tripName: string;
+    /** Trip page link landing on this date's row, or null without a slug. */
+    href: string | null;
+    /** Sanity price, the fallback when Arctic has no fare for the date. */
+    startingPrice: string | null;
+    /** The matching Arctic departure, or null when Arctic has none. */
+    departure: ArcticDeparture | null;
+    /** The date's own photo, else the trip's first photo. */
+    image: SpecialtyImage | null;
+}
+
+/**
+ * One row per upcoming specialty date across a family's trips, by date.
+ * Each row is matched to its Arctic departure by trip-type id and start
+ * date for seats, length, and fare. A row with no match (Arctic down, or
+ * the date isn't scheduled there) still renders from Sanity alone.
+ */
+export function buildSpecialtyDateRows(
+    trips: readonly SpecialtyDatedTrip[] | null | undefined,
+    departures: readonly ArcticDeparture[] | null,
+    today: string,
+): SpecialtyDateRow[] {
+    const rows: SpecialtyDateRow[] = [];
+    for (const trip of trips ?? []) {
+        const ids = new Set(parseArcticIds(trip.arcticTripId));
+        const slug = trip.slug?.current;
+        for (const date of upcomingSpecialtyDates(trip.entries, today)) {
+            const departure =
+                departures?.find(
+                    (d) =>
+                        d.start === date.startDate &&
+                        d.triptypeid != null &&
+                        ids.has(d.triptypeid),
+                ) ?? null;
+            rows.push({
+                key: `${trip._id}-${date.startDate}`,
+                ...date,
+                tripName: trip.name ?? '',
+                href: slug
+                    ? `/trips/${slug}#${departureAnchor(date.startDate)}`
+                    : null,
+                startingPrice: trip.startingPrice ?? null,
+                departure,
+                // An image field with alt text but no upload still falls
+                // back to the trip photo.
+                image: date.image?.asset?._ref
+                    ? date.image
+                    : (trip.image ?? null),
+            });
+        }
+    }
+    return rows.sort(
+        (a, b) =>
+            a.startDate.localeCompare(b.startDate) ||
+            a.tripName.localeCompare(b.tripName),
+    );
 }
 
 /**
