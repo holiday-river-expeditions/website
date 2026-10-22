@@ -19,16 +19,21 @@ import {
 const nativeBookingEnabled = () => process.env.BOOKING_NATIVE === 'true';
 
 /**
- * Renders Arctic departures as a month-grouped schedule: month subheads
- * (with years when the list spans them), seats remaining with urgency
- * states, and a book action per row. Long lists collapse behind a native
- * <details> so the schedule stays scannable without JavaScript.
+ * Renders Arctic departures as a schedule: month subheads (with years when
+ * the list spans them) or one flat list, a seats warning when few are left,
+ * and a book action per row. Long lists collapse behind a native <details>
+ * so the schedule stays scannable without JavaScript.
  *
  * Server component; rows carry data-triptype so DepartureVariantChips
  * (a sibling client island) can filter visibility.
  */
 
-const LOW_SEATS_THRESHOLD = 4;
+/**
+ * Seat counts show only at or below this. A badge on every row is noise
+ * that hides the rows where it matters (NN/g: a signal shown everywhere
+ * stops being read).
+ */
+export const LOW_SEATS_THRESHOLD = 6;
 
 /** Rows shown before the rest collapses behind "Show all". */
 const VISIBLE_ROWS = 8;
@@ -64,12 +69,20 @@ function SeatsBadge({ seats }: { seats: number | null }) {
             </span>
         );
     }
-    const urgent = seats <= LOW_SEATS_THRESHOLD;
+    if (seats > LOW_SEATS_THRESHOLD) return null;
     return (
-        <span
-            className={`inline-block px-3.5 py-1.5 text-[14px] font-bold leading-tight text-holiday-white ${urgent ? 'bg-holiday-red' : 'bg-evergreen'}`}
-        >
+        <span className='inline-block bg-holiday-red px-3.5 py-1.5 text-[14px] font-bold leading-tight text-holiday-white'>
             {seats} {seats === 1 ? 'seat' : 'seats'} left
+        </span>
+    );
+}
+
+/** Short outlined tag for a trip length ("4-Day"), shared with /book's
+    card header so row and header read as one set. */
+export function VariantTag({ label }: { label: string }) {
+    return (
+        <span className='inline-block border border-onyx/30 px-2 py-0.5 font-alt-gothic text-[14px] font-semibold uppercase leading-tight tracking-[0.04em] text-onyx'>
+            {label}
         </span>
     );
 }
@@ -77,10 +90,12 @@ function SeatsBadge({ seats }: { seats: number | null }) {
 function DepartureRow({
     departure,
     showTripName,
+    variantLabel,
     callout,
 }: {
     departure: ArcticDeparture;
     showTripName: boolean;
+    variantLabel?: string;
     callout?: DepartureCallout;
 }) {
     const seats = departure.remainingopenings ?? null;
@@ -92,17 +107,22 @@ function DepartureRow({
     // the client fragment's children as a dynamic list and wants keys.
     const dateCell = (
         <div key='date-cell'>
-            <div>
+            <div className='flex flex-wrap items-center gap-x-3 gap-y-1'>
                 <span className='font-alt-gothic text-h3 font-semibold uppercase leading-h3 text-onyx'>
                     {formatDateRange(departure.start, departure.duration)}
                 </span>
-                {days && days > 1 && (
-                    <span className='ml-3 text-[13px] text-onyx/70'>
-                        {days} days
-                    </span>
+                {variantLabel ? (
+                    <VariantTag label={variantLabel} />
+                ) : (
+                    days &&
+                    days > 1 && (
+                        <span className='text-[13px] text-onyx/70'>
+                            {days} days
+                        </span>
+                    )
                 )}
             </div>
-            {showTripName && departure.name && (
+            {showTripName && !variantLabel && departure.name && (
                 <div className='mt-0.5 text-body leading-body text-onyx/80'>
                     {departure.name}
                 </div>
@@ -123,7 +143,7 @@ function DepartureRow({
     return (
         <li
             data-triptype={departure.triptypeid ?? undefined}
-            className='grid grid-cols-1 items-center gap-x-6 gap-y-2 py-4 sm:grid-cols-[minmax(200px,1fr)_auto]'
+            className='grid grid-cols-[minmax(0,1fr)_auto] items-center gap-x-4 gap-y-2 py-4 sm:grid-cols-[minmax(200px,1fr)_auto] sm:gap-x-6'
         >
             {bookable && nativeBookingEnabled() && departure.triptypeid ? (
                 // BookingRow owns the row internals so its expanded panel can
@@ -144,7 +164,7 @@ function DepartureRow({
             ) : (
                 <>
                     {dateCell}
-                    <div className='flex flex-wrap items-center gap-4 justify-self-start sm:justify-self-end'>
+                    <div className='flex flex-wrap items-center justify-end gap-x-4 gap-y-2 justify-self-end'>
                         <SeatsBadge seats={seats} />
                         {bookable ? (
                             <ExternalLink
@@ -189,56 +209,126 @@ function monthGroupLabel(group: MonthGroupData): string {
         : group.monthLabel;
 }
 
+interface RowOptions {
+    showTripName: boolean;
+    variantLabels?: ReadonlyMap<number, string>;
+    callouts?: DepartureCalloutMap;
+}
+
+function DepartureRows({
+    departures,
+    showTripName,
+    variantLabels,
+    callouts,
+}: RowOptions & { departures: ArcticDeparture[] }) {
+    return (
+        <ul className='divide-y divide-holiday-grey/40 border-y border-holiday-grey/40'>
+            {departures.map((departure) => (
+                <DepartureRow
+                    key={departure.id}
+                    departure={departure}
+                    showTripName={showTripName}
+                    variantLabel={
+                        departure.triptypeid
+                            ? variantLabels?.get(departure.triptypeid)
+                            : undefined
+                    }
+                    callout={callouts?.get(departure.start)}
+                />
+            ))}
+        </ul>
+    );
+}
+
 function MonthGroup({
     group,
-    showTripName,
-    callouts,
-}: {
-    group: MonthGroupData;
-    showTripName: boolean;
-    callouts?: DepartureCalloutMap;
-}) {
+    ...rowOptions
+}: RowOptions & { group: MonthGroupData }) {
     return (
         <div>
             <h3 className='pb-1 pt-2 font-alt-gothic text-[15px] font-semibold uppercase tracking-[0.1em] text-teal'>
                 {monthGroupLabel(group)}
             </h3>
-            <ul className='divide-y divide-holiday-grey/40 border-y border-holiday-grey/40'>
-                {group.departures.map((departure) => (
-                    <DepartureRow
-                        key={departure.id}
-                        departure={departure}
-                        showTripName={showTripName}
-                        callout={callouts?.get(departure.start)}
-                    />
-                ))}
-            </ul>
+            <DepartureRows departures={group.departures} {...rowOptions} />
         </div>
+    );
+}
+
+function ShowAllSummary({ count }: { count: number }) {
+    return (
+        <summary
+            className={buttonClasses({
+                variant: 'outline',
+                display: 'inline-flex',
+                className:
+                    'cursor-pointer list-none items-center gap-2 group-open:hidden [&::-webkit-details-marker]:hidden',
+            })}
+        >
+            Show all {count} dates
+            <span aria-hidden>↓</span>
+        </summary>
     );
 }
 
 interface DepartureListProps {
     departures: ArcticDeparture[];
-    /** Show the Arctic trip name per row (for pages mixing variants). */
+    /** Show the Arctic trip name per row (for pages mixing variants).
+        Ignored on rows that have a variant label. */
     showTripName?: boolean;
+    /** Short length label per trip type, shown as a tag on each row in
+        place of the trip name. */
+    variantLabels?: ReadonlyMap<number, string>;
     /** Specialty callouts keyed by departure start date (YYYY-MM-DD). */
     callouts?: DepartureCalloutMap;
+    /** Month subheads, on by default. Off renders one flat list, for short
+        previews where the date range already names the month. */
+    groupByMonth?: boolean;
+    /** Rows shown before the rest collapses behind "Show all". */
+    visibleRows?: number;
 }
 
 export function DepartureList({
     departures,
     showTripName = false,
+    variantLabels,
     callouts,
+    groupByMonth = true,
+    visibleRows = VISIBLE_ROWS,
 }: DepartureListProps) {
+    const rowOptions: RowOptions = { showTripName, variantLabels, callouts };
+
+    if (!groupByMonth) {
+        const visible = departures.slice(0, visibleRows);
+        const collapsed = departures.slice(visibleRows);
+        return (
+            <div data-departure-list className='space-y-4'>
+                <DepartureRows departures={visible} {...rowOptions} />
+                {collapsed.length > 0 && (
+                    <details data-departure-overflow className='group'>
+                        <ShowAllSummary count={departures.length} />
+                        {/* Continues the list above: no top border, so the
+                            seam reads as one list once opened. */}
+                        <div className='-mt-4 [&>ul]:border-t-0'>
+                            <DepartureRows
+                                departures={collapsed}
+                                {...rowOptions}
+                            />
+                        </div>
+                    </details>
+                )}
+            </div>
+        );
+    }
+
     const groups = groupDeparturesByMonth(departures);
 
-    // Split whole month-groups so roughly VISIBLE_ROWS rows show before the
+    // Split whole month-groups so roughly visibleRows rows show before the
     // native <details> collapse — months never get sliced mid-group.
     let visibleCount = 0;
     const visibleGroups: MonthGroupData[] = [];
     const collapsedGroups: MonthGroupData[] = [];
     for (const group of groups) {
-        if (visibleCount < VISIBLE_ROWS) {
+        if (visibleCount < visibleRows) {
             visibleGroups.push(group);
             visibleCount += group.departures.length;
         } else {
@@ -252,30 +342,18 @@ export function DepartureList({
                 <MonthGroup
                     key={`${group.year}-${group.monthLabel}`}
                     group={group}
-                    showTripName={showTripName}
-                    callouts={callouts}
+                    {...rowOptions}
                 />
             ))}
             {collapsedGroups.length > 0 && (
                 <details data-departure-overflow className='group'>
-                    <summary
-                        className={buttonClasses({
-                            variant: 'outline',
-                            display: 'inline-flex',
-                            className:
-                                'cursor-pointer list-none items-center gap-2 group-open:hidden [&::-webkit-details-marker]:hidden',
-                        })}
-                    >
-                        Show all {departures.length} departures
-                        <span aria-hidden>↓</span>
-                    </summary>
+                    <ShowAllSummary count={departures.length} />
                     <div className='space-y-8'>
                         {collapsedGroups.map((group) => (
                             <MonthGroup
                                 key={`${group.year}-${group.monthLabel}`}
                                 group={group}
-                                showTripName={showTripName}
-                                callouts={callouts}
+                                {...rowOptions}
                             />
                         ))}
                     </div>

@@ -7,9 +7,8 @@ import { buttonClasses } from '@/components/ui/Button';
 /**
  * Floating site-wide "Find Your Trip" pill — the escape hatch for visitors
  * overwhelmed mid-browse (Aug 20 decision; live for everyone since
- * 2026-09-04). Bottom-LEFT: bottom-center is owned by
- * SectionNav/DepartureFilterBar and bottom-right by the demo-flags panel
- * pill. Hidden on the wizard itself — the only reason this is a client
+ * 2026-09-04). Bottom-LEFT: bottom-center is owned by SectionNav and
+ * bottom-right by the demo-flags panel pill. Hidden on the wizard itself — the only reason this is a client
  * component.
  */
 export function TripFinderFab() {

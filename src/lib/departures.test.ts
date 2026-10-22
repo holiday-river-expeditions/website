@@ -13,6 +13,8 @@ import {
     monthOptions,
     nextAvailable,
     parseMonthParam,
+    sortedVariantLabels,
+    variantLabelMap,
 } from './departures';
 
 function departure(overrides: Partial<ArcticDeparture>): ArcticDeparture {
@@ -289,5 +291,35 @@ describe('month filtering', () => {
         expect(filterByMonth(list, '2026-09')).toHaveLength(1);
         expect(filterByMonth(list, null)).toHaveLength(2);
         expect(filterByMonth(list, '2025-01')).toHaveLength(0);
+    });
+});
+
+describe('variantLabelMap', () => {
+    test('labels a single-type list by its duration', () => {
+        const labels = variantLabelMap([departure({ triptypeid: 45 })]);
+        expect(Object.fromEntries(labels)).toEqual({ 45: '5-Day' });
+    });
+
+    test('labels each type of a multi-type list', () => {
+        const labels = variantLabelMap([
+            departure({ id: 1, triptypeid: 57, duration: '96:00:00' }),
+            departure({ id: 2, triptypeid: 58, duration: '72:00:00' }),
+        ]);
+        expect(Object.fromEntries(labels)).toEqual({
+            57: '4-Day',
+            58: '3-Day',
+        });
+        expect(sortedVariantLabels(labels)).toEqual(['3-Day', '4-Day']);
+    });
+
+    test('sorts by days, not alphabetically', () => {
+        expect(
+            sortedVariantLabels(
+                new Map([
+                    [1, '12-Day'],
+                    [2, '5-Day'],
+                ]),
+            ),
+        ).toEqual(['5-Day', '12-Day']);
     });
 });
