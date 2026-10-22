@@ -122,7 +122,7 @@ test('a variant label replaces the trip name on the row', () => {
     expect(row.textContent).not.toContain('Desolation Canyon');
 });
 
-test('a flat list shows the first rows and collapses the rest', () => {
+test('a compact flat list hides extra rows below lg behind a link', () => {
     const departures = Array.from({ length: 6 }, (_, i) =>
         departure({ id: i + 1, start: `2026-09-${String(i + 10)}` }),
     );
@@ -130,12 +130,19 @@ test('a flat list shows the first rows and collapses the rest', () => {
         <DepartureList
             departures={departures}
             groupByMonth={false}
-            visibleRows={4}
+            compactRows={4}
+            showAllHref='/book?trip=desolation-canyon'
         />,
     );
 
     expect(container.querySelector('h3')).toBeNull();
-    const overflow = container.querySelector('[data-departure-overflow]');
-    expect(overflow?.querySelectorAll('li')).toHaveLength(2);
-    expect(screen.getByText(/Show all 6 dates/)).toBeInTheDocument();
+    // Every row stays in the DOM so lg can show them all.
+    const rows = container.querySelectorAll('li');
+    expect(rows).toHaveLength(6);
+    expect(
+        [...rows].map((row) => row.classList.contains('max-lg:hidden')),
+    ).toEqual([false, false, false, false, true, true]);
+    expect(
+        screen.getByRole('link', { name: /Show all 6 dates/ }),
+    ).toHaveAttribute('href', '/book?trip=desolation-canyon');
 });

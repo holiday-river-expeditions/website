@@ -92,11 +92,13 @@ function DepartureRow({
     showTripName,
     variantLabel,
     callout,
+    hiddenBelowLg = false,
 }: {
     departure: ArcticDeparture;
     showTripName: boolean;
     variantLabel?: string;
     callout?: DepartureCallout;
+    hiddenBelowLg?: boolean;
 }) {
     const seats = departure.remainingopenings ?? null;
     const bookable = seats !== null && seats > 0 && departure.onlinebookingurl;
@@ -143,7 +145,7 @@ function DepartureRow({
     return (
         <li
             data-triptype={departure.triptypeid ?? undefined}
-            className='grid grid-cols-[minmax(0,1fr)_auto] items-center gap-x-4 gap-y-2 py-4 sm:grid-cols-[minmax(200px,1fr)_auto] sm:gap-x-6'
+            className={`grid grid-cols-[minmax(0,1fr)_auto] items-center gap-x-4 gap-y-2 py-4 sm:gap-x-6 ${hiddenBelowLg ? 'max-lg:hidden' : ''}`}
         >
             {bookable && nativeBookingEnabled() && departure.triptypeid ? (
                 // BookingRow owns the row internals so its expanded panel can
@@ -220,12 +222,18 @@ function DepartureRows({
     showTripName,
     variantLabels,
     callouts,
-}: RowOptions & { departures: ArcticDeparture[] }) {
+    hideBelowLgFrom = Infinity,
+}: RowOptions & {
+    departures: ArcticDeparture[];
+    /** Index from which rows are hidden below lg. */
+    hideBelowLgFrom?: number;
+}) {
     return (
         <ul className='divide-y divide-holiday-grey/40 border-y border-holiday-grey/40'>
-            {departures.map((departure) => (
+            {departures.map((departure, index) => (
                 <DepartureRow
                     key={departure.id}
+                    hiddenBelowLg={index >= hideBelowLgFrom}
                     departure={departure}
                     showTripName={showTripName}
                     variantLabel={
@@ -280,11 +288,17 @@ interface DepartureListProps {
     variantLabels?: ReadonlyMap<number, string>;
     /** Specialty callouts keyed by departure start date (YYYY-MM-DD). */
     callouts?: DepartureCalloutMap;
-    /** Month subheads, on by default. Off renders one flat list, for short
-        previews where the date range already names the month. */
+    /** Month subheads, on by default. Off renders one flat list, for
+        lists where the date range already names the month. */
     groupByMonth?: boolean;
-    /** Rows shown before the rest collapses behind "Show all". */
+    /** Month-grouped lists: rows shown before the rest collapses behind
+        "Show all". */
     visibleRows?: number;
+    /** Flat lists: below lg, rows past this many hide and a "Show all"
+        link to showAllHref takes their place. From lg up every row shows
+        (the caller bounds the height and scrolls it). */
+    compactRows?: number;
+    showAllHref?: string;
 }
 
 export function DepartureList({
@@ -294,27 +308,36 @@ export function DepartureList({
     callouts,
     groupByMonth = true,
     visibleRows = VISIBLE_ROWS,
+    compactRows = Infinity,
+    showAllHref,
 }: DepartureListProps) {
     const rowOptions: RowOptions = { showTripName, variantLabels, callouts };
 
     if (!groupByMonth) {
-        const visible = departures.slice(0, visibleRows);
-        const collapsed = departures.slice(visibleRows);
+        // One list in the DOM at every width. Hiding rows with CSS rather
+        // than <details> lets lg show them all in a scroll area while
+        // phones get the short preview. A scroll box per card would catch
+        // the page's swipes on a phone.
+        const compact = showAllHref && departures.length > compactRows;
         return (
             <div data-departure-list className='space-y-4'>
-                <DepartureRows departures={visible} {...rowOptions} />
-                {collapsed.length > 0 && (
-                    <details data-departure-overflow className='group'>
-                        <ShowAllSummary count={departures.length} />
-                        {/* Continues the list above: no top border, so the
-                            seam reads as one list once opened. */}
-                        <div className='-mt-4 [&>ul]:border-t-0'>
-                            <DepartureRows
-                                departures={collapsed}
-                                {...rowOptions}
-                            />
-                        </div>
-                    </details>
+                <DepartureRows
+                    departures={departures}
+                    hideBelowLgFrom={compact ? compactRows : Infinity}
+                    {...rowOptions}
+                />
+                {compact && (
+                    <Link
+                        href={showAllHref}
+                        className={buttonClasses({
+                            variant: 'outline',
+                            display: 'inline-flex',
+                            className: 'items-center gap-2 lg:hidden',
+                        })}
+                    >
+                        Show all {departures.length} dates
+                        <span aria-hidden>→</span>
+                    </Link>
                 )}
             </div>
         );

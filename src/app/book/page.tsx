@@ -431,6 +431,10 @@ export default async function BookPage({
                                             variantLabels={group.variantLabels}
                                             callouts={group.callouts}
                                             showAll={filters.trip !== null}
+                                            showAllHref={bookHref({
+                                                ...filters,
+                                                trip: tripParam(group.key),
+                                            })}
                                             preloadImage={index === 0}
                                         />
                                     ))}
