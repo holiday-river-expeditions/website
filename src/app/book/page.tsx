@@ -46,7 +46,10 @@ export const metadata: Metadata = {
 /** Compact identity for a Sanity-authored trip, shown on its card so
     bookers recognize what they're booking (recognition over recall). */
 interface TripSummary {
+    /** 16:9 crop for the photo on top of the card (below lg). */
     imageSrc: string;
+    /** 4:5 crop for the full-height panel beside the dates (lg up). */
+    panelImageSrc: string;
     startingPrice: string | null;
     tagline: string | null;
 }
@@ -173,9 +176,11 @@ export default async function BookPage({
             // Built once per trip and shared across its trip-type ids.
             const callouts = buildCalloutMap(trip.specialtyDepartures);
             const summary: TripSummary = {
-                // 4:3 at 2x the desktop width; the 16:9 mobile frame crops
-                // it with object-cover.
-                imageSrc: imageUrl(trip.image, 800, 600),
+                // One crop per frame shape, so Sanity's hotspot picks the
+                // framing. Several trip photos are 2250x600 banners, and a
+                // single landscape crop stretched up to a tall panel blurs.
+                imageSrc: imageUrl(trip.image, 1200, 675),
+                panelImageSrc: imageUrl(trip.image, 720, 900),
                 startingPrice: trip.startingPrice,
                 tagline: isPlaceholderCopy(trip.tagline) ? null : trip.tagline,
             };
@@ -407,6 +412,10 @@ export default async function BookPage({
                                             href={group.href}
                                             imageSrc={
                                                 group.summary?.imageSrc || null
+                                            }
+                                            panelImageSrc={
+                                                group.summary?.panelImageSrc ||
+                                                null
                                             }
                                             startingPrice={
                                                 group.summary?.startingPrice ??

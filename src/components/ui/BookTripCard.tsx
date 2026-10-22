@@ -4,6 +4,9 @@ import { DepartureList, VariantTag } from '@/components/ui/DepartureList';
 import type { ArcticDeparture } from '@/lib/arctic';
 import type { DepartureCalloutMap } from '@/lib/departures';
 
+const PHOTO =
+    'object-cover motion-safe:transition-transform motion-safe:duration-500 motion-safe:group-hover:scale-105';
+
 /** Dates shown per trip before "Show all N dates". */
 const PREVIEW_ROWS = 4;
 
@@ -13,7 +16,10 @@ interface BookTripCardProps {
     title: string;
     /** Trip page, for Sanity-mapped trips only. */
     href: string | null;
+    /** 16:9 photo, shown on top of the card below lg. */
     imageSrc: string | null;
+    /** 4:5 photo for the full-height panel from lg up. */
+    panelImageSrc: string | null;
     startingPrice: string | null;
     /** Already checked: never empty or a placeholder. */
     tagline: string | null;
@@ -31,14 +37,15 @@ interface BookTripCardProps {
 /**
  * One trip on /book: a photo big enough to recognize the river, the trip's
  * name, lengths and price, and its next few dates with the rest one click
- * away (NN/g progressive disclosure). Photo on top on small screens, beside
- * the dates from lg up.
+ * away (NN/g progressive disclosure). Photo on top on small screens, a
+ * full-height panel beside the dates from lg up.
  */
 export function BookTripCard({
     id,
     title,
     href,
     imageSrc,
+    panelImageSrc,
     startingPrice,
     tagline,
     lengthLabels,
@@ -52,23 +59,42 @@ export function BookTripCard({
         <article
             id={id}
             data-availability
-            className='scroll-mt-6 border border-onyx/15 bg-holiday-white lg:flex [[data-demo-sticky-header=on]_&]:scroll-mt-28'
+            // Sand fill and no border, like the photo-first cards on /trips.
+            // Row dividers go lighter so they don't compete with the photo.
+            className='scroll-mt-6 bg-sand/15 lg:flex [&_li]:border-onyx/12 [&_ul]:border-onyx/12 [[data-demo-sticky-header=on]_&]:scroll-mt-28'
         >
-            {imageSrc && href && (
+            {imageSrc && panelImageSrc && href && (
+                // From lg up the photo fills the card's full height. When
+                // "Show all" makes the card tall, the photo stops growing
+                // and sticks beside the dates instead of cropping to a
+                // sliver.
                 <Link
                     href={href}
                     tabIndex={-1}
                     aria-hidden
-                    className='relative block aspect-[16/9] bg-holiday-grey/15 lg:m-5 lg:mr-0 lg:aspect-[4/3] lg:w-60 lg:shrink-0 lg:self-start xl:w-70'
+                    className='group block lg:w-72 lg:shrink-0 xl:w-85'
                 >
-                    <Image
-                        src={imageSrc}
-                        alt=''
-                        fill
-                        preload={preloadImage}
-                        className='object-cover'
-                        sizes='(min-width: 1280px) 280px, (min-width: 1024px) 240px, 100vw'
-                    />
+                    <div className='relative aspect-[16/9] overflow-hidden bg-holiday-grey/15 lg:sticky lg:top-6 lg:aspect-auto lg:h-full lg:max-h-[36rem] lg:min-h-72 [[data-demo-sticky-header=on]_&]:lg:top-24'>
+                        {/* Two crops, one per frame shape. The hidden one
+                            is display:none, so its lazy image never loads. */}
+                        <Image
+                            src={imageSrc}
+                            alt=''
+                            fill
+                            preload={preloadImage}
+                            className={`${PHOTO} lg:hidden`}
+                            sizes='100vw'
+                        />
+                        <Image
+                            src={panelImageSrc}
+                            alt=''
+                            fill
+                            className={`${PHOTO} hidden lg:block`}
+                            // Up to 340px wide and 576px tall: cover scales
+                            // the 4:5 crop to about 460px wide.
+                            sizes='460px'
+                        />
+                    </div>
                 </Link>
             )}
             <div className='min-w-0 flex-1 p-4 sm:p-5 lg:p-6'>
