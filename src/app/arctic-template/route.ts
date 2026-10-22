@@ -91,11 +91,17 @@ export async function GET() {
     display: grid; grid-template-columns: 1fr auto 1fr; align-items: center;
     gap: 16px; padding: 20px 48px; background: var(--white);
   }
-  header.hre nav ul { display: flex; gap: 32px; list-style: none; }
+  /* Same spacing as the site nav: 20px gaps until 1280px, so the six
+     labels fit on one line at 1024px. */
+  header.hre nav ul { display: flex; gap: 20px; list-style: none; }
+  @media (min-width: 1280px) {
+    header.hre nav ul { gap: 32px; }
+  }
   header.hre nav a {
     font-family: alternate-gothic-atf, Oswald, Arial, sans-serif;
     text-transform: uppercase; font-size: 20px; font-weight: 500;
     line-height: 1; color: var(--red); text-decoration: none;
+    white-space: nowrap;
   }
   header.hre nav a:hover { opacity: 0.7; }
   header.hre .logo { justify-self: center; display: block; }
