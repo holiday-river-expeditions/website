@@ -1,71 +1,63 @@
 import { expect, test } from '@playwright/test';
 
 /**
- * Open Seats floating filter bar: month chips are links that filter the
- * list server-side via ?month=, "All dates" clears, and the trip jumper
- * scrolls to a group. Skips gracefully when Arctic has no live data (the
- * bar only renders with trip groups on the page).
+ * /book filters: month and length chips are links that filter the list
+ * server-side via ?month= and ?days=, the trip select narrows to one trip
+ * via ?trip=, and applied filters show as removable chips above the
+ * results. Desktop viewport, so the filters are in the sidebar. Skips
+ * gracefully when Arctic has no live data (filters only render with trip
+ * groups on the page).
  */
 
 test('month chips filter the departures list', async ({ page }) => {
     await page.goto('/book');
 
-    const bar = page.getByRole('navigation', { name: 'Filter departures' });
-    if ((await bar.count()) === 0) {
-        test.skip(true, 'No live availability — filter bar not rendered');
+    const filters = page.getByRole('complementary', { name: 'Filter dates' });
+    if ((await filters.count()) === 0) {
+        test.skip(true, 'No live availability, filters not rendered');
     }
+    const month = filters.getByRole('group', { name: 'Month' });
 
-    // Default state: "All dates" is the current filter.
-    await expect(bar.getByRole('link', { name: /All dates/ })).toHaveAttribute(
-        'aria-current',
-        'true',
-    );
+    // Default state: "Any month" is the current filter.
+    await expect(
+        month.getByRole('link', { name: 'Any month' }),
+    ).toHaveAttribute('aria-current', 'true');
 
     // Pick the first month chip; the page reloads filtered with the chip
-    // active, and every month heading in the list matches one month.
-    const firstMonth = bar.getByRole('link').nth(1);
-    const chipLabel = (await firstMonth.textContent()) ?? '';
+    // active, and every listed date falls in that month.
+    const firstMonth = month.getByRole('link').nth(1);
+    const chipLabel = ((await firstMonth.textContent()) ?? '')
+        .replace(/\d+$/, '')
+        .trim();
     await firstMonth.click();
     await page.waitForURL(/month=\d{4}-\d{2}/);
-    await expect(
-        page
-            .getByRole('navigation', { name: 'Filter departures' })
-            .locator('[aria-current="true"]'),
-    ).toContainText(chipLabel.replace(/\d+$/, '').trim());
-    const headings = await page
-        .locator('[data-departure-list] h3')
-        .allTextContents();
-    expect(new Set(headings.map((h) => h.trim())).size).toBeLessThanOrEqual(1);
+    await expect(month.locator('[aria-current="true"]')).toContainText(
+        chipLabel,
+    );
+    const shortMonth = chipLabel.slice(0, 3);
+    const dates = await page
+        .locator('[data-departure-list] li')
+        .evaluateAll((rows) =>
+            rows.map((row) => row.textContent?.slice(0, 3) ?? ''),
+        );
+    expect(dates.length).toBeGreaterThan(0);
+    expect(new Set(dates)).toEqual(new Set([shortMonth]));
 
-    // The jumper only offers groups present under the active filter, so a
-    // jump always lands (regression: it listed absent groups before).
-    const select = page.getByRole('combobox', { name: 'Jump to trip' });
-    if ((await select.count()) > 0) {
-        const value = await select
-            .locator('option')
-            .nth(1)
-            .getAttribute('value');
-        await select.selectOption(value!);
-        await expect(page.locator(`#${value}`)).toBeInViewport();
-    }
-
-    // "All dates" clears the filter.
-    await page
-        .getByRole('navigation', { name: 'Filter departures' })
-        .getByRole('link', { name: /All dates/ })
-        .click();
+    // The applied filter shows above the results and removes in one click.
+    await page.getByRole('link', { name: /remove filter/ }).click();
     await page.waitForURL((url) => !url.search.includes('month'));
 });
 
-test('trip jumper scrolls to the chosen group', async ({ page }) => {
+test('trip select narrows the list to one trip', async ({ page }) => {
     await page.goto('/book');
 
-    const select = page.getByRole('combobox', { name: 'Jump to trip' });
+    const select = page.getByRole('combobox', { name: 'Trip' });
     if ((await select.count()) === 0) {
-        test.skip(true, 'No live availability — trip jumper not rendered');
+        test.skip(true, 'No live availability, trip select not rendered');
     }
 
-    const value = await select.locator('option').nth(2).getAttribute('value');
+    const value = await select.locator('option').nth(1).getAttribute('value');
     await select.selectOption(value!);
-    await expect(page.locator(`#${value}`)).toBeInViewport();
+    await page.waitForURL(new RegExp(`trip=${value}`));
+    await expect(page.locator('article[data-availability]')).toHaveCount(1);
 });

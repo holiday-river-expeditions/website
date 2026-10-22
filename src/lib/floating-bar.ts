@@ -1,8 +1,7 @@
 /**
- * Shared chrome for the site's floating bars — the trip/specialty section
- * menu (SectionNav) and the booking filter bar (DepartureFilterBar). Both
- * sit at the same screen position and are compared side by side in demos,
- * so their docking and skin come from one place.
+ * Shared chrome for the site's floating bars, now only the trip/specialty
+ * section menu (SectionNav). /book's filter bar moved into the page
+ * (Oct 2026), so it no longer docks here.
  *
  * Bottom-centre by default; the `bars-top` demo flag docks them under the
  * header instead, clearing the sticky header when that flag is on too.
