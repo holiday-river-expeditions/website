@@ -6,7 +6,11 @@ import Link from 'next/link';
 import { Section } from '@/components/ui/Section';
 import { TripCatalogDisclosure } from '@/components/ui/TripCatalogDisclosure';
 import { SectionNav } from '@/components/ui/SectionNav';
+import { SpecialtyDateList } from '@/components/ui/SpecialtyDateList';
 import { TripCard, tripCardProps } from '@/components/ui/TripCard';
+import { getUpcomingDepartures, todayISO } from '@/lib/arctic';
+import { getTripTypeFare } from '@/lib/arctic/prices';
+import { buildSpecialtyDateRows } from '@/lib/departures';
 import { getAllSpecialtyTypes, getAllTrips, imageUrl } from '@/lib/sanity';
 
 // Same ISR window as the homepage: Studio edits go live within a minute.
@@ -25,12 +29,51 @@ export const metadata: Metadata = {
  * copy, photo, and trips, reachable by jump link (specialty callouts on
  * departure lists deep-link to `/specialty#<slug>`). "View All Trips"
  * expands the full catalog in place instead of navigating away.
+ *
+ * Most specialty trips are single dates on regular river trips
+ * (trip.specialtyDepartures), so each family lists those dates with live
+ * seats and fares. Trips flagged specialty as a whole (trip.specialtyTypes)
+ * still show as cards.
  */
 export default async function SpecialtyPage() {
     const [types, allTrips] = await Promise.all([
         getAllSpecialtyTypes(),
         getAllTrips(),
     ]);
+
+    // One Arctic call per river trip with specialty dates, the same calls
+    // its trip page makes, so the two share a cache and this page never
+    // pulls the whole season. Rows still render from Sanity alone when
+    // Arctic is down, just without seats.
+    const today = todayISO();
+    const arcticTripIds = new Set(
+        types.flatMap((type) =>
+            (type.datedTrips ?? []).flatMap((trip) => trip.arcticTripId ?? []),
+        ),
+    );
+    const departures = (
+        await Promise.all([...arcticTripIds].map(getUpcomingDepartures))
+    ).flatMap((list) => list ?? []);
+    const rowsByType = new Map(
+        types.map((type) => [
+            type._id,
+            buildSpecialtyDateRows(type.datedTrips, departures, today),
+        ]),
+    );
+    const typeIds = new Set(
+        [...rowsByType.values()]
+            .flat()
+            .flatMap((row) => row.departure?.triptypeid ?? []),
+    );
+    const fares = new Map(
+        (
+            await Promise.all(
+                [...typeIds].map(
+                    async (id) => [id, await getTripTypeFare(id)] as const,
+                ),
+            )
+        ).flatMap(([id, fare]) => (fare ? [[id, fare] as const] : [])),
+    );
 
     return (
         <>
@@ -76,6 +119,7 @@ export default async function SpecialtyPage() {
             ) : (
                 types.map((type, index) => {
                     const trips = type.trips ?? [];
+                    const rows = rowsByType.get(type._id) ?? [];
                     const photo = imageUrl(type.image, 1200, 700);
                     return (
                         <Section
@@ -127,7 +171,16 @@ export default async function SpecialtyPage() {
                                 </div>
                             )}
 
-                            {trips.length > 0 ? (
+                            {rows.length > 0 && (
+                                <div className='mt-10'>
+                                    <SpecialtyDateList
+                                        rows={rows}
+                                        fares={fares}
+                                    />
+                                </div>
+                            )}
+
+                            {trips.length > 0 && (
                                 <div
                                     data-reveal-stagger
                                     className='mt-10 grid gap-10 sm:grid-cols-2 lg:grid-cols-3'
@@ -139,7 +192,9 @@ export default async function SpecialtyPage() {
                                         />
                                     ))}
                                 </div>
-                            ) : (
+                            )}
+
+                            {rows.length === 0 && trips.length === 0 && (
                                 <p className='mt-8 max-w-2xl text-body leading-body text-onyx/70'>
                                     Dates for this series are being finalized.
                                     Call{' '}

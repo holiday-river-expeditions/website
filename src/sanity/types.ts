@@ -621,6 +621,14 @@ export type Trip = {
         specialtyType?: SpecialtyTypeReference;
         label?: string;
         note?: string;
+        image?: {
+            asset?: SanityImageAssetReference;
+            media?: unknown;
+            hotspot?: SanityImageHotspot;
+            crop?: SanityImageCrop;
+            alt?: string;
+            _type: 'image';
+        };
         _type: 'specialtyDeparture';
         _key: string;
     }>;
@@ -1486,7 +1494,7 @@ export type AllTripTypesQueryResult = Array<{
 
 // Source: src/lib/sanity/queries.ts
 // Variable: allSpecialtyTypesQuery
-// Query: *[_type == "specialtyType"] | order(order asc, name asc) {    _id,    name,    slug,    tagline,    description,    image,    ribbonLabel,    "trips": *[_type == "trip" && references(^._id)] | order(name asc) {        _id,  name,  slug,  tagline,  subtitle,  "ribbon": coalesce(ribbon, specialtyTypes[0]->ribbonLabel),  startingPrice,  arcticTripId,  durationLabel,  "river": river->{ "name": coalesce(riverName, name), slug },  "tripType": tripType->{ name, cardLabel, tagColor, slug },  "image": photos[0]    }  }
+// Query: *[_type == "specialtyType"] | order(order asc, name asc) {    _id,    name,    slug,    tagline,    description,    image,    ribbonLabel,    "trips": *[_type == "trip" && ^._id in specialtyTypes[]._ref] | order(name asc) {        _id,  name,  slug,  tagline,  subtitle,  "ribbon": coalesce(ribbon, specialtyTypes[0]->ribbonLabel),  startingPrice,  arcticTripId,  durationLabel,  "river": river->{ "name": coalesce(riverName, name), slug },  "tripType": tripType->{ name, cardLabel, tagColor, slug },  "image": photos[0]    },    "datedTrips": *[_type == "trip" && ^._id in specialtyDepartures[].specialtyType._ref] {      _id,      name,      slug,      startingPrice,      arcticTripId,      "image": photos[0],      "entries": specialtyDepartures[specialtyType._ref == ^.^._id]{        _key,        startDate,        label,        note,        image      }    }  }
 export type AllSpecialtyTypesQueryResult = Array<{
     _id: string;
     name: string | null;
@@ -1561,6 +1569,37 @@ export type AllSpecialtyTypesQueryResult = Array<{
             _type: 'image';
             _key: string;
         } | null;
+    }>;
+    datedTrips: Array<{
+        _id: string;
+        name: string | null;
+        slug: Slug | null;
+        startingPrice: string | null;
+        arcticTripId: string | null;
+        image: {
+            asset?: SanityImageAssetReference;
+            media?: unknown;
+            hotspot?: SanityImageHotspot;
+            crop?: SanityImageCrop;
+            alt?: string;
+            caption?: string;
+            _type: 'image';
+            _key: string;
+        } | null;
+        entries: Array<{
+            _key: string;
+            startDate: string | null;
+            label: string | null;
+            note: string | null;
+            image: {
+                asset?: SanityImageAssetReference;
+                media?: unknown;
+                hotspot?: SanityImageHotspot;
+                crop?: SanityImageCrop;
+                alt?: string;
+                _type: 'image';
+            } | null;
+        }> | null;
     }>;
 }>;
 
@@ -1847,7 +1886,8 @@ export type SitemapQueryResult = {
 };
 
 // Query TypeMap
-declare global {
+import '@sanity/client';
+declare module '@sanity/client' {
     interface SanityQueries {
         '\n  *[_type == "trip"] | order(name asc) {\n    \n  _id,\n  name,\n  slug,\n  tagline,\n  subtitle,\n  "ribbon": coalesce(ribbon, specialtyTypes[0]->ribbonLabel),\n  startingPrice,\n  arcticTripId,\n  durationLabel,\n  "river": river->{ "name": coalesce(riverName, name), slug },\n  "tripType": tripType->{ name, cardLabel, tagColor, slug },\n  "image": photos[0]\n,\n    "specialtyDepartures": specialtyDepartures[]{\n      _key,\n      startDate,\n      label,\n      note,\n      "specialtyType": specialtyType->{ name, slug }\n    }\n  }\n': AllTripsQueryResult;
         '\n  *[_type == "trip"] | order(name asc) {\n    \n  _id,\n  name,\n  slug,\n  tagline,\n  subtitle,\n  "ribbon": coalesce(ribbon, specialtyTypes[0]->ribbonLabel),\n  startingPrice,\n  arcticTripId,\n  durationLabel,\n  "river": river->{ "name": coalesce(riverName, name), slug },\n  "tripType": tripType->{ name, cardLabel, tagColor, slug },\n  "image": photos[0]\n,\n    duration,\n    minAge,\n    "minAgeOverrides": minAgeOverrides[]{ months, minAge, reason },\n    maxRapidClass,\n    seasonMonths,\n    craftTypes\n  }\n': TripFinderTripsQueryResult;
@@ -1856,7 +1896,7 @@ declare global {
         '\n  *[_type == "river" && slug.current == $slug][0] {\n    _id,\n    name,\n    "riverLabel": coalesce(riverName, name),\n    slug,\n    description,\n    image,\n    usgsSiteId,\n    flowLinkUrl,\n    "trips": *[_type == "trip" && river._ref == ^._id] | order(name asc) {\n      \n  _id,\n  name,\n  slug,\n  tagline,\n  subtitle,\n  "ribbon": coalesce(ribbon, specialtyTypes[0]->ribbonLabel),\n  startingPrice,\n  arcticTripId,\n  durationLabel,\n  "river": river->{ "name": coalesce(riverName, name), slug },\n  "tripType": tripType->{ name, cardLabel, tagColor, slug },\n  "image": photos[0]\n\n    }\n  }\n': RiverBySlugQueryResult;
         '\n  *[_type == "tripType" && slug.current == $slug][0] {\n    _id,\n    name,\n    slug,\n    description,\n    image,\n    "trips": *[\n      _type == "trip" &&\n      (tripType._ref == ^._id || tripType->listsWith._ref == ^._id)\n    ] | order(name asc) {\n      \n  _id,\n  name,\n  slug,\n  tagline,\n  subtitle,\n  "ribbon": coalesce(ribbon, specialtyTypes[0]->ribbonLabel),\n  startingPrice,\n  arcticTripId,\n  durationLabel,\n  "river": river->{ "name": coalesce(riverName, name), slug },\n  "tripType": tripType->{ name, cardLabel, tagColor, slug },\n  "image": photos[0]\n\n    }\n  }\n': TripTypeBySlugQueryResult;
         '\n  *[_type == "tripType"] | order(order asc, name asc) {\n    _id,\n    name,\n    slug,\n    cardLabel,\n    tagColor,\n    "listsWith": listsWith->slug.current\n  }\n': AllTripTypesQueryResult;
-        '\n  *[_type == "specialtyType"] | order(order asc, name asc) {\n    _id,\n    name,\n    slug,\n    tagline,\n    description,\n    image,\n    ribbonLabel,\n    "trips": *[_type == "trip" && references(^._id)] | order(name asc) {\n      \n  _id,\n  name,\n  slug,\n  tagline,\n  subtitle,\n  "ribbon": coalesce(ribbon, specialtyTypes[0]->ribbonLabel),\n  startingPrice,\n  arcticTripId,\n  durationLabel,\n  "river": river->{ "name": coalesce(riverName, name), slug },\n  "tripType": tripType->{ name, cardLabel, tagColor, slug },\n  "image": photos[0]\n\n    }\n  }\n': AllSpecialtyTypesQueryResult;
+        '\n  *[_type == "specialtyType"] | order(order asc, name asc) {\n    _id,\n    name,\n    slug,\n    tagline,\n    description,\n    image,\n    ribbonLabel,\n    "trips": *[_type == "trip" && ^._id in specialtyTypes[]._ref] | order(name asc) {\n      \n  _id,\n  name,\n  slug,\n  tagline,\n  subtitle,\n  "ribbon": coalesce(ribbon, specialtyTypes[0]->ribbonLabel),\n  startingPrice,\n  arcticTripId,\n  durationLabel,\n  "river": river->{ "name": coalesce(riverName, name), slug },\n  "tripType": tripType->{ name, cardLabel, tagColor, slug },\n  "image": photos[0]\n\n    },\n    "datedTrips": *[_type == "trip" && ^._id in specialtyDepartures[].specialtyType._ref] {\n      _id,\n      name,\n      slug,\n      startingPrice,\n      arcticTripId,\n      "image": photos[0],\n      "entries": specialtyDepartures[specialtyType._ref == ^.^._id]{\n        _key,\n        startDate,\n        label,\n        note,\n        image\n      }\n    }\n  }\n': AllSpecialtyTypesQueryResult;
         '\n  *[_type == "faq"] | order(category asc, order asc) {\n    _id,\n    question,\n    answer,\n    category\n  }\n': AllFaqsQueryResult;
         '\n  *[_type == "siteSettings"][0] {\n    phone,\n    email,\n    address,\n    socialLinks,\n    reviews,\n    whatsIncluded\n  }\n': SiteSettingsQueryResult;
         '\n  *[_type == "post"] | order(publishedAt desc) {\n    _id,\n    title,\n    slug,\n    excerpt,\n    mainImage,\n    publishedAt,\n    category\n  }\n': AllPostsQueryResult;
@@ -1865,8 +1905,4 @@ declare global {
         '\n  *[_type == "homepage"][0] {\n    heroHeading,\n    heroImage,\n    "heroImageAlt": heroImage.alt,\n    heroCtaText,\n    heroCtaLink,\n    "featuredTrips": featuredTrips[]->{ \n  _id,\n  name,\n  slug,\n  tagline,\n  subtitle,\n  "ribbon": coalesce(ribbon, specialtyTypes[0]->ribbonLabel),\n  startingPrice,\n  arcticTripId,\n  durationLabel,\n  "river": river->{ "name": coalesce(riverName, name), slug },\n  "tripType": tripType->{ name, cardLabel, tagColor, slug },\n  "image": photos[0]\n },\n    storyBody,\n    storyImageLeft,\n    storyImagePortrait,\n    storyCtaText,\n    storyCtaLink,\n    "rivers": rivers[]->{\n      _id,\n      name,\n      slug,\n      image,\n      description\n    },\n    learnContent[]{\n      _key,\n      title,\n      image,\n      link,\n      isVideo\n    }\n  }\n': HomepageQueryResult;
         '\n  {\n    "homepage": *[_type == "homepage" && !(_id in path("drafts.**"))][0] { _updatedAt },\n    "tripTypes": *[_type == "tripType" && defined(slug.current) && !(_id in path("drafts.**"))] {\n      "slug": slug.current,\n      _updatedAt\n    },\n    "trips": *[_type == "trip" && defined(slug.current) && !(_id in path("drafts.**"))] | order(slug.current asc) {\n      "slug": slug.current,\n      _updatedAt\n    },\n    "rivers": *[_type == "river" && defined(slug.current) && !(_id in path("drafts.**"))] | order(slug.current asc) {\n      "slug": slug.current,\n      _updatedAt\n    },\n    "posts": *[_type == "post" && defined(slug.current) && !(_id in path("drafts.**"))] | order(slug.current asc) {\n      "slug": slug.current,\n      _updatedAt\n    },\n    "pages": *[_type == "page" && defined(slug.current) && !(_id in path("drafts.**"))] | order(slug.current asc) {\n      "slug": slug.current,\n      _updatedAt\n    }\n  }\n': SitemapQueryResult;
     }
-}
-// Lets @sanity/client releases that predate the global registry read it too
-declare module '@sanity/client' {
-    interface SanityQueries extends globalThis.SanityQueries {}
 }

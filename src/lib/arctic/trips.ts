@@ -19,7 +19,7 @@ import {
 const departureList = listEnvelope(departureSchema);
 
 /** Today's date in Arctic's YYYY-MM-DD convention (Mountain Time). */
-function todayISO(): string {
+export function todayISO(): string {
     return new Intl.DateTimeFormat('en-CA', {
         timeZone: 'America/Denver',
     }).format(new Date());

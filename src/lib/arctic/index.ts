@@ -7,6 +7,7 @@ export {
     getTripType,
     getUpcomingDepartures,
     isPrivateCharter,
+    todayISO,
 } from './trips';
 export {
     BookingError,

@@ -1,3 +1,4 @@
+import { DepartureHashTarget } from '@/components/ui/DepartureHashTarget';
 import { DepartureList } from '@/components/ui/DepartureList';
 import { DepartureVariantChips } from '@/components/ui/DepartureVariantChips';
 import { Section } from '@/components/ui/Section';
@@ -96,6 +97,9 @@ export async function AvailabilitySection({
                         />
                     )}
                 </div>
+                {callouts.size > 0 && (
+                    <DepartureHashTarget fallbackId={AVAILABILITY_ANCHOR} />
+                )}
             </div>
         </Section>
     );
