@@ -2,6 +2,7 @@ import { PortableText } from '@portabletext/react';
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
+import { JsonLd } from '@/components/seo/JsonLd';
 import {
     AVAILABILITY_ANCHOR,
     AvailabilitySection,
@@ -29,6 +30,8 @@ import { TripMapSection } from '@/components/ui/TripMapSection';
 import { WhatsIncluded } from '@/components/ui/WhatsIncluded';
 import { stretchBySlug } from '@/lib/map-style';
 import { getSiteSettings, getTripBySlug, imageUrl } from '@/lib/sanity';
+import { openGraphFor } from '@/lib/seo';
+import { tripJsonLd } from '@/lib/structured-data';
 import { TRIP_MAP_COORDS } from '@/lib/trip-map-data';
 import { embedUrl } from '@/lib/video';
 
@@ -47,9 +50,12 @@ export async function generateMetadata({
     const { slug } = await params;
     const trip = await getTripBySlug(slug);
     if (!trip) return {};
+    const path = `/trips/${slug}`;
     return {
         title: trip.name ?? undefined,
         description: trip.tagline ?? undefined,
+        alternates: { canonical: path },
+        openGraph: openGraphFor(path, trip.photos?.[0], trip.photos?.[0]?.alt),
     };
 }
 
@@ -176,8 +182,17 @@ export default async function TripPage({ params }: TripPageProps) {
             source: review?.source,
         }));
 
+    const structuredData = tripJsonLd({
+        name: trip.name,
+        description: trip.tagline,
+        path: `/trips/${slug}`,
+        images: heroPhoto ? [heroPhoto] : [],
+        startingPrice: trip.startingPrice,
+    });
+
     return (
         <>
+            <JsonLd data={structuredData} />
             {/* Banner — hero-height (Justin: a larger header image on trip
                 pages). */}
             <PageBanner

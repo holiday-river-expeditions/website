@@ -1,5 +1,7 @@
+import type { Metadata } from 'next';
 import Image from 'next/image';
 import Link from 'next/link';
+import { JsonLd } from '@/components/seo/JsonLd';
 import { Button } from '@/components/ui/Button';
 import { ContentCard } from '@/components/ui/ContentCard';
 import { Hero } from '@/components/ui/Hero';
@@ -22,12 +24,17 @@ import {
 } from '@/lib/trip-map-data';
 import { contactEmail, contactPhone } from '@/lib/contact-defaults';
 import { getHomepage, getSiteSettings, imageUrl } from '@/lib/sanity';
+import { organizationJsonLd } from '@/lib/structured-data';
 import { resolveTripFinderSpec } from '@/lib/trip-finder-spec';
 
 // Re-fetch from Sanity at most once a minute so content edits in /studio appear
 // on the live site without a redeploy. (Swap for webhook-based on-demand
 // revalidation later if the team wants near-instant updates.)
 export const revalidate = 60;
+
+export const metadata: Metadata = {
+    alternates: { canonical: '/' },
+};
 
 export default async function Home() {
     const [homepage, settings, finderSpec] = await Promise.all([
@@ -94,8 +101,17 @@ export default async function Home() {
     const storyImageLeft = imageUrl(homepage.storyImageLeft, 940, 1058);
     const storyImagePortrait = imageUrl(homepage.storyImagePortrait, 940, 1410);
 
+    const structuredData = organizationJsonLd({
+        telephone: contactPhone(settings),
+        email: contactEmail(settings),
+        address: settings?.address,
+        socialLinks: settings?.socialLinks,
+        image: heroImage,
+    });
+
     return (
         <>
+            <JsonLd data={structuredData} />
             {/* Hero — CTA is the low-commitment exploration entry; the nav's
                 Book Now stays the persistent high-commitment action. */}
             <Hero

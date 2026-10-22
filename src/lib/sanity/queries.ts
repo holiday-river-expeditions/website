@@ -283,3 +283,32 @@ export const homepageQuery = defineQuery(`
     }
   }
 `);
+
+/** sitemap.xml: every Sanity document that has its own public route, with
+    the timestamp used for <lastmod>. Published only: drafts are filtered
+    out even if a token-authenticated client ever runs this. */
+export const sitemapQuery = defineQuery(`
+  {
+    "homepage": *[_type == "homepage" && !(_id in path("drafts.**"))][0] { _updatedAt },
+    "tripTypes": *[_type == "tripType" && defined(slug.current) && !(_id in path("drafts.**"))] {
+      "slug": slug.current,
+      _updatedAt
+    },
+    "trips": *[_type == "trip" && defined(slug.current) && !(_id in path("drafts.**"))] | order(slug.current asc) {
+      "slug": slug.current,
+      _updatedAt
+    },
+    "rivers": *[_type == "river" && defined(slug.current) && !(_id in path("drafts.**"))] | order(slug.current asc) {
+      "slug": slug.current,
+      _updatedAt
+    },
+    "posts": *[_type == "post" && defined(slug.current) && !(_id in path("drafts.**"))] | order(slug.current asc) {
+      "slug": slug.current,
+      _updatedAt
+    },
+    "pages": *[_type == "page" && defined(slug.current) && !(_id in path("drafts.**"))] | order(slug.current asc) {
+      "slug": slug.current,
+      _updatedAt
+    }
+  }
+`);

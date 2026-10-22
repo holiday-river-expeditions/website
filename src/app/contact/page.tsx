@@ -12,6 +12,7 @@ export const metadata: Metadata = {
     title: 'Contact Us',
     description:
         'Get in touch with Holiday River Expeditions: call, email, or send us a message.',
+    alternates: { canonical: '/contact' },
 };
 
 const locations = [

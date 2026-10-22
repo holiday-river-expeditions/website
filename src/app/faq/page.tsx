@@ -11,6 +11,7 @@ export const metadata: Metadata = {
     title: 'Frequently Asked Questions',
     description:
         'Answers to common questions about booking, preparing for, and enjoying a Holiday River Expeditions trip.',
+    alternates: { canonical: '/faq' },
 };
 
 // Display order and labels for FAQ categories (schema values in faq.ts).

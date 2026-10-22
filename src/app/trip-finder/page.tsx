@@ -31,6 +31,7 @@ export const metadata: Metadata = {
     title: 'Find Your Trip',
     description:
         'Answer five quick questions and get matched to the Holiday River Expeditions rafting or biking trip that fits your crew, your dates, and your appetite for whitewater.',
+    alternates: { canonical: '/trip-finder' },
 };
 
 export default async function TripFinderPage({
