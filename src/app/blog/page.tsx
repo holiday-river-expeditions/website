@@ -11,6 +11,7 @@ export const metadata: Metadata = {
     title: 'Blog',
     description:
         'Stories from the canyon: trip preparation, conservation, and the culture and history of river country.',
+    alternates: { canonical: '/blog' },
 };
 
 const categoryLabels: Record<string, string> = {

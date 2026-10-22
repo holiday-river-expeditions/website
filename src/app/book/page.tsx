@@ -34,6 +34,7 @@ export const metadata: Metadata = {
     title: 'Book Your Trip',
     description:
         'Live availability and booking for upcoming Holiday River Expeditions rafting and mountain biking trips.',
+    alternates: { canonical: '/book' },
 };
 
 /** Compact identity for a Sanity-authored trip, shown at the group header

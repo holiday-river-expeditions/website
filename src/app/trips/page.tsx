@@ -10,6 +10,7 @@ export const metadata: Metadata = {
     title: 'All Trips',
     description:
         'Multi-day whitewater rafting and mountain biking expeditions in Utah and Colorado.',
+    alternates: { canonical: '/trips' },
 };
 
 export default async function TripsPage() {

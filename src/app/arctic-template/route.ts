@@ -19,11 +19,10 @@
  * Not for humans: noindexed via header and meta.
  */
 
-// || (not ??): the env var exists but is empty in some environments, and an
-// empty base would silently produce relative links — broken on the clone.
-const SITE = (
-    process.env.NEXT_PUBLIC_SITE_URL || 'https://website-phi-six-25.vercel.app'
-).replace(/\/$/, '');
+import { getSiteUrl } from '@/lib/site-url';
+
+// Absolute on purpose: relative links would break on the clone.
+const SITE = getSiteUrl();
 
 const NAV = [
     { label: 'Rafting', href: `${SITE}/rafting` },

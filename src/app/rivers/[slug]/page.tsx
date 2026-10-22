@@ -10,6 +10,7 @@ import { RiverFlow } from '@/components/ui/RiverFlow';
 import { Section } from '@/components/ui/Section';
 import { TripCard, tripCardProps } from '@/components/ui/TripCard';
 import { getRiverBySlug, imageUrl } from '@/lib/sanity';
+import { openGraphFor } from '@/lib/seo';
 
 // Same ISR window as the homepage: Studio edits go live within a minute.
 export const revalidate = 60;
@@ -26,9 +27,12 @@ export async function generateMetadata({
     if (!river) return {};
     // Never append "River" to the name: sections are named by stretch, so
     // that would invent "Maze River" and "White Rim River".
+    const path = `/rivers/${slug}`;
     return {
         title: river.name ?? undefined,
         description: river.description ?? undefined,
+        alternates: { canonical: path },
+        openGraph: openGraphFor(path, river.image),
     };
 }
 

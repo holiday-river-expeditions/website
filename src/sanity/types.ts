@@ -1817,6 +1817,35 @@ export type HomepageQueryResult = {
     }> | null;
 } | null;
 
+// Source: src/lib/sanity/queries.ts
+// Variable: sitemapQuery
+// Query: {    "homepage": *[_type == "homepage" && !(_id in path("drafts.**"))][0] { _updatedAt },    "tripTypes": *[_type == "tripType" && defined(slug.current) && !(_id in path("drafts.**"))] {      "slug": slug.current,      _updatedAt    },    "trips": *[_type == "trip" && defined(slug.current) && !(_id in path("drafts.**"))] | order(slug.current asc) {      "slug": slug.current,      _updatedAt    },    "rivers": *[_type == "river" && defined(slug.current) && !(_id in path("drafts.**"))] | order(slug.current asc) {      "slug": slug.current,      _updatedAt    },    "posts": *[_type == "post" && defined(slug.current) && !(_id in path("drafts.**"))] | order(slug.current asc) {      "slug": slug.current,      _updatedAt    },    "pages": *[_type == "page" && defined(slug.current) && !(_id in path("drafts.**"))] | order(slug.current asc) {      "slug": slug.current,      _updatedAt    }  }
+export type SitemapQueryResult = {
+    homepage: {
+        _updatedAt: string;
+    } | null;
+    tripTypes: Array<{
+        slug: string | null;
+        _updatedAt: string;
+    }>;
+    trips: Array<{
+        slug: string | null;
+        _updatedAt: string;
+    }>;
+    rivers: Array<{
+        slug: string | null;
+        _updatedAt: string;
+    }>;
+    posts: Array<{
+        slug: string | null;
+        _updatedAt: string;
+    }>;
+    pages: Array<{
+        slug: string | null;
+        _updatedAt: string;
+    }>;
+};
+
 // Query TypeMap
 declare global {
     interface SanityQueries {
@@ -1834,6 +1863,7 @@ declare global {
         '\n  *[_type == "post" && slug.current == $slug][0] {\n    _id,\n    title,\n    slug,\n    excerpt,\n    mainImage,\n    publishedAt,\n    category,\n    body\n  }\n': PostBySlugQueryResult;
         '\n  *[_type == "page" && slug.current == $slug][0] {\n    _id,\n    title,\n    slug,\n    content\n  }\n': PageBySlugQueryResult;
         '\n  *[_type == "homepage"][0] {\n    heroHeading,\n    heroImage,\n    "heroImageAlt": heroImage.alt,\n    heroCtaText,\n    heroCtaLink,\n    "featuredTrips": featuredTrips[]->{ \n  _id,\n  name,\n  slug,\n  tagline,\n  subtitle,\n  "ribbon": coalesce(ribbon, specialtyTypes[0]->ribbonLabel),\n  startingPrice,\n  arcticTripId,\n  durationLabel,\n  "river": river->{ "name": coalesce(riverName, name), slug },\n  "tripType": tripType->{ name, cardLabel, tagColor, slug },\n  "image": photos[0]\n },\n    storyBody,\n    storyImageLeft,\n    storyImagePortrait,\n    storyCtaText,\n    storyCtaLink,\n    "rivers": rivers[]->{\n      _id,\n      name,\n      slug,\n      image,\n      description\n    },\n    learnContent[]{\n      _key,\n      title,\n      image,\n      link,\n      isVideo\n    }\n  }\n': HomepageQueryResult;
+        '\n  {\n    "homepage": *[_type == "homepage" && !(_id in path("drafts.**"))][0] { _updatedAt },\n    "tripTypes": *[_type == "tripType" && defined(slug.current) && !(_id in path("drafts.**"))] {\n      "slug": slug.current,\n      _updatedAt\n    },\n    "trips": *[_type == "trip" && defined(slug.current) && !(_id in path("drafts.**"))] | order(slug.current asc) {\n      "slug": slug.current,\n      _updatedAt\n    },\n    "rivers": *[_type == "river" && defined(slug.current) && !(_id in path("drafts.**"))] | order(slug.current asc) {\n      "slug": slug.current,\n      _updatedAt\n    },\n    "posts": *[_type == "post" && defined(slug.current) && !(_id in path("drafts.**"))] | order(slug.current asc) {\n      "slug": slug.current,\n      _updatedAt\n    },\n    "pages": *[_type == "page" && defined(slug.current) && !(_id in path("drafts.**"))] | order(slug.current asc) {\n      "slug": slug.current,\n      _updatedAt\n    }\n  }\n': SitemapQueryResult;
     }
 }
 // Lets @sanity/client releases that predate the global registry read it too

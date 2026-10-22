@@ -2,6 +2,7 @@ import type { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 import { TripTypeLanding } from '@/components/ui/TripTypeLanding';
 import { getAllTrips, getTripTypeBySlug } from '@/lib/sanity';
+import { openGraphFor } from '@/lib/seo';
 
 // Same ISR window as the homepage: Studio edits go live within a minute.
 export const revalidate = 60;
@@ -12,6 +13,8 @@ export async function generateMetadata(): Promise<Metadata> {
     return {
         title: tripType.name ?? undefined,
         description: tripType.description ?? undefined,
+        alternates: { canonical: '/rafting' },
+        openGraph: openGraphFor('/rafting', tripType.image),
     };
 }
 

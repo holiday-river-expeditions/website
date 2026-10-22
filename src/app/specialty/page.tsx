@@ -16,6 +16,7 @@ export const metadata: Metadata = {
     title: 'Specialty Trips',
     description:
         'Live music in the canyon, dark-sky stargazing, women’s trips, and other one-of-a-kind departures from Holiday River Expeditions.',
+    alternates: { canonical: '/specialty' },
 };
 
 /**

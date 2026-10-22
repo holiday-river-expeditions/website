@@ -10,6 +10,7 @@ import {
 } from '@/components/ui/PageBanner';
 import { Section } from '@/components/ui/Section';
 import { getPostBySlug, imageUrl } from '@/lib/sanity';
+import { openGraphFor } from '@/lib/seo';
 
 // Same ISR window as the homepage: Studio edits go live within a minute.
 export const revalidate = 60;
@@ -36,9 +37,16 @@ export async function generateMetadata({
     const { slug } = await params;
     const post = await getPostBySlug(slug);
     if (!post) return {};
+    const path = `/blog/${slug}`;
     return {
         title: post.title ?? undefined,
         description: post.excerpt ?? undefined,
+        alternates: { canonical: path },
+        openGraph: {
+            ...openGraphFor(path, post.mainImage),
+            type: 'article',
+            publishedTime: post.publishedAt ?? undefined,
+        },
     };
 }
 

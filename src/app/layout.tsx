@@ -7,6 +7,8 @@ import { DemoFlagsPanel } from '@/components/ui/DemoFlagsPanel';
 import { TripFinderFab } from '@/components/ui/TripFinderFab';
 import { Footer } from '@/components/layout/Footer';
 import { DEMO_INIT_SCRIPT } from '@/lib/demo-flags';
+import { DEFAULT_OPEN_GRAPH, DEFAULT_TWITTER, SITE_NAME } from '@/lib/seo';
+import { getSiteUrl } from '@/lib/site-url';
 import './globals.css';
 
 // Oswald serves as the fallback for the brand typeface, ATF Alternate Gothic,
@@ -28,12 +30,18 @@ const ptSans = PT_Sans({
 });
 
 export const metadata: Metadata = {
+    // Resolves relative canonical and Open Graph URLs. Canonicals are set per
+    // page, never here: a root canonical would be inherited by every page
+    // that forgot its own and point them all at the homepage.
+    metadataBase: new URL(getSiteUrl()),
     title: {
-        default: 'Holiday River Expeditions',
-        template: '%s | Holiday River Expeditions',
+        default: SITE_NAME,
+        template: `%s | ${SITE_NAME}`,
     },
     description:
         'Guided whitewater rafting and nature experiences in Colorado and Utah',
+    openGraph: DEFAULT_OPEN_GRAPH,
+    twitter: DEFAULT_TWITTER,
     icons: {
         icon: [
             { url: '/favicon-32x32.png', sizes: '32x32', type: 'image/png' },
