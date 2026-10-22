@@ -1,7 +1,11 @@
 import { render, screen, fireEvent } from '@testing-library/react';
 import { afterEach, describe, expect, it } from 'vitest';
 import { DemoFlagsPanel } from './DemoFlagsPanel';
-import { DEMO_FLAGS, DEMO_STORAGE_KEY } from '@/lib/demo-flags';
+import {
+    DEMO_FLAG_GROUPS,
+    DEMO_FLAGS,
+    DEMO_STORAGE_KEY,
+} from '@/lib/demo-flags';
 
 function arm(flags: Record<string, boolean> = {}) {
     localStorage.setItem(
@@ -40,7 +44,9 @@ describe('DemoFlagsPanel', () => {
         const grouped = DEMO_FLAGS.filter((flag) => 'group' in flag);
         const ungrouped = DEMO_FLAGS.filter((flag) => !('group' in flag));
         // One extra radio per group: the "default" option.
-        expect(screen.getAllByRole('radio')).toHaveLength(grouped.length + 1);
+        expect(screen.getAllByRole('radio')).toHaveLength(
+            grouped.length + Object.keys(DEMO_FLAG_GROUPS).length,
+        );
         expect(screen.getAllByRole('checkbox')).toHaveLength(ungrouped.length);
         for (const flag of DEMO_FLAGS) {
             expect(

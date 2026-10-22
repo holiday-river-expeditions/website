@@ -53,6 +53,33 @@ export const DEMO_FLAGS = [
         group: 'logo',
     },
     {
+        id: 'hero-video',
+        label: 'Video: Westwater rafts (draft)',
+        description:
+            'Silent 14 second loop. Flying into Desolation, the Westwater rapid, rafts coming through, and dinner at camp.',
+        group: 'hero',
+    },
+    {
+        id: 'hero-major',
+        label: 'Raft “The Major” in whitewater',
+        description:
+            'Family splashing through a rapid on Desolation Canyon, Holiday logo on the tube.',
+        group: 'hero',
+    },
+    {
+        id: 'hero-one-eye',
+        label: 'Raft “One-Eye Smith” up close',
+        description:
+            'Kids laughing in the bow, two Holiday logos across the frame.',
+        group: 'hero',
+    },
+    {
+        id: 'hero-eddy',
+        label: 'Raft “Eddy” on Westwater',
+        description: 'Guide rowing a full boat through white water.',
+        group: 'hero',
+    },
+    {
         id: 'trip-bar',
         label: 'Trip bar under the banner',
         description:
@@ -124,6 +151,10 @@ export const DEMO_FLAG_GROUPS: Record<
     logo: {
         label: 'Logo treatment',
         defaultLabel: 'Classic SVG lockup (default)',
+    },
+    hero: {
+        label: 'Homepage hero photo',
+        defaultLabel: 'Photo set in the Studio (default)',
     },
 };
 
