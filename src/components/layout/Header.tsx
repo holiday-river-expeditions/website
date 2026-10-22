@@ -19,8 +19,10 @@ export function Header() {
         >
             <HeaderReveal />
             {/* Full-bleed: nav hugs the left edge, hamburger/Book Now the right
-                (mock places them ~48px from the viewport edges, no max-width). */}
-            <div className='flex items-center justify-between gap-2 px-4 py-5 sm:px-6 md:px-12 lg:grid lg:grid-cols-[1fr_auto_1fr]'>
+                (mock places them ~48px from the viewport edges, no max-width).
+                lg:gap-4 keeps the nav off the logo at 1024px, where the nav
+                fills its column. */}
+            <div className='flex items-center justify-between gap-2 px-4 py-5 sm:px-6 md:px-12 lg:grid lg:grid-cols-[1fr_auto_1fr] lg:gap-4'>
                 {/* Left: desktop nav */}
                 <div className='hidden lg:block lg:justify-self-start'>
                     <DesktopNav />
