@@ -7,9 +7,11 @@ import { Section } from '@/components/ui/Section';
 import { TripCatalogDisclosure } from '@/components/ui/TripCatalogDisclosure';
 import { SectionNav } from '@/components/ui/SectionNav';
 import { SpecialtyDateList } from '@/components/ui/SpecialtyDateList';
+import { TripBar } from '@/components/ui/TripBar';
 import { TripCard, tripCardProps } from '@/components/ui/TripCard';
 import { getUpcomingDepartures, todayISO } from '@/lib/arctic';
 import { getTripTypeFare } from '@/lib/arctic/prices';
+import { contactPhone } from '@/lib/contact-defaults';
 import { buildSpecialtyDateRows } from '@/lib/departures';
 import { getAllSpecialtyTypes, getAllTrips, imageUrl } from '@/lib/sanity';
 
@@ -40,6 +42,12 @@ export default async function SpecialtyPage() {
         getAllSpecialtyTypes(),
         getAllTrips(),
     ]);
+    const familyItems = types.flatMap((type) =>
+        type.slug?.current && type.name
+            ? [{ id: type.slug.current, label: type.name }]
+            : [],
+    );
+    const phone = contactPhone(null);
 
     // One Arctic call per river trip with specialty dates, the same calls
     // its trip page makes, so the two share a cache and this page never
@@ -94,12 +102,20 @@ export default async function SpecialtyPage() {
             {types.length > 1 && (
                 <SectionNav
                     ariaLabel='Specialty trip families'
-                    showAfter={0}
-                    items={types.flatMap((type) =>
-                        type.slug?.current && type.name
-                            ? [{ id: type.slug.current, label: type.name }]
-                            : [],
-                    )}
+                    items={familyItems}
+                />
+            )}
+            {/* trip-bar demo flag. Five long family names only fit as tabs
+                from xl. */}
+            {types.length > 1 && (
+                <TripBar
+                    ariaLabel='Specialty trip families'
+                    items={familyItems}
+                    tabsFrom='xl'
+                    phone={{
+                        href: `tel:+1${phone.replace(/\D/g, '')}`,
+                        label: phone,
+                    }}
                 />
             )}
 
@@ -219,10 +235,6 @@ export default async function SpecialtyPage() {
                     <TripCatalogDisclosure trips={allTrips} />
                 </Section>
             )}
-
-            {/* Clearance so the floating family menu never permanently
-                occludes the last row of content. */}
-            <div aria-hidden className='h-16' />
         </>
     );
 }

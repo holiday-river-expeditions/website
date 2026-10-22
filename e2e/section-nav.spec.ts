@@ -1,42 +1,69 @@
 import { expect, test } from '@playwright/test';
 
 /**
- * Floating section menu (Aug 20 decision): trip pages carry Trip Details /
- * FAQs / Rates & Dates stops; the specialty hub lists its families. The
- * bar is a fixed nav of plain anchors, hidden until scroll on trip pages
- * and always visible on the specialty hub.
+ * Section menu (Aug 20 decision, reworked Oct 2026): a tab row fixed at
+ * the top from lg up, and below lg a bottom dock whose button opens a
+ * sheet of every section. Trip pages add a See dates jump.
  */
 
-test('trip page floating menu is visible on load and jumps to sections', async ({
+test('desktop tab row appears in the content and jumps to sections', async ({
     page,
 }) => {
     await page.goto('/trips/cataract-canyon');
-
-    // Always visible (Darius: appearing only after a long scroll hid the
-    // navigation exactly when a new visitor needs it), consistent with the
-    // specialty hub and /book bars.
     const nav = page.getByRole('navigation', { name: 'Trip sections' });
-    await expect(nav).not.toHaveClass(/invisible/);
-    await expect(nav.getByRole('link', { name: 'Trip Details' })).toBeVisible();
+    const tabs = nav.getByRole('link', { name: 'Trip Details' }).first();
 
-    // Jumping to Rates & Dates brings the availability section into view.
-    await nav.getByRole('link', { name: 'Rates & Dates' }).click();
+    await page.locator('#trip-details').scrollIntoViewIfNeeded();
+    await expect(tabs).toBeVisible();
+
+    await nav
+        .getByRole('link', { name: 'Dates & Availability' })
+        .first()
+        .click();
     await expect(page.locator('#dates-and-rates')).toBeInViewport();
 });
 
-test('specialty hub floating menu lists the families and is always visible', async ({
+test('phone dock opens the sheet and the sheet jumps and closes', async ({
     page,
 }) => {
-    await page.goto('/specialty');
+    await page.setViewportSize({ width: 390, height: 844 });
+    await page.goto('/trips/cataract-canyon');
+    const nav = page.getByRole('navigation', { name: 'Trip sections' });
 
+    // The dock owns the bottom edge, so the Find Your Trip pill steps
+    // aside and lives in the sheet instead.
+    await expect(nav.getByRole('link', { name: 'See dates' })).toBeVisible();
+    await expect(
+        page
+            .locator('a[href="/trip-finder"]:not(nav a):not([data-trip-bar] a)')
+            .filter({ hasText: 'Find Your Trip' }),
+    ).toBeHidden();
+
+    await nav.getByRole('button', { name: 'On this page' }).click();
+    const sheet = page.getByRole('dialog', { name: 'Trip sections' });
+    await expect(
+        sheet.getByRole('link', { name: 'Find Your Trip' }),
+    ).toBeVisible();
+
+    await sheet.getByRole('link', { name: 'Dates & Availability' }).click();
+    await expect(sheet).toBeHidden();
+    await expect(page.locator('#dates-and-rates')).toBeInViewport();
+});
+
+test('specialty sheet lists every family', async ({ page }) => {
+    await page.setViewportSize({ width: 390, height: 844 });
+    await page.goto('/specialty');
     const nav = page.getByRole('navigation', {
         name: 'Specialty trip families',
     });
-    await expect(nav).not.toHaveClass(/invisible/);
 
-    const first = nav.getByRole('link').first();
+    await nav.getByRole('button').first().click();
+    const sheet = page.getByRole('dialog', {
+        name: 'Specialty trip families',
+    });
+    const first = sheet.getByRole('link').first();
     await expect(first).toBeVisible();
-    await first.click();
     const target = await first.getAttribute('href');
+    await first.click();
     await expect(page.locator(target!)).toBeInViewport();
 });

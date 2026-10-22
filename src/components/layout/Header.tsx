@@ -2,15 +2,22 @@ import Link from 'next/link';
 import { Button } from '@/components/ui/Button';
 import { Logo } from '@/components/ui/Logo';
 import { MiniCart } from '@/components/ui/MiniCart';
+import { HeaderReveal } from './HeaderReveal';
 import { DesktopNav } from './Nav';
 import { MobileNav } from './MobileNav';
 
 export function Header() {
     return (
         // sticky-header demo flag: persistent nav + logo while scrolling
-        // (wayfinding on long pages). z-50 sits above content and the
-        // floating bars (z-40), below the demo panel (z-[100]).
-        <header className='relative bg-holiday-white [[data-demo-sticky-header=on]_&]:sticky [[data-demo-sticky-header=on]_&]:top-0 [[data-demo-sticky-header=on]_&]:z-50 [[data-demo-sticky-header=on]_&]:shadow-md'>
+        // (wayfinding on long pages). header-reveal demo flag: the same
+        // sticky header, slid away while scrolling down (HeaderReveal sets
+        // data-header-hidden). z-50 sits above content and the floating
+        // bars (z-40), below the demo panel (z-[100]).
+        <header
+            data-site-header
+            className='relative bg-holiday-white [[data-demo-sticky-header=on]_&]:sticky [[data-demo-sticky-header=on]_&]:top-0 [[data-demo-sticky-header=on]_&]:z-50 [[data-demo-sticky-header=on]_&]:shadow-md [[data-demo-header-reveal=on]_&]:sticky [[data-demo-header-reveal=on]_&]:top-0 [[data-demo-header-reveal=on]_&]:z-50 [[data-demo-header-reveal=on]_&]:shadow-md [[data-demo-header-reveal=on]_&]:transition-transform [[data-demo-header-reveal=on]_&]:duration-200 motion-reduce:transition-none [[data-header-hidden]_&]:-translate-y-full'
+        >
+            <HeaderReveal />
             {/* Full-bleed: nav hugs the left edge, hamburger/Book Now the right
                 (mock places them ~48px from the viewport edges, no max-width). */}
             <div className='flex items-center justify-between gap-2 px-4 py-5 sm:px-6 md:px-12 lg:grid lg:grid-cols-[1fr_auto_1fr]'>

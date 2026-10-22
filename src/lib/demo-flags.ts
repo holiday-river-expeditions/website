@@ -53,16 +53,34 @@ export const DEMO_FLAGS = [
         group: 'logo',
     },
     {
-        id: 'bars-on-scroll',
-        label: 'Floating bars appear on scroll',
+        id: 'trip-bar',
+        label: 'Trip bar under the banner',
         description:
-            'ON: the floating section/filter bars stay hidden until the page is scrolled. OFF (default): always visible.',
+            'ON: trip pages and the specialty page get one bar under the banner that sticks to the top as you scroll. It holds the site menu, the section you are in (a list on phones, tabs on computers), the price and next open date, and See dates. It replaces the bottom section menu and the top tabs. OFF (default): bottom section menu on phones, tabs at the top on computers.',
     },
     {
-        id: 'bars-top',
-        label: 'Floating bars at the top',
+        id: 'facts-dates',
+        label: 'Next open dates under the trip facts',
         description:
-            'ON: the floating section and filter bars dock under the header instead of at the bottom of the screen (Lauren, Sep 3). OFF (default): bottom.',
+            'ON: trip pages list the next three open departures right under the price and length. Each one jumps to Dates & Availability. OFF (default): dates only in Dates & Availability.',
+    },
+    {
+        id: 'end-cap',
+        label: 'What next? at the end of trip pages',
+        description:
+            'ON: after the reviews, trip pages offer three ways forward: See dates, Call us, and Find a different trip. OFF (default): reviews then Keep Exploring.',
+    },
+    {
+        id: 'header-reveal',
+        label: 'Header comes back on scroll up',
+        description:
+            'ON: the header slides away while you scroll down and comes back as soon as you scroll up, so the main nav is always a flick away. The desktop section tabs move down under it. If the always-visible header flag is also on, that one wins. OFF (default): the header stays at the top of the page.',
+    },
+    {
+        id: 'sheet-trips',
+        label: 'Similar trips in the section menu',
+        description:
+            'ON: on phones, the trip page section menu also lists up to three similar trips (the same ones as Keep Exploring). OFF (default): sections and Find Your Trip only.',
     },
     {
         id: 'sticky-header',

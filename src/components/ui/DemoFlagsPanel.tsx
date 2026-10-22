@@ -78,7 +78,9 @@ export function DemoFlagsPanel() {
     if (!state.armed) return null;
 
     return (
-        <div className='fixed bottom-4 right-4 z-[100]'>
+        // Lifted above the section dock on phones so it never sits on See
+        // dates.
+        <div className='fixed bottom-4 right-4 z-[100] max-lg:[html:not([data-demo-trip-bar=on])_body:has([data-section-dock])_&]:bottom-20'>
             {open ? (
                 <div className='max-h-[calc(100vh-4rem)] w-64 overflow-y-auto border border-holiday-grey/40 bg-holiday-white p-4 shadow-lg'>
                     <div className='flex items-center justify-between'>

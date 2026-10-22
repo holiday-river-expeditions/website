@@ -310,3 +310,24 @@ summary {
         transition-delay: 0.3s;
     }
 }
+
+/* Section menu (SectionNav). Below lg its dock is pinned to the bottom
+   edge, so the page gets matching padding and nothing ends up under it.
+   From lg it is a tab row fixed at the top, so in-page jumps leave room
+   for it on top of each section's own scroll-margin. */
+@media (width < 64rem) {
+    html:not([data-demo-trip-bar='on']) body:has([data-section-dock]) {
+        padding-bottom: calc(4rem + env(safe-area-inset-bottom));
+    }
+}
+@media (width >= 64rem) {
+    html:not([data-demo-trip-bar='on']):has([data-section-dock]) {
+        scroll-padding-top: 3.25rem;
+    }
+}
+
+/* trip-bar demo flag (TripBar): the bar sticks at the top at every width,
+   so every in-page jump leaves room for it. */
+html[data-demo-trip-bar='on']:has([data-trip-bar]) {
+    scroll-padding-top: 3.25rem;
+}
