@@ -53,18 +53,6 @@ export const DEMO_FLAGS = [
         group: 'logo',
     },
     {
-        id: 'bars-on-scroll',
-        label: 'Booking filter bar appears on scroll',
-        description:
-            'ON: the floating filter bar on Book Your Trip stays hidden until the page is scrolled. OFF (default): always visible. The trip and specialty section menu no longer floats, so this flag does not affect it.',
-    },
-    {
-        id: 'bars-top',
-        label: 'Booking filter bar at the top',
-        description:
-            'ON: the floating filter bar on Book Your Trip docks under the header instead of at the bottom of the screen (Lauren, Sep 3). OFF (default): bottom. The section menu is already at the top on desktop and at the bottom on phones.',
-    },
-    {
         id: 'trip-bar',
         label: 'Trip bar under the banner',
         description:
