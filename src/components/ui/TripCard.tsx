@@ -1,5 +1,5 @@
 import Link from 'next/link';
-import { imageUrl } from '@/lib/sanity';
+import { imageUrl, placeholderUrl } from '@/lib/sanity';
 
 /** Card tag fills, one per trip type. Sand needs dark text for WCAG AA
     contrast; the rest carry white. */
@@ -18,6 +18,9 @@ export interface TripCardProps {
     /** Fill for the category tag, from the trip type. */
     categoryColor?: TripTagColor;
     image: string;
+    /** Tiny blurred copy of the same crop (placeholderUrl), layered under
+        the photo so the card never paints as an empty box while it loads. */
+    imagePlaceholder?: string;
     startingPrice: string;
     duration: string;
     /** Body copy. Omitted on specialty cards, which lead with a subtitle. */
@@ -67,6 +70,7 @@ export function tripCardProps(
         category: trip.tripType?.cardLabel ?? trip.tripType?.name ?? '',
         categoryColor: trip.tripType?.tagColor ?? 'teal',
         image: imageUrl(trip.image, width, height),
+        imagePlaceholder: placeholderUrl(trip.image, width, height),
         startingPrice: trip.startingPrice ?? '',
         duration: trip.durationLabel ?? '',
         description: trip.tagline ?? undefined,
@@ -83,6 +87,7 @@ export function TripCard({
     category,
     categoryColor = 'teal',
     image,
+    imagePlaceholder,
     startingPrice,
     duration,
     description,
@@ -102,9 +107,17 @@ export function TripCard({
                     featured ? 'border-4 border-holiday-red' : ''
                 }`}
             >
+                {/* The photo paints over its blurred stand-in, which
+                    arrives first. The grey tone covers the moment before
+                    either has loaded. */}
                 <div
-                    className='absolute inset-0 bg-cover bg-center motion-safe:transition-transform motion-safe:duration-500 motion-safe:group-hover:scale-105'
-                    style={{ backgroundImage: `url(${image})` }}
+                    className='absolute inset-0 bg-holiday-grey/15 bg-cover bg-center motion-safe:transition-transform motion-safe:duration-500 motion-safe:group-hover:scale-105'
+                    style={{
+                        backgroundImage: [image, imagePlaceholder]
+                            .filter(Boolean)
+                            .map((src) => `url("${src}")`)
+                            .join(', '),
+                    }}
                 />
                 {ribbon && (
                     <span className='absolute left-0 top-4 z-10 whitespace-nowrap bg-holiday-red px-3.5 py-1.5 text-[14px] font-bold leading-tight text-holiday-white'>

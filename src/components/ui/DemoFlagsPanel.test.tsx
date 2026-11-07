@@ -35,56 +35,22 @@ describe('DemoFlagsPanel', () => {
         ).toBeInTheDocument();
     });
 
-    it('renders grouped flags as radios and the rest as checkboxes', () => {
+    it('renders every flag as a checkbox', () => {
+        // No radio groups are live since the logo and hero groups
+        // graduated on 2026-11-06.
         arm();
         render(<DemoFlagsPanel />);
         fireEvent.click(
             screen.getByRole('button', { name: 'Open demo flags panel' }),
         );
-        const grouped = DEMO_FLAGS.filter((flag) => 'group' in flag);
-        const ungrouped = DEMO_FLAGS.filter((flag) => !('group' in flag));
-        // One extra radio per group: the "default" option.
-        expect(screen.getAllByRole('radio')).toHaveLength(
-            grouped.length + Object.keys(DEMO_FLAG_GROUPS).length,
-        );
-        expect(screen.getAllByRole('checkbox')).toHaveLength(ungrouped.length);
+        expect(Object.keys(DEMO_FLAG_GROUPS)).toHaveLength(0);
+        expect(screen.queryAllByRole('radio')).toHaveLength(0);
+        expect(screen.getAllByRole('checkbox')).toHaveLength(DEMO_FLAGS.length);
         for (const flag of DEMO_FLAGS) {
             expect(
                 screen.getByLabelText(flag.label, { exact: false }),
             ).toBeInTheDocument();
         }
-    });
-
-    it('picking a logo radio sets its flag and clears the rest of the group', () => {
-        arm({ 'logo-line': true });
-        render(<DemoFlagsPanel />);
-        fireEvent.click(
-            screen.getByRole('button', { name: 'Open demo flags panel' }),
-        );
-        const bold = screen.getByRole('radio', {
-            name: /Bold live-text lockup/,
-        });
-
-        fireEvent.click(bold);
-        expect(
-            document.documentElement.getAttribute('data-demo-logo-bold'),
-        ).toBe('on');
-        expect(
-            document.documentElement.hasAttribute('data-demo-logo-line'),
-        ).toBe(false);
-        const stored = JSON.parse(
-            localStorage.getItem(DEMO_STORAGE_KEY) ?? '{}',
-        );
-        expect(stored.flags['logo-bold']).toBe(true);
-        expect(stored.flags['logo-line']).toBe(false);
-
-        // The default option returns the group to classic.
-        fireEvent.click(
-            screen.getByRole('radio', { name: /Classic SVG lockup/ }),
-        );
-        expect(
-            document.documentElement.hasAttribute('data-demo-logo-bold'),
-        ).toBe(false);
     });
 
     it('toggling an ungrouped flag writes storage and flips the attribute', () => {
@@ -93,23 +59,23 @@ describe('DemoFlagsPanel', () => {
         fireEvent.click(
             screen.getByRole('button', { name: 'Open demo flags panel' }),
         );
-        const checkbox = screen.getByLabelText('Live river flow', {
+        const checkbox = screen.getByLabelText('Trip finder logic panel', {
             exact: false,
         });
 
         fireEvent.click(checkbox);
         expect(
-            document.documentElement.getAttribute('data-demo-river-flow'),
+            document.documentElement.getAttribute('data-demo-finder-logic'),
         ).toBe('on');
 
         fireEvent.click(checkbox);
         expect(
-            document.documentElement.hasAttribute('data-demo-river-flow'),
+            document.documentElement.hasAttribute('data-demo-finder-logic'),
         ).toBe(false);
     });
 
     it('reset all clears flags but keeps the panel armed', () => {
-        arm({ 'logo-bold': true });
+        arm({ 'finder-logic': true });
         render(<DemoFlagsPanel />);
         fireEvent.click(
             screen.getByRole('button', { name: 'Open demo flags panel' }),
@@ -124,7 +90,7 @@ describe('DemoFlagsPanel', () => {
     });
 
     it('disarm removes the storage key, attributes, and the panel', () => {
-        arm({ 'logo-bold': true });
+        arm({ 'finder-logic': true });
         render(<DemoFlagsPanel />);
         fireEvent.click(
             screen.getByRole('button', { name: 'Open demo flags panel' }),
@@ -132,7 +98,7 @@ describe('DemoFlagsPanel', () => {
         fireEvent.click(screen.getByRole('button', { name: 'Disarm' }));
         expect(localStorage.getItem(DEMO_STORAGE_KEY)).toBeNull();
         expect(
-            document.documentElement.hasAttribute('data-demo-logo-bold'),
+            document.documentElement.hasAttribute('data-demo-finder-logic'),
         ).toBe(false);
         expect(screen.queryByRole('button')).not.toBeInTheDocument();
     });

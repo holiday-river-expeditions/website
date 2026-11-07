@@ -24,9 +24,11 @@ import {
  * (same tab) and the native storage event (other tabs).
  */
 
-/** `group` is optional in the registry literal, so narrow through `in`. */
-function flagGroup(flag: (typeof DEMO_FLAGS)[number]): string | undefined {
-    return 'group' in flag ? flag.group : undefined;
+/** `group` is optional in the registry, and no live flag sets it today
+    (the logo and hero radio groups graduated on 2026-11-06), so read it
+    through the registry's declared shape. */
+function flagGroup(flag: { id: string; group?: string }): string | undefined {
+    return flag.group;
 }
 
 function subscribe(callback: () => void) {
@@ -80,7 +82,7 @@ export function DemoFlagsPanel() {
     return (
         // Lifted above the section dock on phones so it never sits on See
         // dates.
-        <div className='fixed bottom-4 right-4 z-[100] max-lg:[html:not([data-demo-trip-bar=on])_body:has([data-section-dock])_&]:bottom-20'>
+        <div className='fixed bottom-4 right-4 z-[100]'>
             {open ? (
                 <div className='max-h-[calc(100vh-4rem)] w-64 overflow-y-auto border border-holiday-grey/40 bg-holiday-white p-4 shadow-lg'>
                     <div className='flex items-center justify-between'>

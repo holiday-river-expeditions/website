@@ -99,6 +99,16 @@ function markerRing(kind: TripMapMarker['kind']): string {
     return 'border-holiday-grey/60 bg-holiday-white p-1';
 }
 
+/** Rafting stacks above its point and bike areas hang below it. Outposts
+    put their label to the LEFT of the mark: the offices share towns with
+    put-ins (Green River HQ by San Rafael and Desolation, Vernal HQ by the
+    Dinosaur rivers), and above or below they landed on a trip pin. */
+const MARKER_ANCHOR = {
+    raft: 'bottom',
+    bike: 'top',
+    outpost: 'right',
+} as const satisfies Record<TripMapMarker['kind'], string>;
+
 function markerChip(kind: TripMapMarker['kind']): string {
     if (kind === 'raft') return 'bg-holiday-red text-holiday-white';
     if (kind === 'bike') return 'bg-sand text-onyx';
@@ -109,6 +119,11 @@ export default function TripsMap({ markers }: { markers: TripMapMarker[] }) {
     // Prototype comparison controls: basemap style + scale preset,
     // flippable live so Holiday can judge options side by side.
     const [styleKey, setStyleKey] = useState<MapStyleKey>('relief');
+    // Phones get the key behind a toggle. Open, it covered a third of a
+    // 390px map.
+    const [keyOpen, setKeyOpen] = useState(false);
+    // The comparison controls fold away on phones the same way.
+    const [optionsOpen, setOptionsOpen] = useState(false);
     // null while a fly-to target (river/region) is active instead of a
     // scale preset — the Scale buttons unpress and the select shows it.
     const [viewKey, setViewKey] = useState<MapViewKey | null>('region');
@@ -153,6 +168,10 @@ export default function TripsMap({ markers }: { markers: TripMapMarker[] }) {
     // Hoverable context cards (WCAG 1.4.13); Escape also collapses the
     // expanded map.
     const collapse = useCallback(() => setExpanded(false), []);
+    const ordered = [
+        ...markers.filter((m) => m.kind === 'outpost'),
+        ...markers.filter((m) => m.kind !== 'outpost'),
+    ];
     const { active, show, scheduleHide, holdOpen } =
         useHoverCard<TripMapMarker>({ onEscape: collapse });
 
@@ -195,50 +214,95 @@ export default function TripsMap({ markers }: { markers: TripMapMarker[] }) {
                     {/* The stretches themselves, keyed by river, over the
                         rough plateau outline (Sep 3 feedback). */}
                     <MapLayers />
-                    {markers.map((marker) => (
-                        // Bike areas hang BELOW their point while everything
-                        // else stacks above — de-collides the Cataract / Maze /
-                        // White Rim cluster at the initial zoom.
-                        <Marker
-                            key={`${marker.kind}-${marker.href}-${marker.label}`}
-                            longitude={marker.longitude}
-                            latitude={marker.latitude}
-                            anchor={marker.kind === 'bike' ? 'top' : 'bottom'}
-                        >
-                            <a
-                                href={marker.href}
-                                className='group flex flex-col items-center'
-                                onMouseEnter={() => show(marker)}
-                                onMouseLeave={scheduleHide}
-                                onFocus={() => show(marker)}
-                                onBlur={scheduleHide}
+                    {/* Two passes over the same markers with the same
+                        layout. The first draws the pins and owns the link,
+                        the second draws only the labels, so every label
+                        sits above every photo. At the opening zoom the
+                        Cataract, White Rim and Maze pins land within 25px
+                        of each other, and with one pass Cataract's label
+                        disappeared under the bike photos. Outposts draw
+                        first in each pass, under the trips. */}
+                    {(['pin', 'label'] as const).map((layer) =>
+                        ordered.map((marker) => (
+                            <Marker
+                                key={`${layer}-${marker.kind}-${marker.href}-${marker.label}`}
+                                longitude={marker.longitude}
+                                latitude={marker.latitude}
+                                anchor={MARKER_ANCHOR[marker.kind]}
+                                // Right-anchored, the point would sit on the
+                                // mark's right edge. Shift by half the mark
+                                // (56px medallion or 16px dot) to centre it.
+                                offset={
+                                    marker.kind === 'outpost'
+                                        ? [marker.imageSrc ? 28 : 8, 0]
+                                        : undefined
+                                }
+                                style={
+                                    layer === 'label'
+                                        ? { pointerEvents: 'none' }
+                                        : undefined
+                                }
                             >
-                                {marker.imageSrc ? (
-                                    <img
-                                        src={marker.imageSrc}
-                                        alt=''
-                                        width={56}
-                                        height={56}
-                                        className={`h-14 w-14 rounded-full border-[3px] object-cover shadow-lg transition-transform group-hover:scale-110 group-focus-visible:scale-110 ${markerRing(marker.kind)}`}
-                                    />
-                                ) : (
-                                    <span
-                                        aria-hidden
-                                        className={`h-4 w-4 rounded-full border-2 border-holiday-white shadow-lg ${
-                                            marker.kind === 'bike'
-                                                ? 'bg-onyx'
-                                                : 'bg-holiday-red'
-                                        }`}
-                                    />
-                                )}
-                                <span
-                                    className={`mt-1 whitespace-nowrap px-2 py-0.5 font-alt-gothic text-[12px] font-semibold uppercase tracking-[0.05em] shadow-md ${markerChip(marker.kind)}`}
+                                <a
+                                    href={marker.href}
+                                    // The label pass repeats the link for
+                                    // pointer users only. Keyboard and
+                                    // screen reader users get one link per
+                                    // marker, named by aria-label because
+                                    // its own label text is hidden.
+                                    {...(layer === 'pin'
+                                        ? { 'aria-label': marker.label }
+                                        : {
+                                              'aria-hidden': true,
+                                              tabIndex: -1,
+                                          })}
+                                    className={`group flex items-center ${
+                                        marker.kind === 'outpost'
+                                            ? 'flex-row-reverse gap-1'
+                                            : 'flex-col'
+                                    }`}
+                                    onMouseEnter={() => show(marker)}
+                                    onMouseLeave={scheduleHide}
+                                    onFocus={() => show(marker)}
+                                    onBlur={scheduleHide}
                                 >
-                                    {marker.label}
-                                </span>
-                            </a>
-                        </Marker>
-                    ))}
+                                    {marker.imageSrc ? (
+                                        <img
+                                            src={marker.imageSrc}
+                                            alt=''
+                                            width={56}
+                                            height={56}
+                                            className={`h-14 w-14 rounded-full border-[3px] object-cover shadow-lg transition-transform group-hover:scale-110 group-focus-visible:scale-110 ${markerRing(marker.kind)} ${
+                                                layer === 'label'
+                                                    ? 'invisible'
+                                                    : ''
+                                            }`}
+                                        />
+                                    ) : (
+                                        <span
+                                            aria-hidden
+                                            className={`h-4 w-4 rounded-full border-2 border-holiday-white shadow-lg ${
+                                                marker.kind === 'bike'
+                                                    ? 'bg-onyx'
+                                                    : 'bg-holiday-red'
+                                            } ${
+                                                layer === 'label'
+                                                    ? 'invisible'
+                                                    : ''
+                                            }`}
+                                        />
+                                    )}
+                                    <span
+                                        className={`${marker.kind === 'outpost' ? '' : 'mt-1 '}pointer-events-auto whitespace-nowrap px-2 py-0.5 font-alt-gothic text-[12px] font-semibold uppercase tracking-[0.05em] shadow-md ${markerChip(marker.kind)} ${
+                                            layer === 'pin' ? 'invisible' : ''
+                                        }`}
+                                    >
+                                        {marker.label}
+                                    </span>
+                                </a>
+                            </Marker>
+                        )),
+                    )}
 
                     {active?.context && (
                         <Popup
@@ -288,18 +352,34 @@ export default function TripsMap({ markers }: { markers: TripMapMarker[] }) {
                         {expanded ? 'Collapse map' : 'Expand map'}
                     </button>
 
-                    {/* Prototype comparison controls (demo-only surface):
-                        basemap style and scale presets, live-flippable so
-                        Holiday judges options in place instead of from
-                        screenshots. */}
-                    <div className='absolute left-3 top-[120px] z-10 border border-holiday-grey/40 bg-holiday-white/95 px-3 py-2 shadow-md'>
-                        <fieldset>
-                            <legend className='font-alt-gothic text-[11px] font-semibold uppercase tracking-[0.08em] text-onyx/70'>
-                                Style
-                            </legend>
-                            <div className='mt-1 flex gap-1'>
-                                {(Object.keys(MAP_STYLES) as MapStyleKey[]).map(
-                                    (key) => (
+                    {/* Comparison controls: basemap style and scale presets
+                        plus fly-to. On for everyone since 2026-11-06 (the
+                        map-controls flag), until the new map design
+                        replaces them. Bottom-left, clear of the key. */}
+                    <div className='absolute bottom-10 left-3 z-10 border border-holiday-grey/40 bg-holiday-white/95 px-3 py-2 shadow-md'>
+                        <button
+                            type='button'
+                            aria-expanded={optionsOpen}
+                            aria-controls='trips-map-options'
+                            onClick={() => setOptionsOpen((open) => !open)}
+                            className='font-alt-gothic text-[12px] font-semibold uppercase tracking-[0.05em] text-onyx md:hidden'
+                        >
+                            {optionsOpen ? 'Hide options' : 'Map options'}
+                        </button>
+                        <div
+                            id='trips-map-options'
+                            className={`md:block ${
+                                optionsOpen ? 'mt-2 block md:mt-0' : 'hidden'
+                            }`}
+                        >
+                            <fieldset>
+                                <legend className='font-alt-gothic text-[11px] font-semibold uppercase tracking-[0.08em] text-onyx/70'>
+                                    Style
+                                </legend>
+                                <div className='mt-1 flex gap-1'>
+                                    {(
+                                        Object.keys(MAP_STYLES) as MapStyleKey[]
+                                    ).map((key) => (
                                         <button
                                             key={key}
                                             type='button'
@@ -313,17 +393,17 @@ export default function TripsMap({ markers }: { markers: TripMapMarker[] }) {
                                         >
                                             {MAP_STYLES[key].label}
                                         </button>
-                                    ),
-                                )}
-                            </div>
-                        </fieldset>
-                        <fieldset className='mt-2'>
-                            <legend className='font-alt-gothic text-[11px] font-semibold uppercase tracking-[0.08em] text-onyx/70'>
-                                Scale
-                            </legend>
-                            <div className='mt-1 flex gap-1'>
-                                {(Object.keys(MAP_VIEWS) as MapViewKey[]).map(
-                                    (key) => (
+                                    ))}
+                                </div>
+                            </fieldset>
+                            <fieldset className='mt-2'>
+                                <legend className='font-alt-gothic text-[11px] font-semibold uppercase tracking-[0.08em] text-onyx/70'>
+                                    Scale
+                                </legend>
+                                <div className='mt-1 flex gap-1'>
+                                    {(
+                                        Object.keys(MAP_VIEWS) as MapViewKey[]
+                                    ).map((key) => (
                                         <button
                                             key={key}
                                             type='button'
@@ -337,51 +417,65 @@ export default function TripsMap({ markers }: { markers: TripMapMarker[] }) {
                                         >
                                             {MAP_VIEWS[key].label}
                                         </button>
-                                    ),
-                                )}
-                            </div>
-                        </fieldset>
-                        <label className='mt-2 block'>
-                            <span className='font-alt-gothic text-[11px] font-semibold uppercase tracking-[0.08em] text-onyx/70'>
-                                Fly to
-                            </span>
-                            <select
-                                value={target}
-                                onChange={(event) =>
-                                    flyToTarget(event.target.value)
-                                }
-                                className='mt-1 block w-full max-w-40 border border-holiday-grey/40 bg-holiday-white px-1.5 py-1 font-alt-gothic text-[12px] font-semibold uppercase tracking-[0.04em] text-onyx'
-                            >
-                                <option value=''>Anywhere…</option>
-                                <optgroup label='Regions'>
-                                    {MAP_REGIONS.map((region) => (
-                                        <option
-                                            key={region.label}
-                                            value={region.label}
-                                        >
-                                            {region.label}
-                                        </option>
                                     ))}
-                                </optgroup>
-                                <optgroup label='Rivers & outposts'>
-                                    {markers.map((marker) => (
-                                        <option
-                                            key={`${marker.kind}-${marker.label}`}
-                                            value={marker.label}
-                                        >
-                                            {marker.label}
-                                        </option>
-                                    ))}
-                                </optgroup>
-                            </select>
-                        </label>
+                                </div>
+                            </fieldset>
+                            <label className='mt-2 block'>
+                                <span className='font-alt-gothic text-[11px] font-semibold uppercase tracking-[0.08em] text-onyx/70'>
+                                    Fly to
+                                </span>
+                                <select
+                                    value={target}
+                                    onChange={(event) =>
+                                        flyToTarget(event.target.value)
+                                    }
+                                    className='mt-1 block w-full max-w-40 border border-holiday-grey/40 bg-holiday-white px-1.5 py-1 font-alt-gothic text-[12px] font-semibold uppercase tracking-[0.04em] text-onyx'
+                                >
+                                    <option value=''>Anywhere…</option>
+                                    <optgroup label='Regions'>
+                                        {MAP_REGIONS.map((region) => (
+                                            <option
+                                                key={region.label}
+                                                value={region.label}
+                                            >
+                                                {region.label}
+                                            </option>
+                                        ))}
+                                    </optgroup>
+                                    <optgroup label='Rivers & outposts'>
+                                        {markers.map((marker) => (
+                                            <option
+                                                key={`${marker.kind}-${marker.label}`}
+                                                value={marker.label}
+                                            >
+                                                {marker.label}
+                                            </option>
+                                        ))}
+                                    </optgroup>
+                                </select>
+                            </label>
+                        </div>
                     </div>
 
                     {/* Legend: three marker kinds is past the point where the
                     chips alone orient a scanner. Kept tiny, inside the Map
                     container so it survives expansion. */}
-                    <div className='pointer-events-none absolute left-3 top-3 z-10 border border-holiday-grey/40 bg-holiday-white/95 px-3 py-2 shadow-md'>
-                        <ul className='space-y-1.5'>
+                    <div className='absolute left-3 top-3 z-10 border border-holiday-grey/40 bg-holiday-white/95 px-3 py-2 shadow-md'>
+                        <button
+                            type='button'
+                            aria-expanded={keyOpen}
+                            aria-controls='trips-map-key'
+                            onClick={() => setKeyOpen((open) => !open)}
+                            className='font-alt-gothic text-[12px] font-semibold uppercase tracking-[0.05em] text-onyx md:hidden'
+                        >
+                            {keyOpen ? 'Hide key' : 'Map key'}
+                        </button>
+                        <ul
+                            id='trips-map-key'
+                            className={`pointer-events-none space-y-1.5 md:block ${
+                                keyOpen ? 'mt-2 block md:mt-0' : 'hidden'
+                            }`}
+                        >
                             {riverKey().map(({ river, swatch }) => (
                                 <li
                                     key={river}

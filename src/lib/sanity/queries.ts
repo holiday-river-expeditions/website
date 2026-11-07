@@ -269,6 +269,9 @@ export const pageBySlugQuery = defineQuery(`
   }
 `);
 
+/** A Learn & Get Inspired card without its own photo borrows the main
+    image of the blog post it links to, so it never renders as an empty
+    grey box. An image set on the card still wins. */
 export const homepageQuery = defineQuery(`
   *[_type == "homepage"][0] {
     heroHeading,
@@ -292,7 +295,10 @@ export const homepageQuery = defineQuery(`
     learnContent[]{
       _key,
       title,
-      image,
+      "image": coalesce(
+        image,
+        *[_type == "post" && "/blog/" + slug.current == ^.link][0].mainImage
+      ),
       link,
       isVideo
     }

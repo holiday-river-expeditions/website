@@ -70,7 +70,7 @@ export function BookTripCard({
             // The fill is mixed to a solid color so the scroll fade can
             // match it. Row dividers go lighter so they don't compete with
             // the photo.
-            className='scroll-mt-6 bg-(--card-bg) [--card-bg:color-mix(in_srgb,var(--color-sand)_15%,var(--color-holiday-white))] lg:flex [&_li]:border-onyx/12 [&_ul]:border-onyx/12 [[data-demo-sticky-header=on]_&]:scroll-mt-28'
+            className='bg-(--card-bg) [--card-bg:color-mix(in_srgb,var(--color-sand)_15%,var(--color-holiday-white))] lg:flex [&_li]:border-onyx/12 [&_ul]:border-onyx/12 scroll-mt-28'
         >
             {imageSrc && panelImageSrc && href && (
                 // From lg up the photo fills the card's full height. On a
@@ -83,7 +83,7 @@ export function BookTripCard({
                     aria-hidden
                     className='group block lg:w-80 lg:shrink-0 xl:w-105'
                 >
-                    <div className='relative aspect-[16/9] overflow-hidden bg-holiday-grey/15 lg:sticky lg:top-6 lg:aspect-auto lg:h-full lg:max-h-[36rem] lg:min-h-72 [[data-demo-sticky-header=on]_&]:lg:top-24'>
+                    <div className='relative aspect-[16/9] overflow-hidden bg-holiday-grey/15 lg:sticky lg:top-24 lg:aspect-auto lg:h-full lg:max-h-[36rem] lg:min-h-72'>
                         {/* Two crops, one per frame shape. The hidden one
                             is display:none, so its lazy image never loads. */}
                         <Image

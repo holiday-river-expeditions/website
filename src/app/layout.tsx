@@ -89,6 +89,16 @@ export default function RootLayout({
                 <script
                     dangerouslySetInnerHTML={{ __html: DEMO_INIT_SCRIPT }}
                 />
+                {/* The kit's font files are CORS requests, which can't
+                    reuse the stylesheet's connection. Opening that second
+                    connection now saves a round trip or two before the
+                    headline and nav text can paint (the kit uses
+                    font-display: auto, so text waits on the fonts). */}
+                <link
+                    rel='preconnect'
+                    href='https://use.typekit.net'
+                    crossOrigin='anonymous'
+                />
                 <link
                     rel='stylesheet'
                     href='https://use.typekit.net/guz5fen.css'

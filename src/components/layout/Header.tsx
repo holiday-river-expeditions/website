@@ -2,27 +2,33 @@ import Link from 'next/link';
 import { Button } from '@/components/ui/Button';
 import { Logo } from '@/components/ui/Logo';
 import { MiniCart } from '@/components/ui/MiniCart';
-import { HeaderReveal } from './HeaderReveal';
+import { HeaderHeight } from './HeaderHeight';
 import { DesktopNav } from './Nav';
 import { MobileNav } from './MobileNav';
 
 export function Header() {
     return (
-        // sticky-header demo flag: persistent nav + logo while scrolling
-        // (wayfinding on long pages). header-reveal demo flag: the same
-        // sticky header, slid away while scrolling down (HeaderReveal sets
-        // data-header-hidden). z-50 sits above content and the floating
-        // bars (z-40), below the demo panel (z-[100]).
+        // Sticky for everyone since 2026-11-06 (was the sticky-header
+        // flag): persistent nav + logo while scrolling, for wayfinding on
+        // long pages. z-50 sits above content and the trip bar (z-40),
+        // below the demo panel (z-[100]).
+        //
+        // Below md it condenses once the page scrolls (HeaderHeight sets
+        // data-header-condensed): 86px tall with a 46px logo on arrival,
+        // 56px with a 32px logo while reading. The 30px bottom margin it
+        // gains while condensed equals the height it loses, and the row,
+        // logo and margin share one duration and easing, so the page below
+        // never moves (no layout shift). Content slides under the header.
         <header
             data-site-header
-            className='relative bg-holiday-white [[data-demo-sticky-header=on]_&]:sticky [[data-demo-sticky-header=on]_&]:top-0 [[data-demo-sticky-header=on]_&]:z-50 [[data-demo-sticky-header=on]_&]:shadow-md [[data-demo-header-reveal=on]_&]:sticky [[data-demo-header-reveal=on]_&]:top-0 [[data-demo-header-reveal=on]_&]:z-50 [[data-demo-header-reveal=on]_&]:shadow-md [[data-demo-header-reveal=on]_&]:transition-transform [[data-demo-header-reveal=on]_&]:duration-200 motion-reduce:transition-none [[data-header-hidden]_&]:-translate-y-full'
+            className='sticky top-0 z-50 bg-holiday-white shadow-md transition-[margin] duration-200 ease-out motion-reduce:transition-none max-md:[[data-header-condensed]_&]:mb-[30px]'
         >
-            <HeaderReveal />
+            <HeaderHeight />
             {/* Full-bleed: nav hugs the left edge, hamburger/Book Now the right
                 (mock places them ~48px from the viewport edges, no max-width).
                 lg:gap-4 keeps the nav off the logo at 1024px, where the nav
                 fills its column. */}
-            <div className='flex items-center justify-between gap-2 px-4 py-5 sm:px-6 md:px-12 lg:grid lg:grid-cols-[1fr_auto_1fr] lg:gap-4'>
+            <div className='flex items-center justify-between gap-2 px-4 py-5 transition-[height,padding] duration-200 ease-out motion-reduce:transition-none max-md:h-[86px] sm:px-6 md:px-12 lg:grid lg:grid-cols-[1fr_auto_1fr] lg:gap-4 max-md:[[data-header-condensed]_&]:h-14 max-md:[[data-header-condensed]_&]:py-2'>
                 {/* Left: desktop nav */}
                 <div className='hidden lg:block lg:justify-self-start'>
                     <DesktopNav />
@@ -37,7 +43,10 @@ export function Header() {
                     className='shrink-0 justify-self-center'
                     aria-label='Holiday River Expeditions home'
                 >
-                    <Logo size='text-[26px] sm:text-[32px] md:text-[48px]' />
+                    <Logo
+                        size='text-[46px] md:text-[48px] max-md:[[data-header-condensed]_&]:text-[32px]'
+                        className='transition-[font-size] duration-200 ease-out motion-reduce:transition-none'
+                    />
                 </Link>
 
                 {/* Right: hamburger + cart + BOOK NOW. shrink-0 keeps the

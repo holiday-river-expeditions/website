@@ -2,8 +2,8 @@ import { act, render, screen } from '@testing-library/react';
 import { afterEach, beforeEach, expect, test, vi } from 'vitest';
 import { TripBar } from './TripBar';
 
-// Same setup as SectionNav.test: sections laid out by hand, a sync rAF
-// that returns 0 so every scroll schedules a fresh frame.
+// Sections laid out by hand, and a sync rAF that returns 0 so every
+// scroll schedules a fresh frame.
 beforeEach(() => {
     vi.stubGlobal('requestAnimationFrame', (run: FrameRequestCallback) => {
         run(0);
@@ -39,20 +39,22 @@ function scrollTo(y: number) {
     });
 }
 
-test('the section button and the site menu open their popovers', () => {
+test('the section button opens the section sheet popover', () => {
     render(<TripBar ariaLabel='Trip sections' items={items} cta={cta} />);
     const sections = screen.getByRole('button', {
         name: /Sections on this page/,
     });
-    const menu = screen.getByRole('button', { name: 'Site menu' });
-
     const sheet = document.getElementById(
         sections.getAttribute('popovertarget')!,
     );
     expect(sheet).toHaveAttribute('popover', 'auto');
+});
+
+test('there is no site menu, since the sticky header always shows', () => {
+    render(<TripBar ariaLabel='Trip sections' items={items} cta={cta} />);
     expect(
-        document.getElementById(menu.getAttribute('popovertarget')!),
-    ).toHaveAttribute('popover', 'auto');
+        screen.queryByRole('button', { name: 'Site menu', hidden: true }),
+    ).toBeNull();
 });
 
 test('the section button names the section in view', () => {
@@ -102,21 +104,31 @@ test('the summary shows in the bar and heads the sheet', () => {
     ).toHaveLength(2);
 });
 
-test('the site menu links the main nav, Find Your Trip and Book Now', () => {
-    render(<TripBar ariaLabel='Trip sections' items={items} cta={cta} />);
-    for (const [name, href] of [
-        ['Home', '/'],
-        ['Rafting', '/rafting'],
-        ['Contact', '/contact'],
-        ['Book Now', '/book'],
-    ]) {
+test('the sheet lists up to three similar trips', () => {
+    const trips = ['Yampa', 'Desolation', 'Westwater', 'Cataract'].map(
+        (name) => ({
+            href: `/trips/${name.toLowerCase()}`,
+            label: name,
+            detail: 'Green River · 5 Days',
+        }),
+    );
+    render(
+        <TripBar
+            ariaLabel='Trip sections'
+            items={items}
+            cta={cta}
+            trips={trips}
+        />,
+    );
+    expect(screen.getByText('Similar trips')).toBeInTheDocument();
+    for (const name of ['Yampa', 'Desolation', 'Westwater']) {
         expect(
-            screen.getByRole('link', { name, hidden: true }),
-        ).toHaveAttribute('href', href);
+            screen.getByRole('link', { name: new RegExp(name), hidden: true }),
+        ).toHaveAttribute('href', `/trips/${name.toLowerCase()}`);
     }
     expect(
-        screen.getAllByRole('link', { name: 'Find Your Trip', hidden: true }),
-    ).not.toHaveLength(0);
+        screen.queryByRole('link', { name: /Cataract/, hidden: true }),
+    ).toBeNull();
 });
 
 test('a page with no CTA gets Find Your Trip on the right', () => {
@@ -129,38 +141,4 @@ test('a page with no CTA gets Find Your Trip on the right', () => {
     expect(
         findLinks.some((link) => link.className.includes('bg-evergreen')),
     ).toBe(true);
-});
-
-test('the site menu slides in only while the site header is off screen', () => {
-    let report: IntersectionObserverCallback = () => {};
-    vi.stubGlobal(
-        'IntersectionObserver',
-        class {
-            constructor(callback: IntersectionObserverCallback) {
-                report = callback;
-            }
-            observe() {}
-            disconnect() {}
-        },
-    );
-    const header = (visible: boolean) =>
-        act(() =>
-            report(
-                [{ isIntersecting: visible } as IntersectionObserverEntry],
-                {} as IntersectionObserver,
-            ),
-        );
-    render(
-        <>
-            <header data-site-header />
-            <TripBar ariaLabel='Trip sections' items={items} cta={cta} />
-        </>,
-    );
-    const slot = () =>
-        screen.getByRole('button', { name: 'Site menu' }).parentElement!;
-
-    header(true);
-    expect(slot()).toHaveAttribute('inert');
-    header(false);
-    expect(slot()).not.toHaveAttribute('inert');
 });

@@ -4,11 +4,13 @@ import Link from 'next/link';
 import { JsonLd } from '@/components/seo/JsonLd';
 import { Button } from '@/components/ui/Button';
 import { ContentCard } from '@/components/ui/ContentCard';
-import { Hero } from '@/components/ui/Hero';
 import {
-    PAGE_BANNER_HEIGHT,
-    PAGE_BANNER_WIDTH,
-} from '@/components/ui/PageBanner';
+    Hero,
+    HERO_HEIGHT,
+    HERO_PHONE_HEIGHT,
+    HERO_PHONE_WIDTH,
+    HERO_WIDTH,
+} from '@/components/ui/Hero';
 import { Section } from '@/components/ui/Section';
 import {
     TripCard,
@@ -23,7 +25,12 @@ import {
     type TripMapMarker,
 } from '@/lib/trip-map-data';
 import { contactEmail, contactPhone } from '@/lib/contact-defaults';
-import { getHomepage, getSiteSettings, imageUrl } from '@/lib/sanity';
+import {
+    getHomepage,
+    getSiteSettings,
+    imageUrl,
+    placeholderUrl,
+} from '@/lib/sanity';
 import { organizationJsonLd } from '@/lib/structured-data';
 import { resolveTripFinderSpec } from '@/lib/trip-finder-spec';
 
@@ -91,12 +98,13 @@ export default async function Home() {
     }));
 
     // Wide banner crop for the full-bleed hero; the editor-set hotspot in
-    // Studio controls which part of the photo shows at every viewport. The
-    // 1440:523 box matches the Hero's display aspect (from the mock) at 2x DPR.
-    const heroImage = imageUrl(
+    // Studio controls which part of the photo shows at every viewport.
+    // HERO_WIDTH x HERO_HEIGHT matches the Hero's 1440:600 box at 2x DPR.
+    const heroImage = imageUrl(homepage.heroImage, HERO_WIDTH, HERO_HEIGHT);
+    const heroPlaceholder = placeholderUrl(
         homepage.heroImage,
-        PAGE_BANNER_WIDTH,
-        PAGE_BANNER_HEIGHT,
+        HERO_WIDTH,
+        HERO_HEIGHT,
     );
     const storyImageLeft = imageUrl(homepage.storyImageLeft, 940, 1058);
     const storyImagePortrait = imageUrl(homepage.storyImagePortrait, 940, 1410);
@@ -117,6 +125,17 @@ export default async function Home() {
             <Hero
                 heading={homepage.heroHeading ?? ''}
                 backgroundImage={heroImage}
+                placeholderImage={heroPlaceholder}
+                phoneImage={imageUrl(
+                    homepage.heroImage,
+                    HERO_PHONE_WIDTH,
+                    HERO_PHONE_HEIGHT,
+                )}
+                phonePlaceholder={placeholderUrl(
+                    homepage.heroImage,
+                    HERO_PHONE_WIDTH,
+                    HERO_PHONE_HEIGHT,
+                )}
                 imageAlt={homepage.heroImageAlt ?? ''}
                 cta={{
                     text: homepage.heroCtaText ?? 'Find Your Trip',
