@@ -358,7 +358,7 @@ export default async function BookPage({
                             scroll past. */}
                         <aside
                             aria-label='Filter dates'
-                            className='hidden lg:sticky lg:top-6 lg:block lg:max-h-[calc(100vh-3rem)] lg:self-start lg:overflow-y-auto [[data-demo-sticky-header=on]_&]:lg:top-28 [[data-demo-sticky-header=on]_&]:lg:max-h-[calc(100vh-8rem)]'
+                            className='hidden lg:sticky lg:top-28 lg:block lg:max-h-[calc(100vh-8rem)] lg:self-start lg:overflow-y-auto'
                         >
                             {panel}
                         </aside>

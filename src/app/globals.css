@@ -267,22 +267,13 @@ summary {
 
 /* ---------------------------------------------------------------------------
    Scroll-reveal ("life of the river"): slow fades with a slight upstream
-   drift. Doubly gated — html[data-reveal='on'] is only set by RevealObserver
+   drift. Doubly gated: html[data-reveal='on'] is only set by RevealObserver
    (so no-JS users never get hidden content) and everything sits inside the
    motion-safe media query (so reduced-motion users never see movement).
-   Grids stagger via nth-child transition delays. */
+   Each grid child reveals on its own; children that arrive together step
+   in via the data-reveal-step the observer stamps on them. */
 @media (prefers-reduced-motion: no-preference) {
-    html[data-reveal='on'] [data-reveal] {
-        opacity: 0;
-        transform: translateY(14px);
-        transition:
-            opacity 0.7s ease-out,
-            transform 0.7s ease-out;
-    }
-    html[data-reveal='on'] [data-reveal][data-revealed] {
-        opacity: 1;
-        transform: none;
-    }
+    html[data-reveal='on'] [data-reveal],
     html[data-reveal='on'] [data-reveal-stagger] > * {
         opacity: 0;
         transform: translateY(14px);
@@ -290,44 +281,31 @@ summary {
             opacity 0.7s ease-out,
             transform 0.7s ease-out;
     }
-    html[data-reveal='on'] [data-reveal-stagger][data-revealed] > * {
+    html[data-reveal='on'] [data-reveal][data-revealed],
+    html[data-reveal='on'] [data-reveal-stagger] > [data-revealed] {
         opacity: 1;
         transform: none;
     }
-    html[data-reveal='on']
-        [data-reveal-stagger][data-revealed]
-        > :nth-child(2) {
+    html[data-reveal='on'] [data-reveal-stagger] > [data-reveal-step='1'] {
         transition-delay: 0.1s;
     }
-    html[data-reveal='on']
-        [data-reveal-stagger][data-revealed]
-        > :nth-child(3) {
+    html[data-reveal='on'] [data-reveal-stagger] > [data-reveal-step='2'] {
         transition-delay: 0.2s;
     }
-    html[data-reveal='on']
-        [data-reveal-stagger][data-revealed]
-        > :nth-child(n + 4) {
+    html[data-reveal='on'] [data-reveal-stagger] > [data-reveal-step='3'] {
         transition-delay: 0.3s;
     }
 }
 
-/* Section menu (SectionNav). Below lg its dock is pinned to the bottom
-   edge, so the page gets matching padding and nothing ends up under it.
-   From lg it is a tab row fixed at the top, so in-page jumps leave room
-   for it on top of each section's own scroll-margin. */
-@media (width < 64rem) {
-    html:not([data-demo-trip-bar='on']) body:has([data-section-dock]) {
-        padding-bottom: calc(4rem + env(safe-area-inset-bottom));
-    }
+/* Sticky chrome. The header is sticky everywhere (HeaderHeight keeps
+   --site-header-h at its live height, 56 to 94px), and on trip pages the
+   trip bar (3.25rem) sticks under it. scroll-padding-top keeps anchor
+   jumps, scrollIntoView and keyboard focus clear of both, so nothing
+   lands hidden under the header (WCAG 2.2 Focus Not Obscured). Sections
+   add only a small scroll-margin for breathing room. */
+html {
+    scroll-padding-top: var(--site-header-h, 5rem);
 }
-@media (width >= 64rem) {
-    html:not([data-demo-trip-bar='on']):has([data-section-dock]) {
-        scroll-padding-top: 3.25rem;
-    }
-}
-
-/* trip-bar demo flag (TripBar): the bar sticks at the top at every width,
-   so every in-page jump leaves room for it. */
-html[data-demo-trip-bar='on']:has([data-trip-bar]) {
-    scroll-padding-top: 3.25rem;
+html:has([data-trip-bar]) {
+    scroll-padding-top: calc(var(--site-header-h, 5rem) + 3.25rem);
 }

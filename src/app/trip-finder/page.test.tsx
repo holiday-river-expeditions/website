@@ -95,6 +95,7 @@ vi.mock('@/lib/sanity', () => ({
     getTripFinderTrips: vi.fn(async () => trips),
     getTripFinderSpec: vi.fn(async () => null),
     imageUrl: () => '',
+    placeholderUrl: () => '',
 }));
 
 const getAllUpcomingDepartures = vi.fn();

@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 
 /**
  * Which page section the visitor is reading, for section menus
- * (SectionNav, TripBar).
+ * (TripBar).
  *
  * `active` is the last section whose top has passed a reading line 40%
  * down the viewport, so gaps between sections keep the one above. Nothing

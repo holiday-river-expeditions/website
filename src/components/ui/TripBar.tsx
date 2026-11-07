@@ -1,11 +1,15 @@
 'use client';
 
 import Link from 'next/link';
-import { useId, useSyncExternalStore } from 'react';
-import { navItems } from '@/components/layout/Nav';
+import { useId } from 'react';
 import { buttonClasses } from '@/components/ui/Button';
-import type { SectionNavItem } from '@/components/ui/SectionNav';
 import { useSectionSpy } from '@/lib/use-section-spy';
+
+export interface SectionNavItem {
+    /** id of the target section element (rendered as href="#id"). */
+    id: string;
+    label: string;
+}
 
 const LABEL =
     'font-alt-gothic text-[15px] font-semibold uppercase tracking-[0.04em]';
@@ -13,26 +17,25 @@ const SHEET_LINK =
     'flex min-h-12 items-center font-alt-gothic text-[17px] font-semibold uppercase tracking-[0.04em]';
 
 /**
- * trip-bar demo flag: one bar for trip pages and the specialty hub, placed
- * in the page under the banner and sticky from there (Oct 2026, from an
- * NN/g review plus IDEO pass of the section menu). It never morphs the site
- * header, never hides, and replaces SectionNav's dock and tab row while the
- * flag is on.
+ * The section menu for trip pages and the specialty hub: one bar placed in
+ * the page under the banner and sticky from there, flush under the sticky
+ * site header (Oct 2026, from an NN/g review plus IDEO pass of the old
+ * section menu). Default since 2026-11-06, when the trip-bar flag graduated
+ * and the old SectionNav dock and tab row were removed.
  *
- * - Left: the site menu (☰), so the main nav is one tap away mid-page. It
- *   only shows while the site header is off screen, sliding in as the
- *   header leaves, so the page never offers two copies of the same menu
- *   (on load, or under the sticky-header and header-reveal flags).
- * - Middle: below `tabsFrom`, a bordered button naming the section in view
+ * - Left: below `tabsFrom`, a bordered button naming the section in view
  *   that opens the section sheet. From `tabsFrom`, inline section tabs.
  * - Summary (price, next open date) from md up, except lg to xl where the
  *   tabs need the room. On phones it heads the section sheet instead.
  * - Right: See dates, swapped for an outlined Call us of the same width
  *   while the dates section is in view. Pages without a CTA get Find Your
  *   Trip.
+ * - The sheet lists the sections, then up to three similar trips (trip
+ *   pages, the same ones as Keep Exploring), then Find Your Trip and the
+ *   phone number.
  *
- * Both menus are HTML popovers, so they open, close on Escape or an outside
- * tap, and keep their links working without JS. The jump offset is one
+ * The sheet is an HTML popover, so it opens, closes on Escape or an outside
+ * tap, and keeps its links working without JS. The jump offset is one
  * scroll-padding-top rule in globals.css.
  */
 export function TripBar({
@@ -42,6 +45,7 @@ export function TripBar({
     summary = [],
     phone,
     tabsFrom = 'lg',
+    trips = [],
 }: {
     items: SectionNavItem[];
     ariaLabel: string;
@@ -53,12 +57,12 @@ export function TripBar({
     phone?: { href: string; label: string };
     /** Width where the section button gives way to inline tabs. */
     tabsFrom?: 'lg' | 'xl';
+    /** Similar trips for the sheet. Up to three are shown. */
+    trips?: { href: string; label: string; detail?: string }[];
 }) {
     const id = useId();
-    const menuId = `${id}-menu`;
     const sectionsId = `${id}-sections`;
     const { active } = useSectionSpy(items.map((item) => item.id));
-    const headerInView = useHeaderInView();
 
     if (items.length === 0) return null;
 
@@ -73,35 +77,12 @@ export function TripBar({
     return (
         <div
             data-trip-bar
-            className='sticky top-0 z-40 hidden border-y border-onyx/15 bg-holiday-white transition-[top] duration-200 [[data-demo-trip-bar=on]_&]:block [[data-demo-sticky-header=on]_&]:top-[var(--site-header-h,7rem)] [[data-demo-header-reveal=on]:not([data-header-hidden])_&]:top-[var(--site-header-h,7rem)]'
+            className='sticky top-[var(--site-header-h,5rem)] z-40 border-y border-onyx/15 bg-holiday-white'
         >
             <nav
                 aria-label={ariaLabel}
                 className='mx-auto flex h-13 max-w-7xl items-center gap-2 px-2 sm:px-6 lg:gap-6'
             >
-                {/* The negative right margin cancels the flex gap while the
-                    slot is collapsed. */}
-                <span
-                    inert={headerInView}
-                    className={`flex shrink-0 overflow-hidden transition-[max-width,opacity,margin] duration-200 motion-reduce:transition-none ${
-                        headerInView
-                            ? 'pointer-events-none -mr-2 max-w-0 opacity-0 lg:-mr-6'
-                            : '-ml-1 max-w-40 opacity-100'
-                    }`}
-                >
-                    <button
-                        type='button'
-                        popoverTarget={menuId}
-                        aria-label='Site menu'
-                        className={`flex size-11 shrink-0 items-center justify-center gap-2 text-onyx md:w-auto md:px-2 ${LABEL}`}
-                    >
-                        <Burger />
-                        <span aria-hidden className='hidden md:inline'>
-                            Menu
-                        </span>
-                    </button>
-                </span>
-
                 <button
                     type='button'
                     popoverTarget={sectionsId}
@@ -221,6 +202,36 @@ export function TripBar({
                             </li>
                         ))}
                     </ul>
+                    {/* A way on to a better-fitting trip without going
+                        back to the main nav (the sheet-trips flag until
+                        2026-11-06). */}
+                    {trips.length > 0 && (
+                        <div className='mt-2 border-t border-onyx/15 pt-3'>
+                            <p className='font-alt-gothic text-[13px] font-semibold uppercase tracking-[0.08em] text-onyx/75'>
+                                Similar trips
+                            </p>
+                            <ul className='mt-1'>
+                                {trips.slice(0, 3).map((trip) => (
+                                    <li key={trip.href}>
+                                        <Link
+                                            href={trip.href}
+                                            onClick={hide(sectionsId)}
+                                            className='flex min-h-12 flex-col justify-center pl-[15px]'
+                                        >
+                                            <span className='font-alt-gothic text-[17px] font-semibold uppercase tracking-[0.04em] text-onyx'>
+                                                {trip.label}
+                                            </span>
+                                            {trip.detail && (
+                                                <span className='text-[14px] text-onyx/75'>
+                                                    {trip.detail}
+                                                </span>
+                                            )}
+                                        </Link>
+                                    </li>
+                                ))}
+                            </ul>
+                        </div>
+                    )}
                     <div className='mt-2 border-t border-onyx/15 pl-[15px]'>
                         <Link
                             href='/trip-finder'
@@ -240,94 +251,7 @@ export function TripBar({
                     </div>
                 </div>
             </div>
-
-            {/* Site menu, every width. */}
-            <div
-                id={menuId}
-                popover='auto'
-                aria-label='Site menu'
-                className='inset-y-0 left-0 right-auto m-0 h-full max-h-none w-80 max-w-[85vw] border-0 bg-holiday-white p-0 text-onyx backdrop:bg-onyx/40'
-            >
-                <div className='px-5 pt-3'>
-                    <SheetHeader title='Menu' closes={menuId} />
-                    <ul>
-                        <li>
-                            <Link
-                                href='/'
-                                onClick={hide(menuId)}
-                                className={`${SHEET_LINK} text-onyx`}
-                            >
-                                Home
-                            </Link>
-                        </li>
-                        {navItems.map((item) => (
-                            <li key={item.href}>
-                                <Link
-                                    href={item.href}
-                                    onClick={hide(menuId)}
-                                    className={`${SHEET_LINK} text-onyx`}
-                                >
-                                    {item.label}
-                                </Link>
-                            </li>
-                        ))}
-                    </ul>
-                    <div className='mt-4 flex flex-col items-start gap-3 border-t border-onyx/15 pt-4'>
-                        <Link
-                            href='/trip-finder'
-                            onClick={hide(menuId)}
-                            className={buttonClasses({ variant: 'evergreen' })}
-                        >
-                            Find Your Trip
-                        </Link>
-                        <Link
-                            href='/book'
-                            onClick={hide(menuId)}
-                            className={buttonClasses()}
-                        >
-                            Book Now
-                        </Link>
-                    </div>
-                </div>
-            </div>
         </div>
-    );
-}
-
-/**
- * Whether the site header is on screen, read through an
- * IntersectionObserver. The server snapshot is true, which matches a page
- * loaded at the top. A page without the header (tests, the Studio) reads
- * false so the bar's own menu shows. The -1px top margin makes a header
- * slid fully out by header-reveal count as gone, not edge-adjacent.
- */
-let headerVisible = true;
-
-function subscribeHeader(onChange: () => void) {
-    const header = document.querySelector('header[data-site-header]');
-    if (!header || typeof IntersectionObserver === 'undefined') {
-        headerVisible = false;
-        onChange();
-        return () => {};
-    }
-    const observer = new IntersectionObserver(
-        ([entry]) => {
-            headerVisible = entry.isIntersecting;
-            onChange();
-        },
-        { rootMargin: '-1px 0px 0px 0px' },
-    );
-    observer.observe(header);
-    return () => observer.disconnect();
-}
-
-function useHeaderInView(): boolean {
-    return useSyncExternalStore(
-        subscribeHeader,
-        () =>
-            document.querySelector('header[data-site-header]') !== null &&
-            headerVisible,
-        () => true,
     );
 }
 
@@ -347,18 +271,6 @@ function SheetHeader({ title, closes }: { title: string; closes: string }) {
                 ×
             </button>
         </div>
-    );
-}
-
-function Burger() {
-    return (
-        <svg aria-hidden viewBox='0 0 20 14' width='20' height='14'>
-            <path
-                d='M0 1h20M0 7h20M0 13h20'
-                stroke='currentColor'
-                strokeWidth='2'
-            />
-        </svg>
     );
 }
 

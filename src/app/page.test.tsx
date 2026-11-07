@@ -39,6 +39,7 @@ vi.mock('@/lib/sanity', () => ({
     })),
     // Returns '' (no image uploaded) — components render their placeholders.
     imageUrl: () => '',
+    placeholderUrl: () => '',
 }));
 
 import Home from './page';

@@ -3,10 +3,10 @@ import type { ReactNode } from 'react';
 
 /**
  * The banner every inner page opens with — trip, section, landing, blog
- * post, and Page hero blocks. Same proportions as the homepage hero
- * (Darius, 2026-09-12: inner-page heroes match the homepage now), so the
- * desktop height tracks the 1440:523 banner ratio with a viewport cap
- * instead of a fixed pixel height, and no page reads shorter than home.
+ * post, and Page hero blocks. The desktop height tracks a 1440:523 ratio
+ * with a viewport cap instead of a fixed pixel height. It matched the
+ * homepage hero from 2026-09-12 until 2026-11-06, when the homepage went
+ * to 1440:600 so its photo could hold the rafts on the beach (Darius).
  *
  * Text sits bottom-left over a bottom-weighted scrim; the evergreen base
  * keeps white text legible before a photo is set. Pass the crop from

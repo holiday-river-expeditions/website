@@ -41,7 +41,7 @@ export function ReviewsSection({
         <Section
             id='reviews'
             background='sand'
-            className={`scroll-mt-6 [[data-demo-sticky-header=on]_&]:scroll-mt-28 ${
+            className={`scroll-mt-6 ${
                 hasReviews ? 'py-16 md:py-20' : 'py-10 md:py-12'
             }`}
         >

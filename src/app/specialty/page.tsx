@@ -5,7 +5,6 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { Section } from '@/components/ui/Section';
 import { TripCatalogDisclosure } from '@/components/ui/TripCatalogDisclosure';
-import { SectionNav } from '@/components/ui/SectionNav';
 import { SpecialtyDateList } from '@/components/ui/SpecialtyDateList';
 import { TripBar } from '@/components/ui/TripBar';
 import { TripCard, tripCardProps } from '@/components/ui/TripCard';
@@ -96,17 +95,8 @@ export default async function SpecialtyPage() {
                 </p>
             </Section>
 
-            {/* Floating family menu (Aug 20 decision: categories get copy,
-                photos, and a floating-menu jump link). Always visible — the
-                first family starts immediately below the intro. */}
-            {types.length > 1 && (
-                <SectionNav
-                    ariaLabel='Specialty trip families'
-                    items={familyItems}
-                />
-            )}
-            {/* trip-bar demo flag. Five long family names only fit as tabs
-                from xl. */}
+            {/* Family menu (Aug 20 decision: categories get a jump link).
+                Five long family names only fit as tabs from xl. */}
             {types.length > 1 && (
                 <TripBar
                     ariaLabel='Specialty trip families'
@@ -146,7 +136,7 @@ export default async function SpecialtyPage() {
                             // scroll. scroll-mt gives jump links breathing
                             // room at the top of the viewport.
                             background={index % 2 === 0 ? 'white' : 'sand'}
-                            className='scroll-mt-6 [[data-demo-sticky-header=on]_&]:scroll-mt-28 py-14 md:py-16'
+                            className='scroll-mt-6 py-14 md:py-16'
                         >
                             <h2 className='font-alt-gothic text-section font-black uppercase text-holiday-red'>
                                 {type.name}

@@ -24,7 +24,6 @@ import {
 } from '@/components/ui/ReviewsSection';
 import { RiverFlow } from '@/components/ui/RiverFlow';
 import { Section } from '@/components/ui/Section';
-import { SectionNav } from '@/components/ui/SectionNav';
 import { SpecialtyDatesCallout } from '@/components/ui/SpecialtyDatesCallout';
 import type { TripMapPoint } from '@/components/ui/TripMap';
 import { TripBar } from '@/components/ui/TripBar';
@@ -182,8 +181,9 @@ export default async function TripPage({ params }: TripPageProps) {
         return [{ key: entry._key, title: entry.section.title, body }];
     });
 
-    // Section menu stops (Aug 20 decision), shared by SectionNav and the
-    // trip-bar flag's TripBar. Labels match the section headings.
+    // Section menu stops (Aug 20 decision) for the TripBar. Reviews and
+    // related trips stay on the page but out of the menu. Labels match
+    // the section headings.
     const sectionItems = [
         { id: 'trip-details', label: 'Trip Details' },
         ...(trip.faqs && trip.faqs.length > 0
@@ -251,11 +251,29 @@ export default async function TripPage({ params }: TripPageProps) {
                 )}
             </PageBanner>
 
-            {/* trip-bar demo flag: one sticky bar in the page, replacing
-                SectionNav's dock and tab row while the flag is on. */}
+            {/* The section menu: one sticky bar in the page, under the
+                sticky header. */}
             <TripBar
                 ariaLabel='Trip sections'
                 items={sectionItems}
+                trips={(trip.relatedTrips ?? []).flatMap((related) =>
+                    related.slug?.current && related.name
+                        ? [
+                              {
+                                  href: `/trips/${related.slug.current}`,
+                                  label: related.name,
+                                  detail:
+                                      [
+                                          related.river?.name,
+                                          related.durationLabel,
+                                      ]
+                                          .filter(Boolean)
+                                          .join(' · ') || undefined,
+                              },
+                          ]
+                        : [],
+                )}
+
                 cta={datesCta}
                 phone={phoneLink}
                 summary={[
@@ -272,7 +290,7 @@ export default async function TripPage({ params }: TripPageProps) {
             <Section
                 id='trip-details'
                 background='white'
-                className='scroll-mt-6 [[data-demo-sticky-header=on]_&]:scroll-mt-28 py-10 md:py-14'
+                className='scroll-mt-6 py-10 md:py-14'
             >
                 <div className='flex flex-wrap items-end justify-between gap-6 border-t border-holiday-grey/40 pt-6'>
                     <dl className='grid w-full grid-cols-2 gap-x-6 gap-y-5 sm:flex sm:w-auto sm:flex-wrap sm:gap-x-10 sm:gap-y-4'>
@@ -318,11 +336,12 @@ export default async function TripPage({ params }: TripPageProps) {
                     </a>
                 </div>
 
-                {/* facts-dates demo flag: the next open departures right
-                    under the facts, so dates are visible without any
-                    navigation. Nothing renders when Arctic has none. */}
+                {/* The next open departures right under the facts, so
+                    dates are visible without any navigation (the
+                    facts-dates flag until 2026-11-06). Nothing renders
+                    when Arctic has none. */}
                 {openDates.length > 0 && (
-                    <p className='mt-6 hidden flex-wrap items-baseline gap-x-3 gap-y-1 [[data-demo-facts-dates=on]_&]:flex'>
+                    <p className='mt-6 flex flex-wrap items-baseline gap-x-3 gap-y-1'>
                         <span className='font-alt-gothic text-[12px] font-medium uppercase leading-[1.3] tracking-[0.05em] text-onyx/70'>
                             Next open
                         </span>
@@ -442,7 +461,7 @@ export default async function TripPage({ params }: TripPageProps) {
                 <Section
                     id='faqs'
                     background='white'
-                    className='scroll-mt-6 [[data-demo-sticky-header=on]_&]:scroll-mt-28 pb-16 pt-12 md:pb-20 md:pt-16'
+                    className='scroll-mt-6 pb-16 pt-12 md:pb-20 md:pt-16'
                 >
                     <div className='max-w-3xl'>
                         <h2 className='font-alt-gothic text-section font-black uppercase text-holiday-red'>
@@ -482,7 +501,7 @@ export default async function TripPage({ params }: TripPageProps) {
                 <Section
                     id='trip-info'
                     background='white'
-                    className='scroll-mt-6 [[data-demo-sticky-header=on]_&]:scroll-mt-28 pb-16 pt-12 md:pb-20 md:pt-16'
+                    className='scroll-mt-6 pb-16 pt-12 md:pb-20 md:pt-16'
                 >
                     <div className='max-w-3xl'>
                         <div className='divide-y divide-holiday-grey/40 border-y border-holiday-grey/40'>
@@ -527,12 +546,10 @@ export default async function TripPage({ params }: TripPageProps) {
                 googleUrl={settings?.reviews?.googleUrl}
             />
 
-            {/* end-cap demo flag: three ways forward at the end of the page,
-                so nobody has to scroll back up to act. */}
-            <Section
-                background='white'
-                className='hidden pb-4 pt-12 md:pt-16 [[data-demo-end-cap=on]_&]:block'
-            >
+            {/* Three ways forward at the end of the page, so nobody has
+                to scroll back up to act (the end-cap flag until
+                2026-11-06). */}
+            <Section background='white' className='pb-4 pt-12 md:pt-16'>
                 <div className='border-y border-holiday-grey/40 py-10'>
                     <h2 className='font-alt-gothic text-section font-black uppercase text-holiday-red'>
                         What next?
@@ -562,32 +579,6 @@ export default async function TripPage({ params }: TripPageProps) {
 
             {/* Cross-sell */}
             <RelatedTrips trips={trip.relatedTrips ?? []} />
-
-            {/* Section menu (Aug 20 decision). Reviews and related trips
-                stay on the page but out of the menu. The label matches the
-                section heading. */}
-            <SectionNav
-                ariaLabel='Trip sections'
-                cta={datesCta}
-                trips={(trip.relatedTrips ?? []).flatMap((related) =>
-                    related.slug?.current && related.name
-                        ? [
-                              {
-                                  href: `/trips/${related.slug.current}`,
-                                  label: related.name,
-                                  detail:
-                                      [
-                                          related.river?.name,
-                                          related.durationLabel,
-                                      ]
-                                          .filter(Boolean)
-                                          .join(' · ') || undefined,
-                              },
-                          ]
-                        : [],
-                )}
-                items={sectionItems}
-            />
         </>
     );
 }
