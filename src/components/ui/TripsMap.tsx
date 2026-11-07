@@ -103,6 +103,12 @@ function markerRing(kind: TripMapMarker['kind']): string {
     put their label to the LEFT of the mark: the offices share towns with
     put-ins (Green River HQ by San Rafael and Desolation, Vernal HQ by the
     Dinosaur rivers), and above or below they landed on a trip pin. */
+/** How each marker pass shows its label (see the passes in TripsMap). */
+const LABEL_LAYER = {
+    pin: 'invisible',
+    label: 'pointer-events-auto',
+} as const;
+
 const MARKER_ANCHOR = {
     raft: 'bottom',
     bike: 'top',
@@ -215,20 +221,26 @@ export default function TripsMap({ markers }: { markers: TripMapMarker[] }) {
                         rough plateau outline (Sep 3 feedback). */}
                     <MapLayers />
                     {/* Two passes over the same markers with the same
-                        layout. The first draws the pins and owns the link,
-                        the second draws only the labels, so every label
-                        sits above every photo. At the opening zoom the
-                        Cataract, White Rim and Maze pins land within 25px
-                        of each other, and with one pass Cataract's label
-                        disappeared under the bike photos. Outposts draw
-                        first in each pass, under the trips. */}
+                        layout, so the stacking is set by pass, not by
+                        marker order (each marker stacks on its own): the
+                        photos and dots first, then every label above them.
+                        At the opening zoom the Cataract, White Rim and Maze
+                        pins land within 25px of each other, and with one
+                        pass Cataract's label disappeared under the bike
+                        photos. Clicks go to whatever is visible on top:
+                        in each pass only the part it shows takes hits.
+                        Outposts draw first in each pass, under the trips. */}
                     {(['pin', 'label'] as const).map((layer) =>
                         ordered.map((marker) => (
                             <Marker
                                 key={`${layer}-${marker.kind}-${marker.href}-${marker.label}`}
                                 longitude={marker.longitude}
                                 latitude={marker.latitude}
-                                anchor={MARKER_ANCHOR[marker.kind]}
+                                anchor={
+                                    marker.hangBelow
+                                        ? 'top'
+                                        : MARKER_ANCHOR[marker.kind]
+                                }
                                 // Right-anchored, the point would sit on the
                                 // mark's right edge. Shift by half the mark
                                 // (56px medallion or 16px dot) to centre it.
@@ -237,26 +249,29 @@ export default function TripsMap({ markers }: { markers: TripMapMarker[] }) {
                                         ? [marker.imageSrc ? 28 : 8, 0]
                                         : undefined
                                 }
-                                style={
-                                    layer === 'label'
-                                        ? { pointerEvents: 'none' }
-                                        : undefined
-                                }
+                                // MapLibre's wrapper box would catch
+                                // hits across the whole marker.
+                                style={{ pointerEvents: 'none' }}
                             >
                                 <a
                                     href={marker.href}
-                                    // The label pass repeats the link for
-                                    // pointer users only. Keyboard and
-                                    // screen reader users get one link per
-                                    // marker, named by aria-label because
-                                    // its own label text is hidden.
+                                    // Only the pin pass is a link for
+                                    // keyboard and screen readers, named by
+                                    // aria-label since its label is hidden.
+                                    // The label pass is aria-hidden and out
+                                    // of the tab order, but still clickable.
                                     {...(layer === 'pin'
                                         ? { 'aria-label': marker.label }
                                         : {
                                               'aria-hidden': true,
                                               tabIndex: -1,
                                           })}
-                                    className={`group flex items-center ${
+                                    // The link box itself is click-through.
+                                    // Only the part this pass shows takes
+                                    // hits (the photo in pin, the label in
+                                    // label), and those still activate the
+                                    // link and its hover card.
+                                    className={`group pointer-events-none flex items-center ${
                                         marker.kind === 'outpost'
                                             ? 'flex-row-reverse gap-1'
                                             : 'flex-col'
@@ -273,9 +288,9 @@ export default function TripsMap({ markers }: { markers: TripMapMarker[] }) {
                                             width={56}
                                             height={56}
                                             className={`h-14 w-14 rounded-full border-[3px] object-cover shadow-lg transition-transform group-hover:scale-110 group-focus-visible:scale-110 ${markerRing(marker.kind)} ${
-                                                layer === 'label'
-                                                    ? 'invisible'
-                                                    : ''
+                                                layer === 'pin'
+                                                    ? 'pointer-events-auto'
+                                                    : 'invisible'
                                             }`}
                                         />
                                     ) : (
@@ -286,15 +301,15 @@ export default function TripsMap({ markers }: { markers: TripMapMarker[] }) {
                                                     ? 'bg-onyx'
                                                     : 'bg-holiday-red'
                                             } ${
-                                                layer === 'label'
-                                                    ? 'invisible'
-                                                    : ''
+                                                layer === 'pin'
+                                                    ? 'pointer-events-auto'
+                                                    : 'invisible'
                                             }`}
                                         />
                                     )}
                                     <span
-                                        className={`${marker.kind === 'outpost' ? '' : 'mt-1 '}pointer-events-auto whitespace-nowrap px-2 py-0.5 font-alt-gothic text-[12px] font-semibold uppercase tracking-[0.05em] shadow-md ${markerChip(marker.kind)} ${
-                                            layer === 'pin' ? 'invisible' : ''
+                                        className={`${marker.kind === 'outpost' ? '' : 'mt-1 '}whitespace-nowrap px-2 py-0.5 font-alt-gothic text-[12px] font-semibold uppercase tracking-[0.05em] shadow-md ${markerChip(marker.kind)} ${
+                                            LABEL_LAYER[layer]
                                         }`}
                                     >
                                         {marker.label}

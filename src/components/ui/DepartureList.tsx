@@ -153,7 +153,7 @@ function DepartureRow({
             // DepartureHashTarget sets data-highlighted on the row a
             // specialty link lands on. The shadow extends the tint past the
             // row edges so the text doesn't sit flush against it.
-            className={`grid scroll-mt-28 grid-cols-[minmax(0,1fr)_auto] items-center gap-x-4 gap-y-2 py-4 sm:gap-x-6 data-[highlighted=true]:bg-sand/30 data-[highlighted=true]:shadow-[0_0_0_12px_color-mix(in_srgb,var(--color-sand)_30%,transparent)] ${hiddenBelowLg ? 'max-lg:hidden' : ''}`}
+            className={`grid scroll-mt-6 grid-cols-[minmax(0,1fr)_auto] items-center gap-x-4 gap-y-2 py-4 sm:gap-x-6 data-[highlighted=true]:bg-sand/30 data-[highlighted=true]:shadow-[0_0_0_12px_color-mix(in_srgb,var(--color-sand)_30%,transparent)] ${hiddenBelowLg ? 'max-lg:hidden' : ''}`}
         >
             {bookable && nativeBookingEnabled() && departure.triptypeid ? (
                 // BookingRow owns the row internals so its expanded panel can

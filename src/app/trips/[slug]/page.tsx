@@ -290,7 +290,7 @@ export default async function TripPage({ params }: TripPageProps) {
             <Section
                 id='trip-details'
                 background='white'
-                className='scroll-mt-28 py-10 md:py-14'
+                className='scroll-mt-6 py-10 md:py-14'
             >
                 <div className='flex flex-wrap items-end justify-between gap-6 border-t border-holiday-grey/40 pt-6'>
                     <dl className='grid w-full grid-cols-2 gap-x-6 gap-y-5 sm:flex sm:w-auto sm:flex-wrap sm:gap-x-10 sm:gap-y-4'>
@@ -461,7 +461,7 @@ export default async function TripPage({ params }: TripPageProps) {
                 <Section
                     id='faqs'
                     background='white'
-                    className='scroll-mt-28 pb-16 pt-12 md:pb-20 md:pt-16'
+                    className='scroll-mt-6 pb-16 pt-12 md:pb-20 md:pt-16'
                 >
                     <div className='max-w-3xl'>
                         <h2 className='font-alt-gothic text-section font-black uppercase text-holiday-red'>
@@ -501,7 +501,7 @@ export default async function TripPage({ params }: TripPageProps) {
                 <Section
                     id='trip-info'
                     background='white'
-                    className='scroll-mt-28 pb-16 pt-12 md:pb-20 md:pt-16'
+                    className='scroll-mt-6 pb-16 pt-12 md:pb-20 md:pt-16'
                 >
                     <div className='max-w-3xl'>
                         <div className='divide-y divide-holiday-grey/40 border-y border-holiday-grey/40'>

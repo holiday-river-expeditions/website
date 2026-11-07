@@ -70,7 +70,7 @@ export function BookTripCard({
             // The fill is mixed to a solid color so the scroll fade can
             // match it. Row dividers go lighter so they don't compete with
             // the photo.
-            className='bg-(--card-bg) [--card-bg:color-mix(in_srgb,var(--color-sand)_15%,var(--color-holiday-white))] lg:flex [&_li]:border-onyx/12 [&_ul]:border-onyx/12 scroll-mt-28'
+            className='bg-(--card-bg) [--card-bg:color-mix(in_srgb,var(--color-sand)_15%,var(--color-holiday-white))] lg:flex [&_li]:border-onyx/12 [&_ul]:border-onyx/12 scroll-mt-6'
         >
             {imageSrc && panelImageSrc && href && (
                 // From lg up the photo fills the card's full height. On a

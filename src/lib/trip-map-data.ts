@@ -15,6 +15,9 @@ export interface TripMapMarker {
     imageSrc?: string;
     /** One-to-two sentences shown in the hover/focus context card. */
     context?: string;
+    /** Hang the pin below its point instead of the kind's default, where
+        a neighbour's label would otherwise cover it. */
+    hangBelow?: boolean;
 }
 
 /**
@@ -57,10 +60,22 @@ export const OUTPOST_MARKERS: TripMapMarker[] = [
 
 export const TRIP_MAP_COORDS: Record<
     string,
-    { longitude: number; latitude: number; kind: 'raft' | 'bike' }
+    {
+        longitude: number;
+        latitude: number;
+        kind: 'raft' | 'bike';
+        hangBelow?: boolean;
+    }
 > = {
     'gates-of-lodore': { longitude: -108.89, latitude: 40.73, kind: 'raft' },
-    yampa: { longitude: -108.54, latitude: 40.46, kind: 'raft' },
+    // Hangs below: above its point, the Gates of Lodore label covered the
+    // middle of its photo at the opening zoom.
+    yampa: {
+        longitude: -108.54,
+        latitude: 40.46,
+        kind: 'raft',
+        hangBelow: true,
+    },
     desolation: { longitude: -110.06, latitude: 39.36, kind: 'raft' },
     westwater: { longitude: -109.13, latitude: 39.14, kind: 'raft' },
     cataract: { longitude: -109.94, latitude: 38.13, kind: 'raft' },

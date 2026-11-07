@@ -66,7 +66,7 @@ export async function AvailabilitySection({
             <div
                 id={AVAILABILITY_ANCHOR}
                 data-availability
-                className='max-w-4xl scroll-mt-28'
+                className='max-w-4xl scroll-mt-6'
             >
                 <div className='flex flex-wrap items-center gap-x-6 gap-y-3'>
                     <h2 className='font-alt-gothic text-section font-black uppercase text-holiday-red'>
