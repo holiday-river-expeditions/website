@@ -64,6 +64,66 @@ export function tripFacts(trip: TripFactsSource): TripFact[] {
     return facts;
 }
 
+/** What one specialty date knows that its trip's facts don't. */
+export interface SpecialtyDateFactsInput {
+    /** Arctic's fare for the matched departure. */
+    fare?: string | null;
+    /** The matched departure's length in days. */
+    days?: number | null;
+    /** Studio overrides on the Specialty Departure. */
+    minAge?: number | null;
+    priceText?: string | null;
+    lengthText?: string | null;
+}
+
+/**
+ * A trip's facts adjusted for one specialty date. What an editor typed
+ * for the date (age, price, length) always wins. Arctic's fare belongs to
+ * the trip type, not the departure, so it is wrong for a date with its
+ * own price, and a date booked by phone has no Arctic departure at all.
+ * Without a typed value, Arctic's fare and length for the matched
+ * departure replace the trip's ranges. The season is dropped: the banner
+ * gives the date.
+ */
+export function specialtyDateFacts(
+    facts: readonly TripFact[],
+    date: SpecialtyDateFactsInput,
+): TripFact[] {
+    const price = date.priceText?.trim() || date.fare || null;
+    const length =
+        date.lengthText?.trim() ||
+        (date.days ? (date.days === 1 ? '1 Day' : `${date.days} Days`) : null);
+    // 0 is "not set", as on the trip itself (tripFacts hides it too).
+    const minAge = date.minAge ? String(date.minAge) : null;
+
+    const out: TripFact[] = [];
+    const seen = new Set<string>();
+    for (const fact of facts) {
+        seen.add(fact.label);
+        if (fact.label === 'Season') continue;
+        if (fact.label === 'Starts at' && price) {
+            out.push({ label: 'Price', value: price });
+        } else if (fact.label === 'Duration' && length) {
+            out.push({ ...fact, value: length });
+        } else if (fact.label === 'Min Age' && minAge) {
+            out.push({ ...fact, value: minAge });
+        } else {
+            out.push(fact);
+        }
+    }
+    // A trip with none of its own still shows what the date sets, in the
+    // strip's usual order: price, length, then age.
+    const lead: TripFact[] = [];
+    if (!seen.has('Starts at') && price)
+        lead.push({ label: 'Price', value: price });
+    if (!seen.has('Duration') && length)
+        lead.push({ label: 'Duration', value: length });
+    const withLead = [...lead, ...out];
+    if (!seen.has('Min Age') && minAge)
+        withLead.push({ label: 'Min Age', value: minAge });
+    return withLead;
+}
+
 /**
  * The facts strip on trip pages and specialty date pages. Justin, Sep 10:
  * 12px labels at a 1.3 line height; the sizing is fixed. Children render

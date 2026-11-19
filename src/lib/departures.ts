@@ -254,6 +254,11 @@ export interface SpecialtyDepartureEntry {
     image?: SpecialtyImage | null;
     /** Set in the Studio to pin the page URL; otherwise one is derived. */
     slug?: { current?: string | null } | null;
+    /** Booked by phone: never matched to an Arctic departure. */
+    phoneOnly?: boolean | null;
+    /** This date's own price and length, shown in place of Arctic's. */
+    priceText?: string | null;
+    lengthText?: string | null;
     specialtyType?: {
         name?: string | null;
         slug?: { current?: string | null } | null;
@@ -389,6 +394,10 @@ export function buildCalloutMap(
         // Both are required in the Studio, but drafts and older documents
         // can still arrive incomplete.
         if (!startDate || !label || map.has(startDate)) continue;
+        // A phone-only date has no row of its own in the list. Badging
+        // another departure that happens to start that day would put its
+        // name on a trip anyone can book.
+        if (entry.phoneOnly) continue;
         const family = entry.specialtyType?.slug?.current;
         map.set(startDate, {
             label: specialtyDateTitle(label, entry.specialtyType?.name),
@@ -453,6 +462,11 @@ export interface UpcomingSpecialtyDate {
     image: SpecialtyImage | null;
     /** The slug pinned in the Studio, when there is one. */
     slug: { current?: string | null } | null;
+    /** Booked by phone: never matched to an Arctic departure. */
+    phoneOnly: boolean;
+    /** This date's own price and length, shown in place of Arctic's. */
+    priceText: string | null;
+    lengthText: string | null;
 }
 
 /**
@@ -477,6 +491,9 @@ export function upcomingSpecialtyDates(
             note: entry.note ?? null,
             image: entry.image ?? null,
             slug: entry.slug ?? null,
+            phoneOnly: entry.phoneOnly === true,
+            priceText: entry.priceText?.trim() || null,
+            lengthText: entry.lengthText?.trim() || null,
         });
     }
     return [...byDate.values()].sort((a, b) =>
@@ -506,6 +523,11 @@ export interface SpecialtyDateRow {
     href: string | null;
     /** Sanity price, the fallback when Arctic has no fare for the date. */
     startingPrice: string | null;
+    /** Booked by phone: `departure` is always null. */
+    phoneOnly: boolean;
+    /** This date's own price and length, shown in place of Arctic's. */
+    priceText: string | null;
+    lengthText: string | null;
     /** The matching Arctic departure, or null when Arctic has none. */
     departure: ArcticDeparture | null;
     /** The date's own photo, else the trip's first photo. */
@@ -528,13 +550,17 @@ export function buildSpecialtyDateRows(
         const ids = new Set(parseArcticIds(trip.arcticTripId));
         const slug = trip.slug?.current;
         for (const date of upcomingSpecialtyDates(trip.entries, today)) {
-            const departure =
-                departures?.find(
-                    (d) =>
-                        d.start === date.startDate &&
-                        d.triptypeid != null &&
-                        ids.has(d.triptypeid),
-                ) ?? null;
+            // A phone-only date is never matched: another departure of
+            // the trip can start the same day, and its Book button and
+            // fare would be for the wrong trip.
+            const departure = date.phoneOnly
+                ? null
+                : (departures?.find(
+                      (d) =>
+                          d.start === date.startDate &&
+                          d.triptypeid != null &&
+                          ids.has(d.triptypeid),
+                  ) ?? null);
             rows.push({
                 key: `${trip._id}-${date.startDate}`,
                 ...date,

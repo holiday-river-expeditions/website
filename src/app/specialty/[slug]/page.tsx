@@ -14,7 +14,11 @@ import {
 } from '@/components/ui/PageBanner';
 import { richTextComponents } from '@/components/ui/RichText';
 import { Section } from '@/components/ui/Section';
-import { TripFacts, tripFacts } from '@/components/ui/TripFacts';
+import {
+    specialtyDateFacts,
+    TripFacts,
+    tripFacts,
+} from '@/components/ui/TripFacts';
 import { getUpcomingDepartures, todayISO } from '@/lib/arctic';
 import { getTripTypeFare } from '@/lib/arctic/prices';
 import { contactPhone } from '@/lib/contact-defaults';
@@ -108,14 +112,21 @@ export default async function SpecialtyDatePage({
     const today = todayISO();
     const past = entry.startDate < today;
     const typeIds = new Set(parseArcticIds(trip.arcticTripId));
+    // A date booked by phone is never looked up: another departure of the
+    // trip can start the same day, and its Book button and fare would be
+    // for the wrong trip.
+    const phoneOnly = entry.phoneOnly === true;
     const departures =
-        !past && trip.arcticTripId
+        !past && !phoneOnly && trip.arcticTripId
             ? await getUpcomingDepartures(trip.arcticTripId)
             : null;
     // null means Arctic didn't answer, which is not the same as Arctic
     // answering without this date (AvailabilitySection draws the same line).
     const arcticDown =
-        !past && Boolean(trip.arcticTripId) && departures === null;
+        !past &&
+        !phoneOnly &&
+        Boolean(trip.arcticTripId) &&
+        departures === null;
     const departure =
         departures?.find(
             (candidate) =>
@@ -143,15 +154,12 @@ export default async function SpecialtyDatePage({
         PAGE_BANNER_HEIGHT,
     );
 
-    // The trip's facts, with this date's own length and fare in place of
-    // the trip's range. The season is dropped: the banner gives the date.
-    const facts = tripFacts(trip).flatMap((fact) => {
-        if (fact.label === 'Starts at' && fare)
-            return [{ ...fact, label: 'Price', value: fare }];
-        if (fact.label === 'Duration' && days)
-            return [{ ...fact, value: days === 1 ? '1 Day' : `${days} Days` }];
-        if (fact.label === 'Season') return [];
-        return [fact];
+    const facts = specialtyDateFacts(tripFacts(trip), {
+        fare,
+        days,
+        minAge: entry.minAge,
+        priceText: entry.priceText,
+        lengthText: entry.lengthText,
     });
 
     const hasWriteUp = Boolean(entry.body && entry.body.length > 0);
@@ -198,9 +206,11 @@ export default async function SpecialtyDatePage({
                         <p className='mt-3 max-w-2xl text-body leading-body text-onyx'>
                             {past
                                 ? 'This date has passed.'
-                                : arcticDown
-                                  ? 'Live availability is momentarily unavailable.'
-                                  : 'This date is not listed online yet.'}{' '}
+                                : phoneOnly
+                                  ? 'This date is booked by phone.'
+                                  : arcticDown
+                                    ? 'Live availability is momentarily unavailable.'
+                                    : 'This date is not listed online yet.'}{' '}
                             Call{' '}
                             <a
                                 href={`tel:+1${phone.replace(/\D/g, '')}`}
@@ -208,7 +218,9 @@ export default async function SpecialtyDatePage({
                             >
                                 {phone}
                             </a>{' '}
-                            and we will help you find a trip.
+                            {phoneOnly && !past
+                                ? 'to book.'
+                                : 'and we will help you find a trip.'}
                         </p>
                     )}
                 </div>
@@ -294,7 +306,7 @@ export default async function SpecialtyDatePage({
                     </Link>
                     <Link
                         href={`/trips/${tripSlug}#${
-                            past
+                            past || phoneOnly
                                 ? AVAILABILITY_ANCHOR
                                 : departureAnchor(entry.startDate)
                         }`}
