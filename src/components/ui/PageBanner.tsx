@@ -8,8 +8,12 @@ import type { ReactNode } from 'react';
  * homepage hero from 2026-09-12 until 2026-11-06, when the homepage went
  * to 1440:600 so its photo could hold the rafts on the beach (Darius).
  *
- * Text sits bottom-left over a bottom-weighted scrim; the evergreen base
- * keeps white text legible before a photo is set. Pass the crop from
+ * Text sits bottom-left straight on the photo. Holiday asked for the dark
+ * scrim to go (Oct 22 sync), so headings carry a soft text shadow instead
+ * and the smaller sublines a tighter, darker one. Keep sublines full
+ * white: nothing else separates them from a bright photo. Eyebrow chips
+ * have their own ground and get no shadow. The evergreen base keeps white
+ * text legible before a photo is set. Pass the crop from
  * `imageUrl(..., PAGE_BANNER_WIDTH, PAGE_BANNER_HEIGHT)` so the request
  * matches the display aspect at 2x.
  */
@@ -43,8 +47,7 @@ export function PageBanner({
                         sizes='100vw'
                     />
                 )}
-                <div className='absolute inset-0 bg-gradient-to-t from-onyx/70 via-onyx/10 to-transparent' />
-                <div className='relative z-10 w-full px-6 pb-10 md:px-12 md:pb-14'>
+                <div className='relative z-10 w-full px-6 pb-10 md:px-12 md:pb-14 [&_:is(h1,h2)]:[text-shadow:0_2px_12px_rgb(0_0_0/0.55)] [&_p]:[text-shadow:0_1px_3px_rgb(0_0_0/0.8),0_2px_12px_rgb(0_0_0/0.55)]'>
                     {children}
                 </div>
             </div>

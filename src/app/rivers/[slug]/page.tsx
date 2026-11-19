@@ -58,7 +58,7 @@ export default async function RiverPage({ params }: RiverPageProps) {
                     while the page is titled by section ("Westwater");
                     naming both closes that gap. */}
                 {river.riverLabel && river.riverLabel !== river.name && (
-                    <p className='mt-2 font-alt-gothic text-subheading font-black uppercase leading-[0.95] text-holiday-white/80'>
+                    <p className='mt-2 font-alt-gothic text-subheading font-black uppercase leading-[0.95] text-holiday-white'>
                         {river.riverLabel}
                     </p>
                 )}

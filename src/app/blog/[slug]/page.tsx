@@ -74,7 +74,7 @@ export default async function PostPage({ params }: PostPageProps) {
                     {post.title}
                 </h1>
                 {post.publishedAt && (
-                    <p className='mt-2 text-[13px] uppercase tracking-wider text-holiday-white/80'>
+                    <p className='mt-2 text-[13px] uppercase tracking-wider text-holiday-white'>
                         {dateFormat.format(new Date(post.publishedAt))}
                     </p>
                 )}
