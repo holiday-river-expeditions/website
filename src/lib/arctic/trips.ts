@@ -133,9 +133,11 @@ async function fetchUpcomingDepartures(
 }
 
 /**
- * Trip types with online reservations enabled — the public catalog. Used to
- * keep internal Arctic entries (staff retreats, office transactions,
- * charters) off public pages.
+ * Trip types with online reservations enabled in Arctic. /book and the
+ * trip finder also treat a type as public when a Sanity trip page maps to
+ * it (isPublicTripType in lib/departures.ts), so this list alone is not
+ * the public catalog. It keeps internal Arctic entries (staff retreats,
+ * office transactions) off those pages and supplies type names for labels.
  */
 export async function getBookableTripTypes(): Promise<ArcticTripType[] | null> {
     if (!isArcticConfigured()) return null;

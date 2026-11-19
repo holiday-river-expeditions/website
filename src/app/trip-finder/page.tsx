@@ -83,16 +83,16 @@ export default async function TripFinderPage({
 
     const availabilityBySlug = new Map<string, ResultAvailability>();
     if (departures !== null && tripTypes !== null) {
-        const publicTypeIds = new Set(tripTypes.map((t) => t.id));
         for (const match of matches) {
             const slug = match.trip.slug?.current;
             if (!slug) continue;
             const ids = new Set(parseArcticIds(match.trip.arcticTripId));
             const tripDepartures = departures.filter(
+                // Every id here comes from the trip's Sanity page, which
+                // is enough to be public (see isPublicTripType). Requiring
+                // Arctic's type flag as well hid Yampa.
                 (d) =>
-                    typeof d.triptypeid === 'number' &&
-                    ids.has(d.triptypeid) &&
-                    publicTypeIds.has(d.triptypeid),
+                    typeof d.triptypeid === 'number' && ids.has(d.triptypeid),
             );
             // Prefer a date in the chosen month; fall back to any month
             // rather than showing nothing.

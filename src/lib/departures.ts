@@ -412,6 +412,31 @@ export function departureAnchor(startDate: string): string {
     return `departure-${startDate}`;
 }
 
+/**
+ * Whether a departure's trip type belongs on the public lists that span
+ * trips (/book and the trip finder). A type counts when Arctic has online
+ * reservations switched on for it, or when a trip page in Sanity maps to
+ * it. The Arctic flag alone hid Yampa: its two types (59, 60) have the
+ * flag off while their departures are bookable and show on the Yampa
+ * page. A Sanity page is Holiday's own statement that the trip is public.
+ * Internal types (staff retreats, office transactions) have neither.
+ * Private charters are dropped earlier, per departure.
+ *
+ * The cost: switching a type off in Arctic no longer hides a trip that
+ * has a Sanity page from these lists. Its departures' own online flags
+ * still do, which is the rule the trip page has always followed.
+ */
+export function isPublicTripType(
+    typeId: number | null | undefined,
+    arcticPublicTypeIds: { has(id: number): boolean },
+    sanityTypeIds: { has(id: number): boolean },
+): boolean {
+    return (
+        typeof typeId === 'number' &&
+        (arcticPublicTypeIds.has(typeId) || sanityTypeIds.has(typeId))
+    );
+}
+
 /** Splits Sanity's comma-separated arcticTripId into trip-type ids. */
 export function parseArcticIds(raw: string | null | undefined): number[] {
     if (!raw) return [];
