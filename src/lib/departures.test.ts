@@ -11,6 +11,7 @@ import {
     formatDateRange,
     formatDayLabel,
     groupDeparturesByMonth,
+    isPublicTripType,
     monthOptions,
     nextAvailable,
     parseArcticIds,
@@ -646,5 +647,24 @@ describe('specialty date pages', () => {
             'Canyon Concerts: Pompe & Honey',
         );
         expect(specialtyDateTitle('New Moon', null)).toBe('New Moon');
+    });
+});
+
+describe('isPublicTripType', () => {
+    const arctic = new Set([37, 41]);
+    const sanity = new Map([[59, 'yampa']]);
+
+    test('keeps a type Arctic has switched on for online reservations', () => {
+        expect(isPublicTripType(37, arctic, sanity)).toBe(true);
+    });
+
+    test('keeps a type with a Sanity trip page though Arctic has it off', () => {
+        expect(isPublicTripType(59, arctic, sanity)).toBe(true);
+    });
+
+    test('drops a type with neither, and a departure with no type', () => {
+        expect(isPublicTripType(12, arctic, sanity)).toBe(false);
+        expect(isPublicTripType(null, arctic, sanity)).toBe(false);
+        expect(isPublicTripType(undefined, arctic, sanity)).toBe(false);
     });
 });

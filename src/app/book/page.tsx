@@ -27,6 +27,7 @@ import {
     type DepartureCalloutMap,
     formatDayLabel,
     groupAnchor,
+    isPublicTripType,
     monthOptions,
     sortedVariantLabels,
     variantLabelMap,
@@ -156,7 +157,8 @@ export default async function BookPage({
     let groups: TripGroup[] | null = null;
     if (departures !== null && tripTypes !== null) {
         // Public catalog only: keep departures whose trip type has online
-        // reservations enabled in Arctic.
+        // reservations enabled in Arctic, or has a trip page in Sanity
+        // (see isPublicTripType).
         const publicTypes = new Map(tripTypes.map((t) => [t.id, t]));
 
         // Arctic trip-type id → Sanity trip page, via the arcticTripId field.
@@ -203,7 +205,12 @@ export default async function BookPage({
         const byGroup = new Map<string, TripGroup>();
         for (const departure of departures) {
             const typeId = departure.triptypeid;
-            if (!typeId || !publicTypes.has(typeId)) continue;
+            if (
+                !typeId ||
+                !isPublicTripType(typeId, publicTypes, sanityByTypeId)
+            ) {
+                continue;
+            }
             const sanityTrip = sanityByTypeId.get(typeId);
             // Group by Sanity trip page when mapped, else by Arctic type.
             const key = sanityTrip
