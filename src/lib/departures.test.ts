@@ -239,6 +239,21 @@ describe('buildCalloutMap', () => {
         });
     });
 
+    test('gives a phone-only date no badge in the dates list', () => {
+        const map = buildCalloutMap(
+            [
+                {
+                    startDate: '2027-08-13',
+                    label: 'Affinity Trip',
+                    phoneOnly: true,
+                },
+                { startDate: '2027-07-22', label: 'Theoretical Blonde' },
+            ],
+            'westwater-canyon',
+        );
+        expect([...map.keys()]).toEqual(['2027-07-22']);
+    });
+
     test('omits href when no specialty type is referenced', () => {
         const map = buildCalloutMap([
             { startDate: '2026-09-12', label: 'New Moon' },
@@ -397,6 +412,9 @@ describe('upcomingSpecialtyDates', () => {
                 note: 'n',
                 image: null,
                 slug: null,
+                phoneOnly: false,
+                priceText: null,
+                lengthText: null,
             },
         ]);
     });
@@ -459,6 +477,58 @@ describe('buildSpecialtyDateRows', () => {
         expect(
             rows.find((row) => row.startDate === '2027-06-21')?.departure,
         ).toBe(match);
+    });
+
+    test('carries a date’s own price and length onto its row', () => {
+        const rows = buildSpecialtyDateRows(
+            [
+                {
+                    ...westwater,
+                    entries: [
+                        {
+                            startDate: '2027-08-13',
+                            label: 'Affinity Trip',
+                            priceText: ' $890 ',
+                            lengthText: '3 Days',
+                        },
+                    ],
+                },
+            ],
+            null,
+            '2026-10-21',
+        );
+        expect(rows[0].priceText).toBe('$890');
+        expect(rows[0].lengthText).toBe('3 Days');
+    });
+
+    test('never matches a phone-only date to a departure that starts the same day', () => {
+        const sameDay = departure({
+            id: 7,
+            triptypeid: 55,
+            start: '2027-08-13',
+        });
+        const entries = [
+            {
+                startDate: '2027-08-13',
+                label: 'Affinity Trip',
+                phoneOnly: true,
+            },
+        ];
+        const rows = buildSpecialtyDateRows(
+            [{ ...westwater, entries }],
+            [sameDay],
+            '2026-10-21',
+        );
+        expect(rows[0].phoneOnly).toBe(true);
+        expect(rows[0].departure).toBeNull();
+        // The same entry without the switch does match, which is the
+        // collision the switch exists to prevent.
+        const open = buildSpecialtyDateRows(
+            [{ ...westwater, entries: [{ ...entries[0], phoneOnly: false }] }],
+            [sameDay],
+            '2026-10-21',
+        );
+        expect(open[0].departure).toBe(sameDay);
     });
 
     test('drops past dates and omits href without a slug', () => {

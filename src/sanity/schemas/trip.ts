@@ -581,6 +581,38 @@ export const trip = defineType({
                                 'Optional extra line shown under the date on this departure only.',
                         }),
                         defineField({
+                            name: 'phoneOnly',
+                            title: 'Booked by phone only',
+                            type: 'boolean',
+                            initialValue: false,
+                            description:
+                                'Turn on for a date guests cannot book online. Its page then shows the phone number and never a Book button, even when another departure of this trip starts the same day. The date also gets no badge in the trip’s dates list.',
+                        }),
+                        defineField({
+                            name: 'minAge',
+                            title: 'Minimum Age (this date only)',
+                            type: 'number',
+                            description:
+                                'Only when this date differs from the trip, such as an adults-only departure. Leave empty to use the trip’s minimum age.',
+                            validation: (rule) => rule.min(1).integer(),
+                        }),
+                        defineField({
+                            name: 'priceText',
+                            title: 'Price (this date only)',
+                            type: 'string',
+                            description:
+                                'Only when this date is priced differently from the trip. Shown in place of the price from Arctic, so remove it if the price changes. Keep it short, like "$890". Put the details in the Write-up.',
+                            validation: (rule) => rule.max(32),
+                        }),
+                        defineField({
+                            name: 'lengthText',
+                            title: 'Length (this date only)',
+                            type: 'string',
+                            description:
+                                'Only when the site shows the wrong length for this date, or the date is booked by phone. Shown in place of the length from Arctic, like "3 Days".',
+                            validation: (rule) => rule.max(24),
+                        }),
+                        defineField({
                             name: 'body',
                             title: 'Write-up',
                             type: 'array',

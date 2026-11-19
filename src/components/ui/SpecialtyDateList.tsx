@@ -36,10 +36,16 @@ export function SpecialtyDateList({
             {rows.map((row) => {
                 const { departure } = row;
                 const days = durationToDays(departure?.duration);
-                const price =
+                // A price or length typed for the date wins, as on the
+                // date's page (see specialtyDateFacts). Then Arctic's fare
+                // for the matched departure, then the trip's own price.
+                const fare =
                     (departure?.triptypeid != null &&
                         fares.get(departure.triptypeid)) ||
-                    row.startingPrice;
+                    null;
+                const ownPrice = row.priceText;
+                const price = ownPrice ?? fare ?? row.startingPrice;
+                const ownLength = row.lengthText;
                 const photo = imageUrl(row.image, 480, 360);
                 // "Book" only where the date can be booked online (same
                 // test as DepartureRow). It opens Arctic for this
@@ -90,10 +96,17 @@ export function SpecialtyDateList({
                                 )}
                                 , {row.startDate.slice(0, 4)}
                             </span>
-                            {days && days > 1 && (
+                            {ownLength ? (
                                 <span className='ml-3 whitespace-nowrap text-[13px] text-onyx/70'>
-                                    {days} days
+                                    {ownLength}
                                 </span>
+                            ) : (
+                                days &&
+                                days > 1 && (
+                                    <span className='ml-3 whitespace-nowrap text-[13px] text-onyx/70'>
+                                        {days} days
+                                    </span>
+                                )
                             )}
                         </div>
                         <div className='mt-1 text-paragraph font-bold leading-paragraph text-holiday-red'>
@@ -110,7 +123,13 @@ export function SpecialtyDateList({
                         </div>
                         <div className='mt-0.5 text-body leading-body text-onyx/80'>
                             {row.tripName}
-                            {price && <> &middot; Starts at {price}</>}
+                            {price && (
+                                <>
+                                    {' '}
+                                    &middot;{' '}
+                                    {ownPrice ? price : `Starts at ${price}`}
+                                </>
+                            )}
                         </div>
                         {row.note && (
                             <p className='mt-1.5 max-w-prose text-body leading-body text-onyx/80'>

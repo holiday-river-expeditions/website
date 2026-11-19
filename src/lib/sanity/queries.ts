@@ -29,6 +29,7 @@ export const allTripsQuery = defineQuery(`
       label,
       note,
       slug,
+      phoneOnly,
       "specialtyType": specialtyType->{ name, slug }
     }
   }
@@ -127,6 +128,10 @@ export const tripBySlugQuery = defineQuery(`
       slug,
       body,
       image,
+      phoneOnly,
+      minAge,
+      priceText,
+      lengthText,
       "specialtyType": specialtyType->{ name, slug }
     },
     featuredReview,
@@ -224,7 +229,10 @@ export const allSpecialtyTypesQuery = defineQuery(`
         label,
         note,
         slug,
-        image
+        image,
+        phoneOnly,
+        priceText,
+        lengthText
       }
     }
   }
