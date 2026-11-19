@@ -1,4 +1,5 @@
 import type { ArcticDeparture, ArcticTripType } from '@/lib/arctic';
+import { SPECIALTY_SLUG_FORMAT } from '@/lib/specialty-slug-format';
 
 /**
  * Pure presentation logic for Arctic departures: date math, month grouping,
@@ -229,7 +230,7 @@ export interface DepartureCallout {
     label: string;
     /** Optional detail line under the date. */
     note?: string | null;
-    /** Parent page for the specialty family, when one exists. */
+    /** The date's own page, else the family's section on /specialty. */
     href?: string | null;
 }
 
@@ -251,9 +252,116 @@ export interface SpecialtyDepartureEntry {
     label?: string | null;
     note?: string | null;
     image?: SpecialtyImage | null;
+    /** Set in the Studio to pin the page URL; otherwise one is derived. */
+    slug?: { current?: string | null } | null;
     specialtyType?: {
+        name?: string | null;
         slug?: { current?: string | null } | null;
     } | null;
+}
+
+/** Lowercase words joined by hyphens, with "&" spelled out as "and". */
+export function slugifyLabel(text: string): string {
+    return text
+        .normalize('NFKD')
+        .replace(/[\u0300-\u036f]/g, '')
+        .toLowerCase()
+        .replace(/&/g, ' and ')
+        .replace(/['\u2019]/g, '')
+        .replace(/[^a-z0-9]+/g, '-')
+        .replace(/^-+|-+$/g, '');
+}
+
+/**
+ * The slug of a specialty date's page at /specialty/<slug>. An editor can
+ * pin one in the Studio. Without it the slug is the label, the trip and
+ * the start date, which is unique because a trip holds one entry per date.
+ * A derived slug changes when the label or date is edited, so pin one
+ * before sharing a link widely.
+ */
+export function specialtyDateSlug(
+    entry: Pick<SpecialtyDepartureEntry, 'startDate' | 'label' | 'slug'>,
+    tripSlug: string | null | undefined,
+): string | null {
+    // A pin the URL can't carry as written is ignored, so a stray space
+    // or ampersand in the Studio never produces a link that 404s.
+    const pinned = entry.slug?.current?.trim();
+    if (pinned && SPECIALTY_SLUG_FORMAT.test(pinned)) return pinned;
+    const startDate = entry.startDate?.trim();
+    const label = slugifyLabel(entry.label ?? '');
+    if (!startDate || !label || !tripSlug) return null;
+    return `${label}-${tripSlug}-${startDate}`;
+}
+
+/** Where a specialty date's page lives, or null when it has no slug. */
+export function specialtyDateHref(
+    entry: Pick<SpecialtyDepartureEntry, 'startDate' | 'label' | 'slug'>,
+    tripSlug: string | null | undefined,
+): string | null {
+    const slug = specialtyDateSlug(entry, tripSlug);
+    return slug ? `/specialty/${slug}` : null;
+}
+
+/** One trip's entries, as specialtyDateIndexQuery projects them. */
+export interface SpecialtyDateIndexTrip {
+    tripSlug?: string | null;
+    _updatedAt?: string | null;
+    entries?:
+        readonly (SpecialtyDepartureEntry & { _key?: string | null })[] | null;
+}
+
+export interface SpecialtyDatePage {
+    slug: string;
+    tripSlug: string;
+    /** _key of the specialtyDepartures entry on the trip. */
+    key: string | null;
+    startDate: string;
+    updatedAt: string | null;
+}
+
+/**
+ * Every specialty date that has a page, one per slug. The page route and
+ * the sitemap both read this, so the sitemap never lists a page the route
+ * would refuse. An entry needs a date and a label. When two entries end
+ * up with the same slug (two pins that match, or a second entry on the
+ * same date), the first in trip then array order keeps the page and the
+ * rest get none. The Studio blocks matching pins, so this is a backstop.
+ */
+export function specialtyDatePages(
+    index: readonly SpecialtyDateIndexTrip[] | null | undefined,
+): SpecialtyDatePage[] {
+    const bySlug = new Map<string, SpecialtyDatePage>();
+    for (const trip of index ?? []) {
+        if (!trip.tripSlug) continue;
+        for (const entry of trip.entries ?? []) {
+            const startDate = entry.startDate?.trim();
+            if (!startDate || !entry.label?.trim()) continue;
+            const slug = specialtyDateSlug(entry, trip.tripSlug);
+            if (!slug || bySlug.has(slug)) continue;
+            bySlug.set(slug, {
+                slug,
+                tripSlug: trip.tripSlug,
+                key: entry._key ?? null,
+                startDate,
+                updatedAt: trip._updatedAt ?? null,
+            });
+        }
+    }
+    return [...bySlug.values()];
+}
+
+/**
+ * A specialty date's name with its family in front ("Canyon Concerts:
+ * Pompe & Honey"), for lists outside the family's own section, where a
+ * band or theme name alone doesn't say what kind of trip it is (Oct 22
+ * sync). The family name is Holiday's own, used as written.
+ */
+export function specialtyDateTitle(
+    label: string,
+    typeName: string | null | undefined,
+): string {
+    const prefix = typeName?.trim();
+    return prefix ? `${prefix}: ${label}` : label;
 }
 
 /**
@@ -266,9 +374,13 @@ export interface SpecialtyDepartureEntry {
  * schemas/trip.ts). The cost is that a date typo silently renders no
  * callout, and that two departures starting the same day cannot be told
  * apart: the first entry wins and later duplicates are ignored.
+ *
+ * With the trip's slug, each callout links to the date's own page and
+ * falls back to the family's section on the hub.
  */
 export function buildCalloutMap(
     entries: readonly SpecialtyDepartureEntry[] | null | undefined,
+    tripSlug?: string | null,
 ): DepartureCalloutMap {
     const map = new Map<string, DepartureCallout>();
     for (const entry of entries ?? []) {
@@ -277,21 +389,24 @@ export function buildCalloutMap(
         // Both are required in the Studio, but drafts and older documents
         // can still arrive incomplete.
         if (!startDate || !label || map.has(startDate)) continue;
-        const slug = entry.specialtyType?.slug?.current;
+        const family = entry.specialtyType?.slug?.current;
         map.set(startDate, {
-            label,
+            label: specialtyDateTitle(label, entry.specialtyType?.name),
             note: entry.note ?? null,
-            // Anchor into the family's section on the specialty hub — the
-            // per-family parent pages were removed (Aug 20 decision).
-            href: slug ? `/specialty#${slug}` : null,
+            // The date's own page (Nov 16 decision). Without a trip slug,
+            // the family's section on the hub: the per-family parent
+            // pages were removed (Aug 20 decision).
+            href:
+                specialtyDateHref(entry, tripSlug) ??
+                (family ? `/specialty#${family}` : null),
         });
     }
     return map;
 }
 
 /**
- * DOM id on a specialty departure row in Dates & Availability. The trip
- * page callout and the /specialty date list both link to it.
+ * DOM id on a specialty departure row in Dates & Availability. A
+ * specialty date's page links to it from "See every date".
  */
 export function departureAnchor(startDate: string): string {
     return `departure-${startDate}`;
@@ -311,12 +426,14 @@ export interface UpcomingSpecialtyDate {
     label: string;
     note: string | null;
     image: SpecialtyImage | null;
+    /** The slug pinned in the Studio, when there is one. */
+    slug: { current?: string | null } | null;
 }
 
 /**
  * Specialty entries from today on, by date, one per date. Same rules as
  * buildCalloutMap (date and label required, first entry for a date wins),
- * so the trip page callout never names a date the departure list won't
+ * so /specialty never lists a date the trip page's departure list won't
  * badge. `today` is YYYY-MM-DD, compared as a string.
  */
 export function upcomingSpecialtyDates(
@@ -334,6 +451,7 @@ export function upcomingSpecialtyDates(
             label,
             note: entry.note ?? null,
             image: entry.image ?? null,
+            slug: entry.slug ?? null,
         });
     }
     return [...byDate.values()].sort((a, b) =>
@@ -359,7 +477,7 @@ export interface SpecialtyDateRow {
     label: string;
     note: string | null;
     tripName: string;
-    /** Trip page link landing on this date's row, or null without a slug. */
+    /** The date's own page, or null when the trip has no slug. */
     href: string | null;
     /** Sanity price, the fallback when Arctic has no fare for the date. */
     startingPrice: string | null;
@@ -396,9 +514,7 @@ export function buildSpecialtyDateRows(
                 key: `${trip._id}-${date.startDate}`,
                 ...date,
                 tripName: trip.name ?? '',
-                href: slug
-                    ? `/trips/${slug}#${departureAnchor(date.startDate)}`
-                    : null,
+                href: specialtyDateHref(date, slug),
                 startingPrice: trip.startingPrice ?? null,
                 departure,
                 // An image field with alt text but no upload still falls
