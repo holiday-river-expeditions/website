@@ -33,6 +33,13 @@ export function SpecialtyDateList({
                         fares.get(departure.triptypeid)) ||
                     row.startingPrice;
                 const photo = imageUrl(row.image, 480, 360);
+                // "Book" only where the trip page row it lands on offers
+                // booking (same test as DepartureRow). A full date, or one
+                // Arctic doesn't list, keeps the plain "View Trip".
+                const seats = departure?.remainingopenings ?? null;
+                const bookable = Boolean(
+                    seats !== null && seats > 0 && departure?.onlinebookingurl,
+                );
                 return (
                     <li
                         key={row.key}
@@ -92,7 +99,7 @@ export function SpecialtyDateList({
                                         className: 'text-center',
                                     })}
                                 >
-                                    View Trip
+                                    {bookable ? 'Book' : 'View Trip'}
                                 </Link>
                             )}
                         </div>
