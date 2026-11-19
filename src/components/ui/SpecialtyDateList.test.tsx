@@ -1,5 +1,5 @@
 import { render, screen } from '@testing-library/react';
-import { expect, test, vi } from 'vitest';
+import { afterEach, expect, test, vi } from 'vitest';
 import type { ArcticDeparture } from '@/lib/arctic';
 import type { SpecialtyDateRow } from '@/lib/departures';
 import { SpecialtyDateList } from './SpecialtyDateList';
@@ -28,10 +28,10 @@ function row(overrides: Partial<SpecialtyDateRow> = {}): SpecialtyDateRow {
     return {
         key: 'yampa-2027-05-15',
         startDate: '2027-05-15',
-        label: 'Pompe n’ Honey',
+        label: 'Pompe & Honey',
         note: null,
         tripName: 'Yampa River',
-        href: '/trips/yampa#departure-2027-05-15',
+        href: '/specialty/pompe-and-honey-yampa-2027-05-15',
         startingPrice: '$1,435',
         departure: departure(),
         image: null,
@@ -39,31 +39,52 @@ function row(overrides: Partial<SpecialtyDateRow> = {}): SpecialtyDateRow {
     };
 }
 
-function linkLabel(r: SpecialtyDateRow): string | null {
-    const { unmount } = render(
-        <SpecialtyDateList rows={[r]} fares={new Map()} />,
-    );
-    const label = screen.getByRole('link').textContent;
-    unmount();
-    return label;
+const PAGE = '/specialty/pompe-and-honey-yampa-2027-05-15';
+
+function renderRow(r: SpecialtyDateRow) {
+    return render(<SpecialtyDateList rows={[r]} fares={new Map()} />);
 }
 
-test('says Book when the date has open seats and an online booking link', () => {
-    expect(linkLabel(row())).toBe('Book');
+afterEach(() => {
+    vi.unstubAllEnvs();
 });
 
-test('keeps View Trip when the date is full', () => {
-    expect(
-        linkLabel(row({ departure: departure({ remainingopenings: 0 }) })),
-    ).toBe('View Trip');
+test('the name links to the date page', () => {
+    renderRow(row());
+    expect(screen.getByRole('link', { name: 'Pompe & Honey' })).toHaveAttribute(
+        'href',
+        PAGE,
+    );
 });
 
-test('keeps View Trip when the date cannot be booked online', () => {
-    expect(
-        linkLabel(row({ departure: departure({ onlinebookingurl: null }) })),
-    ).toBe('View Trip');
+test('Book opens Arctic for an open date, in one click', () => {
+    renderRow(row());
+    const book = screen.getByRole('link', { name: /^Book/ });
+    expect(book).toHaveAttribute('href', 'https://example.com/reserve');
+    expect(book).toHaveAttribute('target', '_blank');
 });
 
-test('keeps View Trip when Arctic has no matching departure', () => {
-    expect(linkLabel(row({ departure: null }))).toBe('View Trip');
+test('Book opens the booking panel in the row when native booking is on', () => {
+    vi.stubEnv('BOOKING_NATIVE', 'true');
+    renderRow(row());
+    const book = screen.getByRole('button', { name: 'Book' });
+    expect(book).toHaveAttribute('aria-expanded', 'false');
+    // No Book link that would leave the page.
+    expect(screen.queryByRole('link', { name: /^Book/ })).toBeNull();
+});
+
+test.each([
+    ['the date is full', { departure: departure({ remainingopenings: 0 }) }],
+    [
+        'the date cannot be booked online',
+        { departure: departure({ onlinebookingurl: null }) },
+    ],
+    ['Arctic has no matching departure', { departure: null }],
+])('shows View Trip to the date page when %s', (_name, overrides) => {
+    renderRow(row(overrides));
+    expect(screen.queryByRole('link', { name: /^Book/ })).toBeNull();
+    expect(screen.getByRole('link', { name: 'View Trip' })).toHaveAttribute(
+        'href',
+        PAGE,
+    );
 });

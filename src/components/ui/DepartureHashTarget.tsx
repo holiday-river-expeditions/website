@@ -5,11 +5,11 @@ import { useEffect } from 'react';
 const PREFIX = 'departure-';
 
 /**
- * Lands specialty links on their date in Dates & Availability. The trip
- * page callout and /specialty link to `#departure-YYYY-MM-DD`; this opens
+ * Lands specialty links on their date in Dates & Availability. A
+ * specialty date's page links to `#departure-YYYY-MM-DD`; this opens
  * the "Show all" <details> when the row is collapsed inside it, marks the
  * row, and scrolls to it. Done here rather than with :target because
- * client-side navigation from /specialty doesn't update :target.
+ * client-side navigation doesn't update :target.
  *
  * When the date has no row (an editor typo, or Arctic doesn't list it)
  * the link falls back to the top of the section.

@@ -12,6 +12,7 @@ import {
     riverBySlugQuery,
     siteSettingsQuery,
     sitemapQuery,
+    specialtyDateIndexQuery,
     tripBySlugQuery,
     tripFinderSpecQuery,
     tripFinderTripsQuery,
@@ -101,6 +102,11 @@ export async function getHomepage() {
             featuredTrips: await withArcticPrices(homepage.featuredTrips),
         }
     );
+}
+
+/** Trips with specialty dates, for resolving and listing their pages. */
+export async function getSpecialtyDateIndex() {
+    return client.fetch(specialtyDateIndexQuery);
 }
 
 /** Slugs and timestamps for sitemap.xml. Sanity only, never Arctic. */

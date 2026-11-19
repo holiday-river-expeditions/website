@@ -17,7 +17,7 @@ import {
  * can't resolve) the Book action stays an external link into Arctic's
  * hosted reserve flow — that link is also the no-JS fallback.
  */
-const nativeBookingEnabled = () => process.env.BOOKING_NATIVE === 'true';
+export const nativeBookingEnabled = () => process.env.BOOKING_NATIVE === 'true';
 
 /**
  * Renders Arctic departures as a schedule: month subheads (with years when

@@ -4,7 +4,6 @@ import {
     buildCalloutMap,
     buildSpecialtyDateRows,
     cleanTypeName,
-    departureAnchor,
     departureMonth,
     detectVariants,
     durationToDays,
@@ -18,6 +17,11 @@ import {
     parseMonthParam,
     sortedVariantLabels,
     variantLabelMap,
+    slugifyLabel,
+    specialtyDateHref,
+    specialtyDatePages,
+    specialtyDateSlug,
+    specialtyDateTitle,
     upcomingSpecialtyDates,
 } from './departures';
 
@@ -213,6 +217,27 @@ describe('buildCalloutMap', () => {
         });
     });
 
+    test('links the date page and names the family with a trip slug', () => {
+        const map = buildCalloutMap(
+            [
+                {
+                    startDate: '2027-05-15',
+                    label: 'Pompe & Honey',
+                    specialtyType: {
+                        name: 'Canyon Concerts',
+                        slug: { current: 'canyon-concerts' },
+                    },
+                },
+            ],
+            'yampa',
+        );
+        expect(map.get('2027-05-15')).toEqual({
+            label: 'Canyon Concerts: Pompe & Honey',
+            note: null,
+            href: '/specialty/pompe-and-honey-yampa-2027-05-15',
+        });
+    });
+
     test('omits href when no specialty type is referenced', () => {
         const map = buildCalloutMap([
             { startDate: '2026-09-12', label: 'New Moon' },
@@ -370,6 +395,7 @@ describe('upcomingSpecialtyDates', () => {
                 label: 'First',
                 note: 'n',
                 image: null,
+                slug: null,
             },
         ]);
     });
@@ -408,7 +434,7 @@ describe('buildSpecialtyDateRows', () => {
             ['2027-06-21', 'Yampa River'],
         ]);
         expect(rows[2].href).toBe(
-            `/trips/yampa-river#${departureAnchor('2027-06-21')}`,
+            '/specialty/the-pickpockets-yampa-river-2027-06-21',
         );
         expect(rows[2].departure).toBeNull();
         expect(rows[2].startingPrice).toBe('$1,300');
@@ -486,5 +512,139 @@ describe('buildSpecialtyDateRows', () => {
     test('leaves the image null when neither has a photo', () => {
         const [row] = buildSpecialtyDateRows([westwater], null, '2026-10-21');
         expect(row.image).toBeNull();
+    });
+});
+
+describe('specialty date pages', () => {
+    test('slugifies labels, spelling out the ampersand', () => {
+        expect(slugifyLabel('Pompe & Honey')).toBe('pompe-and-honey');
+        expect(slugifyLabel('Women’s River & Yoga!')).toBe(
+            'womens-river-and-yoga',
+        );
+        expect(slugifyLabel('  Café  ')).toBe('cafe');
+    });
+
+    test('builds the slug from the label, trip and date', () => {
+        const entry = { startDate: '2027-06-29', label: 'Stargazing Special' };
+        expect(specialtyDateSlug(entry, 'gates-of-lodore')).toBe(
+            'stargazing-special-gates-of-lodore-2027-06-29',
+        );
+        expect(specialtyDateHref(entry, 'gates-of-lodore')).toBe(
+            '/specialty/stargazing-special-gates-of-lodore-2027-06-29',
+        );
+    });
+
+    test('a slug pinned in the Studio wins', () => {
+        expect(
+            specialtyDateSlug(
+                {
+                    startDate: '2027-05-15',
+                    label: 'Pompe & Honey',
+                    slug: { current: 'pompe-n-honey' },
+                },
+                'yampa',
+            ),
+        ).toBe('pompe-n-honey');
+    });
+
+    test('ignores a pin the URL cannot carry as written', () => {
+        for (const bad of [
+            'Pompe & Honey',
+            'a/b',
+            'Has Space',
+            '-lead',
+            'x--y',
+        ]) {
+            expect(
+                specialtyDateSlug(
+                    {
+                        startDate: '2027-05-15',
+                        label: 'Pompe & Honey',
+                        slug: { current: bad },
+                    },
+                    'yampa',
+                ),
+            ).toBe('pompe-and-honey-yampa-2027-05-15');
+        }
+    });
+
+    test('lists one page per slug, first entry wins', () => {
+        const pages = specialtyDatePages([
+            {
+                tripSlug: 'westwater-canyon',
+                _updatedAt: '2026-11-01T00:00:00Z',
+                entries: [
+                    {
+                        _key: 'a',
+                        startDate: '2027-07-22',
+                        label: 'Theoretical Blonde',
+                        slug: { current: 'the-band' },
+                    },
+                ],
+            },
+            {
+                tripSlug: 'yampa',
+                _updatedAt: '2026-11-02T00:00:00Z',
+                entries: [
+                    // Same pin as Westwater's: no page of its own.
+                    {
+                        _key: 'b',
+                        startDate: '2027-05-15',
+                        label: 'Pompe & Honey',
+                        slug: { current: 'the-band' },
+                    },
+                    {
+                        _key: 'c',
+                        startDate: '2027-06-21',
+                        label: 'Pickpockets',
+                    },
+                    // Second entry on a date: same derived slug only when
+                    // the label matches too.
+                    {
+                        _key: 'd',
+                        startDate: '2027-06-21',
+                        label: 'Pickpockets',
+                    },
+                    // No label, even with a pin: the route would refuse it.
+                    {
+                        _key: 'e',
+                        startDate: '2027-07-01',
+                        slug: { current: 'no-label' },
+                    },
+                    { _key: 'f', label: 'No date' },
+                ],
+            },
+            {
+                tripSlug: null,
+                entries: [{ startDate: '2027-01-01', label: 'x' }],
+            },
+        ]);
+        expect(
+            pages.map((page) => [page.slug, page.tripSlug, page.key]),
+        ).toEqual([
+            ['the-band', 'westwater-canyon', 'a'],
+            ['pickpockets-yampa-2027-06-21', 'yampa', 'c'],
+        ]);
+        expect(pages[1].updatedAt).toBe('2026-11-02T00:00:00Z');
+    });
+
+    test('has no slug without a trip, a date or a usable label', () => {
+        const entry = { startDate: '2027-05-15', label: 'Pompe & Honey' };
+        expect(specialtyDateSlug(entry, null)).toBeNull();
+        expect(specialtyDateSlug({ label: 'x' }, 'yampa')).toBeNull();
+        expect(
+            specialtyDateSlug(
+                { startDate: '2027-05-15', label: '!!' },
+                'yampa',
+            ),
+        ).toBeNull();
+        expect(specialtyDateHref(entry, null)).toBeNull();
+    });
+
+    test('puts the family name in front of the label', () => {
+        expect(specialtyDateTitle('Pompe & Honey', 'Canyon Concerts')).toBe(
+            'Canyon Concerts: Pompe & Honey',
+        );
+        expect(specialtyDateTitle('New Moon', null)).toBe('New Moon');
     });
 });

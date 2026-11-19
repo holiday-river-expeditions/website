@@ -174,7 +174,10 @@ export default async function BookPage({
                 continue;
             }
             // Built once per trip and shared across its trip-type ids.
-            const callouts = buildCalloutMap(trip.specialtyDepartures);
+            const callouts = buildCalloutMap(
+                trip.specialtyDepartures,
+                trip.slug.current,
+            );
             const summary: TripSummary = {
                 // One crop per frame shape, so Sanity's hotspot picks the
                 // framing. Several trip photos are 2250x600 banners, and a

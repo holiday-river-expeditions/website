@@ -24,18 +24,14 @@ import {
 } from '@/components/ui/ReviewsSection';
 import { RiverFlow } from '@/components/ui/RiverFlow';
 import { Section } from '@/components/ui/Section';
-import { SpecialtyDatesCallout } from '@/components/ui/SpecialtyDatesCallout';
 import type { TripMapPoint } from '@/components/ui/TripMap';
 import { TripBar } from '@/components/ui/TripBar';
+import { TripFacts, tripFacts } from '@/components/ui/TripFacts';
 import { TripMapSection } from '@/components/ui/TripMapSection';
 import { WhatsIncluded } from '@/components/ui/WhatsIncluded';
-import { getUpcomingDepartures, todayISO } from '@/lib/arctic';
+import { getUpcomingDepartures } from '@/lib/arctic';
 import { contactPhone } from '@/lib/contact-defaults';
-import {
-    formatDateRange,
-    openDepartures,
-    upcomingSpecialtyDates,
-} from '@/lib/departures';
+import { formatDateRange, openDepartures } from '@/lib/departures';
 import { stretchBySlug } from '@/lib/map-style';
 import { getSiteSettings, getTripBySlug, imageUrl } from '@/lib/sanity';
 import { openGraphFor } from '@/lib/seo';
@@ -49,8 +45,6 @@ export const revalidate = 60;
 interface TripPageProps {
     params: Promise<{ slug: string }>;
 }
-
-const RAPID_CLASS_NUMERALS = ['I', 'II', 'III', 'IV', 'V'];
 
 export async function generateMetadata({
     params,
@@ -102,38 +96,7 @@ export default async function TripPage({ params }: TripPageProps) {
         caption: photo.caption,
     }));
 
-    // Rapid class replaces the old difficulty scale (Justin's build-out doc).
-    // Trips with no whitewater have no class, so they show who the trip is
-    // for in the same slot rather than leaving a gap.
-    const rapidClass =
-        trip.maxRapidClass && RAPID_CLASS_NUMERALS[trip.maxRapidClass - 1]
-            ? `Class ${RAPID_CLASS_NUMERALS[trip.maxRapidClass - 1]}`
-            : null;
-
-    const facts: Array<{ label: string; value: string; href?: string }> = [];
-    if (trip.startingPrice)
-        facts.push({ label: 'Starts at', value: trip.startingPrice });
-    if (trip.durationLabel)
-        facts.push({ label: 'Duration', value: trip.durationLabel });
-    if (rapidClass) {
-        facts.push({ label: 'Whitewater', value: rapidClass });
-    } else if (trip.whoIsThisFor) {
-        facts.push({ label: 'Who it’s for', value: trip.whoIsThisFor });
-    }
-    if (trip.season) facts.push({ label: 'Season', value: trip.season });
-    if (trip.minAge)
-        facts.push({ label: 'Min Age', value: String(trip.minAge) });
-    if (trip.meetingPlace)
-        facts.push({ label: 'Meet at', value: trip.meetingPlace });
-    if (trip.deposit) facts.push({ label: 'Deposit', value: trip.deposit });
-    if (trip.river?.riverLabel)
-        facts.push({
-            label: 'River',
-            value: trip.river.riverLabel,
-            href: trip.river.slug?.current
-                ? `/rivers/${trip.river.slug.current}`
-                : undefined,
-        });
+    const facts = tripFacts(trip);
 
     // Trip map under the highlights: the section's drawn stretch (from
     // the National Hydrography Dataset) and/or the photo points authored
@@ -293,26 +256,7 @@ export default async function TripPage({ params }: TripPageProps) {
                 className='scroll-mt-6 py-10 md:py-14'
             >
                 <div className='flex flex-wrap items-end justify-between gap-6 border-t border-holiday-grey/40 pt-6'>
-                    <dl className='grid w-full grid-cols-2 gap-x-6 gap-y-5 sm:flex sm:w-auto sm:flex-wrap sm:gap-x-10 sm:gap-y-4'>
-                        {facts.map((fact) => (
-                            <div key={fact.label}>
-                                <dt className='font-alt-gothic text-[12px] font-medium uppercase leading-[1.3] tracking-[0.05em] text-onyx/70'>
-                                    {fact.label}
-                                </dt>
-                                <dd className='mt-1 font-alt-gothic text-h3 font-semibold uppercase leading-h3 text-holiday-red'>
-                                    {fact.href ? (
-                                        <Link
-                                            href={fact.href}
-                                            className='transition-opacity hover:opacity-70'
-                                        >
-                                            {fact.value}
-                                        </Link>
-                                    ) : (
-                                        fact.value
-                                    )}
-                                </dd>
-                            </div>
-                        ))}
+                    <TripFacts facts={facts}>
                         {/* Live CFS from USGS; renders nothing without a
                             configured gauge or reading. */}
                         <RiverFlow
@@ -320,7 +264,7 @@ export default async function TripPage({ params }: TripPageProps) {
                             siteIds={trip.river?.usgsSiteId}
                             href={trip.river?.flowLinkUrl}
                         />
-                    </dl>
+                    </TripFacts>
                     {/* Book Now jumps to Dates & Availability on this page
                         (Aug 20 decision). Plain anchor, not Link: a
                         same-page fragment needs native scrolling, not a
@@ -356,15 +300,6 @@ export default async function TripPage({ params }: TripPageProps) {
                         ))}
                     </p>
                 )}
-
-                {/* Specialty dates otherwise only show as badges in Dates &
-                    Availability, the last section on the page. */}
-                <SpecialtyDatesCallout
-                    dates={upcomingSpecialtyDates(
-                        trip.specialtyDepartures,
-                        todayISO(),
-                    )}
-                />
 
                 {/* Description + highlights */}
                 <div className='mt-12 grid gap-12 md:grid-cols-[1.6fr_1fr]'>
@@ -534,6 +469,7 @@ export default async function TripPage({ params }: TripPageProps) {
                 matches the page's. */}
             <AvailabilitySection
                 arcticTripId={trip.arcticTripId ?? null}
+                tripSlug={slug}
                 specialtyDepartures={trip.specialtyDepartures}
             />
 

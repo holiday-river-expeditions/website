@@ -1,4 +1,5 @@
 import { defineField, defineType } from 'sanity';
+import { SPECIALTY_SLUG_FORMAT } from '../../lib/specialty-slug-format';
 import { richTextOf } from './blocks/divider';
 
 export const MONTHS = [
@@ -525,6 +526,22 @@ export const trip = defineType({
             group: 'specialty',
             description:
                 'Call out individual dates in Dates & Availability — the September date that is the bluegrass trip, the new-moon date that is the stargazing trip. Leave empty when every departure of this trip is the same.',
+            // Two dates on one trip can't share a page address: the second
+            // would open the first one's page.
+            validation: (rule) =>
+                rule.custom((entries) => {
+                    const seen = new Set<string>();
+                    for (const entry of (entries ?? []) as {
+                        slug?: { current?: string };
+                    }[]) {
+                        const slug = entry.slug?.current;
+                        if (!slug) continue;
+                        if (seen.has(slug))
+                            return `Two dates share the page address "${slug}". Give each its own.`;
+                        seen.add(slug);
+                    }
+                    return true;
+                }),
             of: [
                 {
                     type: 'object',
@@ -545,7 +562,7 @@ export const trip = defineType({
                             type: 'reference',
                             to: [{ type: 'specialtyType' }],
                             description:
-                                'Links the callout to that family’s section on /specialty.',
+                                'The family this date belongs to. It lists the date in that family’s section on /specialty and puts the family name in front of the label on trip pages.',
                         }),
                         defineField({
                             name: 'label',
@@ -564,12 +581,60 @@ export const trip = defineType({
                                 'Optional extra line shown under the date on this departure only.',
                         }),
                         defineField({
+                            name: 'body',
+                            title: 'Write-up',
+                            type: 'array',
+                            of: richTextOf,
+                            description:
+                                'Shown at the top of this date’s own page, above the trip details. Who the band or host is and what makes this date different.',
+                        }),
+                        defineField({
+                            name: 'slug',
+                            title: 'Page Address',
+                            type: 'slug',
+                            options: {
+                                source: (_doc, context) =>
+                                    (context.parent as { label?: string })
+                                        ?.label ?? '',
+                                // The default check compares documents at
+                                // the same path. These live in an array,
+                                // so look across every other trip here and
+                                // across this trip's own dates in the
+                                // array rule below.
+                                isUnique: async (slug, context) => {
+                                    const id = (
+                                        context.document?._id ?? ''
+                                    ).replace(/^drafts\./, '');
+                                    const taken = await context
+                                        .getClient({ apiVersion: '2024-10-01' })
+                                        .fetch<boolean>(
+                                            `count(*[_type == "trip" && !(_id in [$id, $draft]) && $slug in specialtyDepartures[].slug.current]) > 0`,
+                                            {
+                                                id,
+                                                draft: `drafts.${id}`,
+                                                slug,
+                                            },
+                                        );
+                                    return !taken;
+                                },
+                            },
+                            validation: (rule) =>
+                                rule.custom((value) =>
+                                    !value?.current ||
+                                    SPECIALTY_SLUG_FORMAT.test(value.current)
+                                        ? true
+                                        : 'Use lowercase letters, numbers and hyphens only.',
+                                ),
+                            description:
+                                'Optional. Sets the end of this date’s page address, /specialty/your-text. Leave empty and the site builds one from the label, the trip and the date. Fill it in before sharing the link widely, since a built address changes when the label or date changes.',
+                        }),
+                        defineField({
                             name: 'image',
                             title: 'Photo',
                             type: 'image',
                             options: { hotspot: true },
                             description:
-                                'Optional thumbnail for this date on /specialty, such as the band or a night sky. Leave empty to use this trip’s first photo.',
+                                'Optional photo for this date, such as the band or a night sky. It is the thumbnail on /specialty and the banner on the date’s own page. Leave empty to use this trip’s first photo.',
                             fields: [
                                 defineField({
                                     name: 'alt',

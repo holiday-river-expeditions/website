@@ -2,8 +2,16 @@ import { afterEach, beforeEach, expect, test, vi } from 'vitest';
 
 // The sitemap reads slugs from Sanity. Mock the data layer so the test
 // checks the route list without hitting the network.
-const getSitemapDocuments = vi.hoisted(() => vi.fn());
-vi.mock('@/lib/sanity', () => ({ getSitemapDocuments }));
+const { getSitemapDocuments, getSpecialtyDateIndex } = vi.hoisted(() => ({
+    getSitemapDocuments: vi.fn(),
+    getSpecialtyDateIndex: vi.fn(),
+}));
+vi.mock('@/lib/sanity', () => ({
+    getSitemapDocuments,
+    getSpecialtyDateIndex,
+}));
+// Only the date helper is used. The real module sets up the Arctic client.
+vi.mock('@/lib/arctic', () => ({ todayISO: () => '2026-11-19' }));
 
 import sitemap from './sitemap';
 
@@ -27,6 +35,25 @@ beforeEach(() => {
             { slug: 'trips', _updatedAt: '2026-10-08T00:00:00Z' },
         ],
     });
+    getSpecialtyDateIndex.mockResolvedValue([
+        {
+            tripSlug: 'yampa',
+            _updatedAt: '2026-10-09T00:00:00Z',
+            entries: [
+                { startDate: '2027-05-15', label: 'Pompe & Honey' },
+                // Past dates keep their page but leave the sitemap.
+                { startDate: '2026-06-01', label: 'Last Summer' },
+                // No label: the route refuses it, so it isn't listed.
+                { startDate: '2027-07-01', slug: { current: 'no-label' } },
+                // A second entry with the first one's address: listed once.
+                {
+                    startDate: '2027-08-01',
+                    label: 'Other',
+                    slug: { current: 'pompe-and-honey-yampa-2027-05-15' },
+                },
+            ],
+        },
+    ]);
 });
 
 afterEach(() => {
@@ -49,6 +76,7 @@ test('lists static routes and every Sanity-driven page', async () => {
         'https://holidayriver.com/contact',
         'https://holidayriver.com/trips/cataract-canyon',
         'https://holidayriver.com/rivers/green-river',
+        'https://holidayriver.com/specialty/pompe-and-honey-yampa-2027-05-15',
         'https://holidayriver.com/blog/what-to-pack',
         'https://holidayriver.com/about',
     ]);

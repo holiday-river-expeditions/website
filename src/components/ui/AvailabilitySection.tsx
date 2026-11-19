@@ -38,12 +38,15 @@ export const AVAILABILITY_ANCHOR = 'dates-and-rates';
 
 interface AvailabilitySectionProps {
     arcticTripId: string | null;
+    /** The trip's slug, so specialty badges link to each date's page. */
+    tripSlug?: string | null;
     /** trip.specialtyDepartures — badges the dates they name. */
     specialtyDepartures?: readonly SpecialtyDepartureEntry[] | null;
 }
 
 export async function AvailabilitySection({
     arcticTripId,
+    tripSlug,
     specialtyDepartures,
 }: AvailabilitySectionProps) {
     const departures = arcticTripId
@@ -59,7 +62,7 @@ export async function AvailabilitySection({
         ? detectVariants(departures, tripTypes ?? undefined)
         : [];
     const next = departures ? nextAvailable(departures) : null;
-    const callouts = buildCalloutMap(specialtyDepartures);
+    const callouts = buildCalloutMap(specialtyDepartures, tripSlug);
 
     return (
         <Section background='white' className='pb-20 pt-12 md:pb-24 md:pt-16'>

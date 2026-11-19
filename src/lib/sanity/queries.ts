@@ -28,6 +28,7 @@ export const allTripsQuery = defineQuery(`
       startDate,
       label,
       note,
+      slug,
       "specialtyType": specialtyType->{ name, slug }
     }
   }
@@ -123,6 +124,9 @@ export const tripBySlugQuery = defineQuery(`
       startDate,
       label,
       note,
+      slug,
+      body,
+      image,
       "specialtyType": specialtyType->{ name, slug }
     },
     featuredReview,
@@ -135,6 +139,16 @@ export const tripBySlugQuery = defineQuery(`
         (river._ref == ^.river._ref || tripType._ref == ^.tripType._ref)
       ] | order(name asc) [0...3] { ${TRIP_CARD} }
     )
+  }
+`);
+
+/** Every specialty date with what's needed to work out its page slug.
+    /specialty/[slug] finds its trip here, and the sitemap lists them. */
+export const specialtyDateIndexQuery = defineQuery(`
+  *[_type == "trip" && defined(slug.current) && count(specialtyDepartures) > 0 && !(_id in path("drafts.**"))] | order(slug.current asc) {
+    "tripSlug": slug.current,
+    _updatedAt,
+    "entries": specialtyDepartures[]{ _key, startDate, label, slug }
   }
 `);
 
@@ -209,6 +223,7 @@ export const allSpecialtyTypesQuery = defineQuery(`
         startDate,
         label,
         note,
+        slug,
         image
       }
     }

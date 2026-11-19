@@ -43,6 +43,7 @@ export function BookingRow({
     dateLabel,
     dateSlot,
     badgeSlot,
+    actionsClassName = 'justify-end justify-self-end',
 }: {
     departureId: number;
     triptypeid: number;
@@ -53,6 +54,8 @@ export function BookingRow({
     dateSlot: React.ReactNode;
     /** Server-rendered seats badge. */
     badgeSlot: React.ReactNode;
+    /** Alignment of the badge and Book button cell in the host's grid. */
+    actionsClassName?: string;
 }) {
     const [flow, setFlow] = useState<FlowState>({ step: 'collapsed' });
     const [counts, setCounts] = useState<Record<string, number>>({});
@@ -157,7 +160,9 @@ export function BookingRow({
     return (
         <>
             {dateSlot}
-            <div className='flex flex-wrap items-center justify-end gap-x-4 gap-y-2 justify-self-end'>
+            <div
+                className={`flex flex-wrap items-center gap-x-4 gap-y-2 ${actionsClassName}`}
+            >
                 {badgeSlot}
                 <button
                     type='button'
@@ -170,7 +175,7 @@ export function BookingRow({
                     Book
                 </button>
             </div>
-            {expanded && <div className='col-span-2'>{renderPanel()}</div>}
+            {expanded && <div className='col-span-full'>{renderPanel()}</div>}
         </>
     );
 
