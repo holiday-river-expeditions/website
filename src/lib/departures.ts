@@ -235,10 +235,33 @@ export interface DepartureCallout {
 }
 
 /**
- * Specialty callouts keyed by Arctic departure start date (YYYY-MM-DD).
- * Authored in Sanity as trip.specialtyDepartures.
+ * Specialty callouts for a trip's departure rows. A date tied to one Arctic
+ * departure is keyed `id:<departure id>`, so a regular trip that starts the
+ * same day gets no badge. A date known only by its day (a Sanity entry with
+ * no tagged departure to match) is keyed by its start date (YYYY-MM-DD).
+ * Look rows up with calloutFor.
  */
 export type DepartureCalloutMap = ReadonlyMap<string, DepartureCallout>;
+
+/** The map key for a specialty entry: its Arctic departure, else its day. */
+function calloutKey(
+    entry: Pick<SpecialtyDepartureEntry, 'arcticDepartureId'>,
+    startDate: string,
+): string {
+    return entry.arcticDepartureId != null
+        ? `id:${entry.arcticDepartureId}`
+        : startDate;
+}
+
+/** The callout for one departure row, by departure id first, then by day. */
+export function calloutFor(
+    callouts: DepartureCalloutMap | null | undefined,
+    departure: Pick<ArcticDeparture, 'id' | 'start'>,
+): DepartureCallout | undefined {
+    return (
+        callouts?.get(`id:${departure.id}`) ?? callouts?.get(departure.start)
+    );
+}
 
 /** A Sanity image as our queries project it (hotspot and crop ride along). */
 export interface SpecialtyImage {
@@ -259,10 +282,136 @@ export interface SpecialtyDepartureEntry {
     /** This date's own price and length, shown in place of Arctic's. */
     priceText?: string | null;
     lengthText?: string | null;
+    /**
+     * The Arctic departure this date is, when Arctic keywords tagged it
+     * (see mergeSpecialtyEntries). Matched by id from then on, so another
+     * departure that starts the same day is never mistaken for it.
+     */
+    arcticDepartureId?: number | null;
     specialtyType?: {
+        _id?: string | null;
         name?: string | null;
         slug?: { current?: string | null } | null;
     } | null;
+}
+
+/** A specialty family with the Arctic keywords that claim dates for it. */
+export interface KeywordFamily {
+    _id: string;
+    name?: string | null;
+    slug?: { current?: string | null } | null;
+    arcticKeywords?: readonly string[] | null;
+}
+
+const normalizeKeyword = (keyword: string) => keyword.trim().toLowerCase();
+
+/**
+ * The family a departure belongs to: the first of `families` (hub order)
+ * that lists one of its keywords. Case and spacing are ignored, since the
+ * keywords are typed by hand in both Arctic and the Studio.
+ */
+export function familyForKeywords(
+    keywords: readonly string[] | null | undefined,
+    families: readonly KeywordFamily[] | null | undefined,
+): KeywordFamily | null {
+    const tags = new Set((keywords ?? []).map(normalizeKeyword));
+    if (tags.size === 0) return null;
+    return (
+        families?.find((family) =>
+            (family.arcticKeywords ?? []).some((keyword) =>
+                tags.has(normalizeKeyword(keyword)),
+            ),
+        ) ?? null
+    );
+}
+
+/** A specialty date after merging: a Sanity entry, which may have taken
+    an Arctic departure id, or a date made from Arctic alone. */
+export type MergedSpecialtyEntry<T extends SpecialtyDepartureEntry> =
+    (T & { arcticDepartureId?: number | null }) | ArcticSpecialtyEntry;
+
+/** A specialty date made from a tagged Arctic departure. */
+export interface ArcticSpecialtyEntry extends SpecialtyDepartureEntry {
+    _key: string;
+    startDate: string;
+    /** The departure's Arctic name, as Holiday wrote it. */
+    label: string;
+    arcticDepartureId: number;
+    specialtyType: KeywordFamily;
+    /** Only Sanity entries carry these. Declared so a merged list reads
+        them without narrowing. */
+    body?: null;
+    minAge?: null;
+}
+
+/**
+ * Specialty dates for one trip from Arctic keywords: one per departure of
+ * the trip's types whose keywords name a family. Expects the public lists
+ * from lib/arctic (online, not canceled, no charters) and checks the
+ * Charter keyword as well, so a private group never shows as a specialty
+ * date. The label is the Arctic name with runs of spaces closed up, and
+ * nothing else changed, because it is Holiday's own text.
+ */
+export function arcticSpecialtyEntries(
+    departures: readonly ArcticDeparture[] | null | undefined,
+    families: readonly KeywordFamily[] | null | undefined,
+    typeIds: ReadonlySet<number>,
+): ArcticSpecialtyEntry[] {
+    if (!families?.length || typeIds.size === 0) return [];
+    const entries: ArcticSpecialtyEntry[] = [];
+    for (const departure of departures ?? []) {
+        if (departure.canceled) continue;
+        if (departure.triptypeid == null || !typeIds.has(departure.triptypeid))
+            continue;
+        const keywords = departure.keywords ?? [];
+        if (keywords.some((k) => normalizeKeyword(k) === 'charter')) continue;
+        const family = familyForKeywords(keywords, families);
+        const label = departure.name?.replace(/\s+/g, ' ').trim();
+        if (!family || !label || !departure.start) continue;
+        entries.push({
+            _key: `arctic-${departure.id}`,
+            startDate: departure.start,
+            label,
+            arcticDepartureId: departure.id,
+            specialtyType: family,
+        });
+    }
+    return entries;
+}
+
+/**
+ * A trip's specialty dates: its Sanity entries, plus the Arctic-tagged
+ * dates on days no Sanity entry names. A Sanity entry replaces Arctic's
+ * date on the same day (its label, photo and write-up win), and it takes
+ * that departure's id, so its badge lands on the right row when another
+ * departure starts the same day. A phone-only entry is never tied to a
+ * departure. An entry without a date or label claims no day, so it can't
+ * hide an Arctic date it would never show itself.
+ */
+export function mergeSpecialtyEntries<T extends SpecialtyDepartureEntry>(
+    sanity: readonly T[] | null | undefined,
+    arctic: readonly ArcticSpecialtyEntry[],
+): MergedSpecialtyEntry<T>[] {
+    const arcticByDate = new Map<string, ArcticSpecialtyEntry>();
+    for (const entry of arctic) {
+        if (!arcticByDate.has(entry.startDate)) {
+            arcticByDate.set(entry.startDate, entry);
+        }
+    }
+    const claimed = new Set<string>();
+    const merged: MergedSpecialtyEntry<T>[] = (sanity ?? []).map((entry) => {
+        const startDate = entry.startDate?.trim();
+        if (!startDate || !entry.label?.trim()) return entry;
+        claimed.add(startDate);
+        const match = arcticByDate.get(startDate);
+        return match && !entry.phoneOnly && entry.arcticDepartureId == null
+            ? { ...entry, arcticDepartureId: match.arcticDepartureId }
+            : entry;
+    });
+    for (const entry of arctic) {
+        if (!claimed.has(entry.startDate)) merged.push(entry);
+    }
+    return merged;
 }
 
 /** Lowercase words joined by hyphens, with "&" spelled out as "and". */
@@ -370,15 +519,17 @@ export function specialtyDateTitle(
 }
 
 /**
- * Indexes specialty callouts by start date so DepartureList can look each
- * row up in O(1).
+ * Indexes specialty callouts so DepartureList can look each row up in
+ * O(1) (see calloutFor).
  *
  * Sanity holds the join as a date rather than an Arctic departure id —
  * editors know "Sept 12 is the bluegrass trip", they do not know id 4417,
  * and ids are reissued each season (see the field description in
- * schemas/trip.ts). The cost is that a date typo silently renders no
- * callout, and that two departures starting the same day cannot be told
- * apart: the first entry wins and later duplicates are ignored.
+ * schemas/trip.ts). Dates that Arctic keywords tagged, and Sanity entries
+ * merged onto them, carry the departure id instead, so they badge only
+ * their own row. A Sanity entry with no tagged departure still matches by
+ * day: a date typo renders no callout, and two departures starting that
+ * day both get it. The first entry for a key wins.
  *
  * With the trip's slug, each callout links to the date's own page and
  * falls back to the family's section on the hub.
@@ -393,13 +544,15 @@ export function buildCalloutMap(
         const label = entry.label?.trim();
         // Both are required in the Studio, but drafts and older documents
         // can still arrive incomplete.
-        if (!startDate || !label || map.has(startDate)) continue;
+        if (!startDate || !label) continue;
+        const key = calloutKey(entry, startDate);
+        if (map.has(key)) continue;
         // A phone-only date has no row of its own in the list. Badging
         // another departure that happens to start that day would put its
         // name on a trip anyone can book.
         if (entry.phoneOnly) continue;
         const family = entry.specialtyType?.slug?.current;
-        map.set(startDate, {
+        map.set(key, {
             label: specialtyDateTitle(label, entry.specialtyType?.name),
             note: entry.note ?? null,
             // The date's own page (Nov 16 decision). Without a trip slug,
@@ -419,6 +572,28 @@ export function buildCalloutMap(
  */
 export function departureAnchor(startDate: string): string {
     return `departure-${startDate}`;
+}
+
+/**
+ * One trip's specialty dates from both sources: its Sanity entries and the
+ * departures of its Arctic types that keywords tag (mergeSpecialtyEntries
+ * has the rules). With Arctic down, `departures` is null and only the
+ * Sanity entries come back.
+ */
+export function tripSpecialtyEntries<T extends SpecialtyDepartureEntry>(
+    entries: readonly T[] | null | undefined,
+    arcticTripId: string | null | undefined,
+    departures: readonly ArcticDeparture[] | null | undefined,
+    families: readonly KeywordFamily[] | null | undefined,
+): MergedSpecialtyEntry<T>[] {
+    return mergeSpecialtyEntries(
+        entries,
+        arcticSpecialtyEntries(
+            departures,
+            families,
+            new Set(parseArcticIds(arcticTripId)),
+        ),
+    );
 }
 
 /**
@@ -467,11 +642,13 @@ export interface UpcomingSpecialtyDate {
     /** This date's own price and length, shown in place of Arctic's. */
     priceText: string | null;
     lengthText: string | null;
+    /** The tagged Arctic departure this date is, when there is one. */
+    arcticDepartureId: number | null;
 }
 
 /**
- * Specialty entries from today on, by date, one per date. Same rules as
- * buildCalloutMap (date and label required, first entry for a date wins),
+ * Specialty entries from today on, by date. Same rules as buildCalloutMap
+ * (date and label required, first entry for a departure or day wins),
  * so /specialty never lists a date the trip page's departure list won't
  * badge. `today` is YYYY-MM-DD, compared as a string.
  */
@@ -483,9 +660,10 @@ export function upcomingSpecialtyDates(
     for (const entry of entries ?? []) {
         const startDate = entry.startDate?.trim();
         const label = entry.label?.trim();
-        if (!startDate || !label || byDate.has(startDate)) continue;
-        if (startDate < today) continue;
-        byDate.set(startDate, {
+        if (!startDate || !label) continue;
+        const key = calloutKey(entry, startDate);
+        if (byDate.has(key) || startDate < today) continue;
+        byDate.set(key, {
             startDate,
             label,
             note: entry.note ?? null,
@@ -494,6 +672,7 @@ export function upcomingSpecialtyDates(
             phoneOnly: entry.phoneOnly === true,
             priceText: entry.priceText?.trim() || null,
             lengthText: entry.lengthText?.trim() || null,
+            arcticDepartureId: entry.arcticDepartureId ?? null,
         });
     }
     return [...byDate.values()].sort((a, b) =>
@@ -536,8 +715,8 @@ export interface SpecialtyDateRow {
 
 /**
  * One row per upcoming specialty date across a family's trips, by date.
- * Each row is matched to its Arctic departure by trip-type id and start
- * date for seats, length, and fare. A row with no match (Arctic down, or
+ * Each row is matched to its Arctic departure for seats, length, and fare:
+ * by id when Arctic tagged the date, else by trip-type id and start date. A row with no match (Arctic down, or
  * the date isn't scheduled there) still renders from Sanity alone.
  */
 export function buildSpecialtyDateRows(
@@ -555,14 +734,15 @@ export function buildSpecialtyDateRows(
             // fare would be for the wrong trip.
             const departure = date.phoneOnly
                 ? null
-                : (departures?.find(
-                      (d) =>
-                          d.start === date.startDate &&
-                          d.triptypeid != null &&
-                          ids.has(d.triptypeid),
+                : (departures?.find((d) =>
+                      date.arcticDepartureId != null
+                          ? d.id === date.arcticDepartureId
+                          : d.start === date.startDate &&
+                            d.triptypeid != null &&
+                            ids.has(d.triptypeid),
                   ) ?? null);
             rows.push({
-                key: `${trip._id}-${date.startDate}`,
+                key: `${trip._id}-${date.arcticDepartureId ?? date.startDate}`,
                 ...date,
                 tripName: trip.name ?? '',
                 href: specialtyDateHref(date, slug),

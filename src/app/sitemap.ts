@@ -1,9 +1,9 @@
 import type { MetadataRoute } from 'next';
 import { RESERVED_SLUGS } from '@/lib/reserved-slugs';
 import { todayISO } from '@/lib/arctic';
-import { specialtyDatePages } from '@/lib/departures';
-import { getSitemapDocuments, getSpecialtyDateIndex } from '@/lib/sanity';
+import { getSitemapDocuments } from '@/lib/sanity';
 import { absoluteUrl } from '@/lib/site-url';
+import { getSpecialtyDatePages } from '@/lib/specialty-dates';
 
 // Rebuilt at most hourly. Crawlers read the sitemap rarely, so there is no
 // need to match the pages' one-minute ISR window.
@@ -48,21 +48,22 @@ function entries(prefix: string, docs: SluggedDoc[]): MetadataRoute.Sitemap {
 }
 
 /**
- * Static routes plus every published trip, river, blog post and CMS page.
- * Sanity only: prices and departures come from Arctic and aren't needed
- * here, so the sitemap never calls it.
+ * Static routes plus every published trip, river, blog post and CMS page,
+ * and every upcoming specialty date. Arctic is called only for the dates
+ * its keywords tag, and only once a family has keywords. If it is down,
+ * those dates are left out until the next rebuild.
  */
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
-    const [docs, specialtyTrips] = await Promise.all([
+    const [docs, specialtyPages] = await Promise.all([
         getSitemapDocuments(),
-        getSpecialtyDateIndex(),
+        getSpecialtyDatePages(),
     ]);
 
     // Upcoming specialty dates only: a past date's page stays up for old
-    // links but has nothing to book. specialtyDatePages is the list the
+    // links but has nothing to book. getSpecialtyDatePages is the list the
     // route itself resolves from, so nothing here can 404 or repeat.
     const today = todayISO();
-    const specialtyDates: SluggedDoc[] = specialtyDatePages(specialtyTrips)
+    const specialtyDates: SluggedDoc[] = specialtyPages
         .filter((page) => page.startDate >= today)
         .map((page) => ({
             slug: page.slug,

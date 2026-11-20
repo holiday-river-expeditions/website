@@ -1,17 +1,29 @@
 import { afterEach, beforeEach, expect, test, vi } from 'vitest';
 
-// The sitemap reads slugs from Sanity. Mock the data layer so the test
-// checks the route list without hitting the network.
-const { getSitemapDocuments, getSpecialtyDateIndex } = vi.hoisted(() => ({
+// The sitemap reads slugs from Sanity, plus the dates Arctic keywords tag.
+// Mock the data layer so the test checks the route list without hitting
+// the network.
+const {
+    getSitemapDocuments,
+    getSpecialtyDateIndex,
+    getSpecialtyFamilies,
+    getAllUpcomingDepartures,
+} = vi.hoisted(() => ({
     getSitemapDocuments: vi.fn(),
     getSpecialtyDateIndex: vi.fn(),
+    getSpecialtyFamilies: vi.fn(),
+    getAllUpcomingDepartures: vi.fn(),
 }));
 vi.mock('@/lib/sanity', () => ({
     getSitemapDocuments,
     getSpecialtyDateIndex,
+    getSpecialtyFamilies,
 }));
-// Only the date helper is used. The real module sets up the Arctic client.
-vi.mock('@/lib/arctic', () => ({ todayISO: () => '2026-11-19' }));
+// The real module sets up the Arctic client.
+vi.mock('@/lib/arctic', () => ({
+    todayISO: () => '2026-11-19',
+    getAllUpcomingDepartures,
+}));
 
 import sitemap from './sitemap';
 
@@ -35,9 +47,12 @@ beforeEach(() => {
             { slug: 'trips', _updatedAt: '2026-10-08T00:00:00Z' },
         ],
     });
+    getSpecialtyFamilies.mockResolvedValue([]);
+    getAllUpcomingDepartures.mockResolvedValue([]);
     getSpecialtyDateIndex.mockResolvedValue([
         {
             tripSlug: 'yampa',
+            arcticTripId: '59,60',
             _updatedAt: '2026-10-09T00:00:00Z',
             entries: [
                 { startDate: '2027-05-15', label: 'Pompe & Honey' },
@@ -80,6 +95,30 @@ test('lists static routes and every Sanity-driven page', async () => {
         'https://holidayriver.com/blog/what-to-pack',
         'https://holidayriver.com/about',
     ]);
+});
+
+test('lists dates Arctic keywords tag, without calling Arctic until a family has keywords', async () => {
+    expect(getAllUpcomingDepartures).not.toHaveBeenCalled();
+    await sitemap();
+    expect(getAllUpcomingDepartures).not.toHaveBeenCalled();
+
+    getSpecialtyFamilies.mockResolvedValue([
+        { _id: 'stars', name: 'Dark Sky Stargazing', arcticKeywords: ['SG'] },
+    ]);
+    getAllUpcomingDepartures.mockResolvedValue([
+        {
+            id: 1501,
+            triptypeid: 60,
+            name: 'Yampa River Stargazing Special',
+            start: '2027-05-26',
+            keywords: ['Dinosaur', 'SG', 'Special', 'YM'],
+        },
+    ]);
+    const urls = (await sitemap()).map((entry) => entry.url);
+
+    expect(urls).toContain(
+        'https://holidayriver.com/specialty/yampa-river-stargazing-special-yampa-2027-05-26',
+    );
 });
 
 test('leaves out routes that are not for visitors', async () => {

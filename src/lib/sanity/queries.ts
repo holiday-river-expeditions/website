@@ -11,7 +11,7 @@ const TRIP_CARD = `
   slug,
   tagline,
   subtitle,
-  "ribbon": coalesce(ribbon, specialtyTypes[0]->ribbonLabel),
+  ribbon,
   startingPrice,
   arcticTripId,
   durationLabel,
@@ -30,7 +30,7 @@ export const allTripsQuery = defineQuery(`
       note,
       slug,
       phoneOnly,
-      "specialtyType": specialtyType->{ name, slug }
+      "specialtyType": specialtyType->{ _id, name, slug }
     }
   }
 `);
@@ -119,7 +119,6 @@ export const tripBySlugQuery = defineQuery(`
       overrideBody,
       "section": section->{ _id, title, slug, body }
     },
-    "specialtyTypes": specialtyTypes[]->{ _id, name, slug, ribbonLabel },
     "specialtyDepartures": specialtyDepartures[]{
       _key,
       startDate,
@@ -132,7 +131,7 @@ export const tripBySlugQuery = defineQuery(`
       minAge,
       priceText,
       lengthText,
-      "specialtyType": specialtyType->{ name, slug }
+      "specialtyType": specialtyType->{ _id, name, slug }
     },
     featuredReview,
     "reviews": reviews[]{ _key, quote, author, source },
@@ -148,12 +147,15 @@ export const tripBySlugQuery = defineQuery(`
 `);
 
 /** Every specialty date with what's needed to work out its page slug.
-    /specialty/[slug] finds its trip here, and the sitemap lists them. */
+    /specialty/[slug] finds its trip here, and the sitemap lists them.
+    Trips with Arctic ids come along too, since Arctic keywords can give
+    them dates no Sanity entry names. */
 export const specialtyDateIndexQuery = defineQuery(`
-  *[_type == "trip" && defined(slug.current) && count(specialtyDepartures) > 0 && !(_id in path("drafts.**"))] | order(slug.current asc) {
+  *[_type == "trip" && defined(slug.current) && (count(specialtyDepartures) > 0 || defined(arcticTripId)) && !(_id in path("drafts.**"))] | order(slug.current asc) {
     "tripSlug": slug.current,
     _updatedAt,
-    "entries": specialtyDepartures[]{ _key, startDate, label, slug }
+    arcticTripId,
+    "entries": specialtyDepartures[]{ _key, startDate, label, slug, phoneOnly }
   }
 `);
 
@@ -212,28 +214,43 @@ export const allSpecialtyTypesQuery = defineQuery(`
     tagline,
     description,
     image,
-    ribbonLabel,
-    "trips": *[_type == "trip" && ^._id in specialtyTypes[]._ref] | order(name asc) {
-      ${TRIP_CARD}
-    },
-    "datedTrips": *[_type == "trip" && ^._id in specialtyDepartures[].specialtyType._ref] {
-      _id,
-      name,
+    arcticKeywords
+  }
+`);
+
+/** Specialty families that Arctic keywords map to, in hub order. The
+    first family to claim one of a departure's keywords is its family. */
+export const specialtyFamiliesQuery = defineQuery(`
+  *[_type == "specialtyType" && count(arcticKeywords) > 0] | order(order asc, name asc) {
+    _id,
+    name,
+    slug,
+    arcticKeywords
+  }
+`);
+
+/** Trips that can have specialty dates on /specialty: ones with Sanity
+    entries, and ones with Arctic ids whose departures keywords can tag.
+    Entries carry their family so the hub can split them by section. */
+export const specialtyDatedTripsQuery = defineQuery(`
+  *[_type == "trip" && (count(specialtyDepartures) > 0 || defined(arcticTripId))] | order(name asc) {
+    _id,
+    name,
+    slug,
+    startingPrice,
+    arcticTripId,
+    "image": photos[0],
+    "entries": specialtyDepartures[]{
+      _key,
+      startDate,
+      label,
+      note,
       slug,
-      startingPrice,
-      arcticTripId,
-      "image": photos[0],
-      "entries": specialtyDepartures[specialtyType._ref == ^.^._id]{
-        _key,
-        startDate,
-        label,
-        note,
-        slug,
-        image,
-        phoneOnly,
-        priceText,
-        lengthText
-      }
+      image,
+      phoneOnly,
+      priceText,
+      lengthText,
+      "specialtyType": specialtyType->{ _id, name, slug }
     }
   }
 `);

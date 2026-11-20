@@ -7,12 +7,16 @@ import { Section } from '@/components/ui/Section';
 import { TripCatalogDisclosure } from '@/components/ui/TripCatalogDisclosure';
 import { SpecialtyDateList } from '@/components/ui/SpecialtyDateList';
 import { TripBar } from '@/components/ui/TripBar';
-import { TripCard, tripCardProps } from '@/components/ui/TripCard';
-import { getUpcomingDepartures, todayISO } from '@/lib/arctic';
+import { getAllUpcomingDepartures, todayISO } from '@/lib/arctic';
 import { getTripTypeFare } from '@/lib/arctic/prices';
 import { contactPhone } from '@/lib/contact-defaults';
-import { buildSpecialtyDateRows } from '@/lib/departures';
-import { getAllSpecialtyTypes, getAllTrips, imageUrl } from '@/lib/sanity';
+import { buildSpecialtyDateRows, tripSpecialtyEntries } from '@/lib/departures';
+import {
+    getAllSpecialtyTypes,
+    getAllTrips,
+    getSpecialtyDatedTrips,
+    imageUrl,
+} from '@/lib/sanity';
 
 // Same ISR window as the homepage: Studio edits go live within a minute.
 export const revalidate = 60;
@@ -31,15 +35,18 @@ export const metadata: Metadata = {
  * departure lists deep-link to `/specialty#<slug>`). "View All Trips"
  * expands the full catalog in place instead of navigating away.
  *
- * Most specialty trips are single dates on regular river trips
- * (trip.specialtyDepartures), so each family lists those dates with live
- * seats and fares. Trips flagged specialty as a whole (trip.specialtyTypes)
- * still show as cards.
+ * Most specialty trips are single dates on regular river trips, so each
+ * family lists those dates with live seats and fares. A date comes from
+ * an Arctic departure whose keywords name the family, or from a trip's
+ * specialtyDepartures in Sanity, which wins on its day. There are no
+ * trip cards per family: specialty trips have only ever run as dates.
  */
 export default async function SpecialtyPage() {
-    const [types, allTrips] = await Promise.all([
+    const [types, datedTrips, allTrips, departures] = await Promise.all([
         getAllSpecialtyTypes(),
+        getSpecialtyDatedTrips(),
         getAllTrips(),
+        getAllUpcomingDepartures(),
     ]);
     const familyItems = types.flatMap((type) =>
         type.slug?.current && type.name
@@ -48,23 +55,36 @@ export default async function SpecialtyPage() {
     );
     const phone = contactPhone(null);
 
-    // One Arctic call per river trip with specialty dates, the same calls
-    // its trip page makes, so the two share a cache and this page never
-    // pulls the whole season. Rows still render from Sanity alone when
-    // Arctic is down, just without seats.
+    // The whole season in one paged Arctic call (the one /book makes),
+    // because keywords can tag a date on any trip. Rows from Sanity still
+    // render when Arctic is down, just without seats, and the dates that
+    // only Arctic knows drop out until it answers.
     const today = todayISO();
-    const arcticTripIds = new Set(
-        types.flatMap((type) =>
-            (type.datedTrips ?? []).flatMap((trip) => trip.arcticTripId ?? []),
-        ),
+    const families = types.filter(
+        (type) => (type.arcticKeywords?.length ?? 0) > 0,
     );
-    const departures = (
-        await Promise.all([...arcticTripIds].map(getUpcomingDepartures))
-    ).flatMap((list) => list ?? []);
+    const trips = datedTrips.map((trip) => ({
+        ...trip,
+        entries: tripSpecialtyEntries(
+            trip.entries,
+            trip.arcticTripId,
+            departures,
+            families,
+        ),
+    }));
     const rowsByType = new Map(
         types.map((type) => [
             type._id,
-            buildSpecialtyDateRows(type.datedTrips, departures, today),
+            buildSpecialtyDateRows(
+                trips.map((trip) => ({
+                    ...trip,
+                    entries: trip.entries.filter(
+                        (entry) => entry.specialtyType?._id === type._id,
+                    ),
+                })),
+                departures,
+                today,
+            ),
         ]),
     );
     const typeIds = new Set(
@@ -124,7 +144,6 @@ export default async function SpecialtyPage() {
                 </Section>
             ) : (
                 types.map((type, index) => {
-                    const trips = type.trips ?? [];
                     const rows = rowsByType.get(type._id) ?? [];
                     const photo = imageUrl(type.image, 1200, 700);
                     return (
@@ -186,21 +205,7 @@ export default async function SpecialtyPage() {
                                 </div>
                             )}
 
-                            {trips.length > 0 && (
-                                <div
-                                    data-reveal-stagger
-                                    className='mt-10 grid gap-10 sm:grid-cols-2 lg:grid-cols-3'
-                                >
-                                    {trips.map((trip) => (
-                                        <TripCard
-                                            key={trip._id}
-                                            {...tripCardProps(trip)}
-                                        />
-                                    ))}
-                                </div>
-                            )}
-
-                            {rows.length === 0 && trips.length === 0 && (
+                            {rows.length === 0 && (
                                 <p className='mt-8 max-w-2xl text-body leading-body text-onyx/70'>
                                     Dates for this series are being finalized.
                                     Call{' '}

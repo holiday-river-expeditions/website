@@ -19,7 +19,11 @@ import {
     TripFacts,
     tripFacts,
 } from '@/components/ui/TripFacts';
-import { getUpcomingDepartures, todayISO } from '@/lib/arctic';
+import {
+    getAllUpcomingDepartures,
+    getUpcomingDepartures,
+    todayISO,
+} from '@/lib/arctic';
 import { getTripTypeFare } from '@/lib/arctic/prices';
 import { contactPhone } from '@/lib/contact-defaults';
 import {
@@ -28,14 +32,15 @@ import {
     formatDateRange,
     formatDayLabel,
     parseArcticIds,
-    specialtyDatePages,
+    tripSpecialtyEntries,
 } from '@/lib/departures';
 import {
     getSiteSettings,
-    getSpecialtyDateIndex,
+    getSpecialtyFamilies,
     getTripBySlug,
     imageUrl,
 } from '@/lib/sanity';
+import { getSpecialtyDatePages } from '@/lib/specialty-dates';
 import { openGraphFor } from '@/lib/seo';
 
 // Same ISR window as the trip pages: Studio edits go live within a minute.
@@ -49,21 +54,32 @@ interface SpecialtyDatePageProps {
 }
 
 /**
- * Finds the trip and specialtyDepartures entry behind a page slug. Slugs
- * are worked out in code (see specialtyDateSlug), so this reads the small
- * index of every specialty date, then loads the one trip.
- * specialtyDatePages decides which entry owns a slug, the same list the
- * sitemap is built from.
+ * Finds the trip and specialty date behind a page slug. Slugs are worked
+ * out in code (see specialtyDateSlug), so this reads the small index of
+ * every specialty date, then loads the one trip. getSpecialtyDatePages
+ * decides which date owns a slug, the same list the sitemap is built
+ * from. The date is a specialtyDepartures entry, or a departure Arctic
+ * keywords tagged (its key starts "arctic-"), merged the same way as on
+ * the trip page.
  */
 async function resolveSpecialtyDate(slug: string) {
-    const page = specialtyDatePages(await getSpecialtyDateIndex()).find(
+    const page = (await getSpecialtyDatePages()).find(
         (candidate) => candidate.slug === slug,
     );
     if (!page) return null;
-    const trip = await getTripBySlug(page.tripSlug);
-    const entry = trip?.specialtyDepartures?.find(
-        (candidate) => candidate._key === page.key,
-    );
+    const [trip, families] = await Promise.all([
+        getTripBySlug(page.tripSlug),
+        getSpecialtyFamilies(),
+    ]);
+    // Already fetched for the index above, and cached for this render.
+    const departures =
+        families.length > 0 ? await getAllUpcomingDepartures() : null;
+    const entry = tripSpecialtyEntries(
+        trip?.specialtyDepartures,
+        trip?.arcticTripId,
+        departures,
+        families,
+    ).find((candidate) => candidate._key === page.key);
     if (!trip || !entry?.startDate || !entry.label) return null;
     return {
         trip,
@@ -108,7 +124,8 @@ export default async function SpecialtyDatePage({
     const { trip, tripSlug, entry } = found;
 
     // The same Arctic call the trip page makes, so the two share a cache.
-    // Matched by trip type and start date, as on /specialty.
+    // Matched by id when Arctic tagged the date, else by trip type and
+    // start date, as on /specialty.
     const today = todayISO();
     const past = entry.startDate < today;
     const typeIds = new Set(parseArcticIds(trip.arcticTripId));
@@ -128,11 +145,12 @@ export default async function SpecialtyDatePage({
         Boolean(trip.arcticTripId) &&
         departures === null;
     const departure =
-        departures?.find(
-            (candidate) =>
-                candidate.start === entry.startDate &&
-                candidate.triptypeid != null &&
-                typeIds.has(candidate.triptypeid),
+        departures?.find((candidate) =>
+            entry.arcticDepartureId != null
+                ? candidate.id === entry.arcticDepartureId
+                : candidate.start === entry.startDate &&
+                  candidate.triptypeid != null &&
+                  typeIds.has(candidate.triptypeid),
         ) ?? null;
     const fare =
         departure?.triptypeid != null

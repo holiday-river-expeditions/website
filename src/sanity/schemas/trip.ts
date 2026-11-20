@@ -111,7 +111,7 @@ export const trip = defineType({
             type: 'string',
             group: ['card', 'specialty'],
             description:
-                'Optional ribbon label on the card image (e.g. "Specialty Music Trip"). Cards with a ribbon get the red feature frame. Falls back to the first Specialty Type’s ribbon.',
+                'Optional ribbon label on the card image (e.g. "Specialty Music Trip"). Cards with a ribbon get the red feature frame.',
         }),
         defineField({
             name: 'photos',
@@ -510,22 +510,17 @@ export const trip = defineType({
         }),
 
         // --- Specialty trips ---
-        defineField({
-            name: 'specialtyTypes',
-            title: 'Specialty Types',
-            type: 'array',
-            group: 'specialty',
-            description:
-                'Specialty families this trip belongs to (Canyon Concerts, Stargazing, ...). Flags the trip as specialty, lists it in that family’s section on /specialty, and supplies the card ribbon unless the Specialty Ribbon field overrides it.',
-            of: [{ type: 'reference', to: [{ type: 'specialtyType' }] }],
-        }),
+        // A trip is never specialty as a whole: across 2025 to 2027 every
+        // specialty trip in Arctic ran as single dates on a regular trip
+        // type, so the trip-level Specialty Types field was removed
+        // (2026-11-19). Dates come from Arctic keywords and these entries.
         defineField({
             name: 'specialtyDepartures',
             title: 'Specialty Departures',
             type: 'array',
             group: 'specialty',
             description:
-                'Call out individual dates in Dates & Availability — the September date that is the bluegrass trip, the new-moon date that is the stargazing trip. Leave empty when every departure of this trip is the same.',
+                'Dates tagged in Arctic with a specialty keyword show up on their own. Add a date here to give it a photo, a write-up, a shorter label or its own price, or to add a date Arctic does not tag. A date here replaces the Arctic one on the same day.',
             // Two dates on one trip can't share a page address: the second
             // would open the first one's page.
             validation: (rule) =>

@@ -4,12 +4,9 @@ import { richTextOf } from './blocks/divider';
 /**
  * A family of specialty trips — Canyon Concerts, Dark Sky Stargazing,
  * Women's, and so on. The legacy site gave each family its own URL parent
- * (see docs/project/site-audit.md); this type is the replacement, and it does
- * three jobs at once:
- *
- *  1. flags a trip as specialty (trip.specialtyTypes)
- *  2. backs the /specialty hub linked from the nav
- *  3. renders its own parent page at /specialty/[slug]
+ * (see docs/project/site-audit.md). This type is the replacement: a section
+ * of the /specialty hub with its own copy and photo, holding the dates that
+ * its Arctic keywords tag and the specialtyDepartures entries that name it.
  */
 export const specialtyType = defineType({
     name: 'specialtyType',
@@ -50,11 +47,13 @@ export const specialtyType = defineType({
             options: { hotspot: true },
         }),
         defineField({
-            name: 'ribbonLabel',
-            title: 'Card Ribbon Label',
-            type: 'string',
+            name: 'arcticKeywords',
+            title: 'Arctic Keywords',
+            type: 'array',
+            of: [{ type: 'string' }],
+            options: { layout: 'tags' },
             description:
-                'Ribbon text on trip cards in this family, e.g. "Specialty Music Trip". A trip\'s own Specialty Ribbon field overrides this.',
+                'Keywords on Arctic departures that put a date in this family, such as MT for music trips. A date that is bookable online and has one of these keywords shows as a specialty date, with its Arctic name as the label. If a date has keywords from two families, the family that comes first in Order wins.',
         }),
         defineField({
             name: 'order',

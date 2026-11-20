@@ -153,10 +153,15 @@ export async function getBookableTripTypes(): Promise<ArcticTripType[] | null> {
     }
 }
 
-/** All upcoming departures across trip types, for /book and the trip finder. */
-export async function getAllUpcomingDepartures(): Promise<
-    ArcticDeparture[] | null
-> {
+/**
+ * All upcoming departures across trip types, for /book, the trip finder
+ * and the specialty pages. Cached per render like getUpcomingDepartures,
+ * because a specialty date page reads it from both its metadata and its
+ * body.
+ */
+export const getAllUpcomingDepartures = cache(fetchAllUpcomingDepartures);
+
+async function fetchAllUpcomingDepartures(): Promise<ArcticDeparture[] | null> {
     if (!isArcticConfigured()) return null;
     try {
         const departures = await queryDepartures(

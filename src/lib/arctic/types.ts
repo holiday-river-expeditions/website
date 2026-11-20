@@ -41,6 +41,14 @@ export const departureSchema = z.object({
     duration: z.coerce.string().nullish(),
     guests: looseInt.nullish(),
     onlinebookingurl: z.string().nullish(),
+    /**
+     * Holiday's own tags on a departure, e.g. ["Dinosaur", "MT", "Special"]
+     * (see docs/project/arctic-api.md, Keywords). Not in Arctic's PHP
+     * models, but returned on every trip record (verified live
+     * 2026-11-19). An unexpected shape reads as no keywords rather than
+     * dropping the departure.
+     */
+    keywords: z.array(z.coerce.string()).nullish().catch(null),
 });
 export type ArcticDeparture = z.infer<typeof departureSchema>;
 

@@ -6,6 +6,7 @@ import type { ArcticDeparture } from '@/lib/arctic';
 import {
     type DepartureCallout,
     type DepartureCalloutMap,
+    calloutFor,
     departureAnchor,
     durationToDays,
     formatDateRange,
@@ -252,7 +253,7 @@ function DepartureRows({
                             ? variantLabels?.get(departure.triptypeid)
                             : undefined
                     }
-                    callout={callouts?.get(departure.start)}
+                    callout={calloutFor(callouts, departure)}
                     anchored={anchoredIds?.has(departure.id) ?? false}
                 />
             ))}
@@ -298,7 +299,7 @@ interface DepartureListProps {
     /** Short length label per trip type, shown as a tag on each row in
         place of the trip name. */
     variantLabels?: ReadonlyMap<number, string>;
-    /** Specialty callouts keyed by departure start date (YYYY-MM-DD). */
+    /** Specialty callouts, by departure id or start date (see calloutFor). */
     callouts?: DepartureCalloutMap;
     /** Month subheads, on by default. Off renders one flat list, for
         lists where the date range already names the month. */
@@ -328,7 +329,7 @@ export function DepartureList({
     const anchoredIds = new Set<number>();
     const anchoredDates = new Set<string>();
     for (const departure of departures) {
-        if (!callouts?.has(departure.start)) continue;
+        if (!calloutFor(callouts, departure)) continue;
         if (anchoredDates.has(departure.start)) continue;
         anchoredDates.add(departure.start);
         anchoredIds.add(departure.id);

@@ -30,9 +30,10 @@ import {
     isPublicTripType,
     monthOptions,
     sortedVariantLabels,
+    tripSpecialtyEntries,
     variantLabelMap,
 } from '@/lib/departures';
-import { getAllTrips, imageUrl } from '@/lib/sanity';
+import { getAllTrips, getSpecialtyFamilies, imageUrl } from '@/lib/sanity';
 
 // Availability changes as reservations come in; regenerate every minute.
 export const revalidate = 60;
@@ -60,7 +61,7 @@ interface TripGroup {
     title: string;
     href: string | null;
     departures: ArcticDeparture[];
-    /** Specialty callouts for this trip, keyed by departure start date. */
+    /** Specialty callouts for this trip (see calloutFor). */
     callouts?: DepartureCalloutMap;
     /** Present only for Sanity-mapped trips; unmapped Arctic types render
         name-only until they're authored (content phase). */
@@ -146,12 +147,14 @@ export default async function BookPage({
         trip?: string | string[];
     }>;
 }) {
-    const [departures, tripTypes, sanityTrips, params] = await Promise.all([
-        getAllUpcomingDepartures(),
-        getBookableTripTypes(),
-        getAllTrips(),
-        searchParams,
-    ]);
+    const [departures, tripTypes, sanityTrips, families, params] =
+        await Promise.all([
+            getAllUpcomingDepartures(),
+            getBookableTripTypes(),
+            getAllTrips(),
+            getSpecialtyFamilies(),
+            searchParams,
+        ]);
     const filters = parseBookFilters(params);
 
     let groups: TripGroup[] | null = null;
@@ -177,7 +180,12 @@ export default async function BookPage({
             }
             // Built once per trip and shared across its trip-type ids.
             const callouts = buildCalloutMap(
-                trip.specialtyDepartures,
+                tripSpecialtyEntries(
+                    trip.specialtyDepartures,
+                    trip.arcticTripId,
+                    departures,
+                    families,
+                ),
                 trip.slug.current,
             );
             const summary: TripSummary = {
