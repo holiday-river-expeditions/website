@@ -147,6 +147,7 @@ export default async function TripPage({ params }: TripPageProps) {
     // Section menu stops (Aug 20 decision) for the TripBar. Reviews and
     // related trips stay on the page but out of the menu. Labels match
     // the section headings.
+    const hasFaqs = Boolean(trip.faqs && trip.faqs.length > 0);
     const sectionItems = [
         { id: 'trip-details', label: 'Trip Details' },
         ...(trip.faqs && trip.faqs.length > 0
@@ -396,7 +397,11 @@ export default async function TripPage({ params }: TripPageProps) {
                 <Section
                     id='faqs'
                     background='white'
-                    className='scroll-mt-6 pb-16 pt-12 md:pb-20 md:pt-16'
+                    // With the trip info lists right after, the two read
+                    // as one group, so no bottom padding of its own.
+                    className={`scroll-mt-6 pt-12 md:pt-16 ${
+                        infoSections.length > 0 ? 'pb-0' : 'pb-16 md:pb-20'
+                    }`}
                 >
                     <div className='max-w-3xl'>
                         <h2 className='font-alt-gothic text-section font-black uppercase text-holiday-red'>
@@ -436,7 +441,11 @@ export default async function TripPage({ params }: TripPageProps) {
                 <Section
                     id='trip-info'
                     background='white'
-                    className='scroll-mt-6 pb-16 pt-12 md:pb-20 md:pt-16'
+                    // Directly under the FAQs it has no heading, so a full
+                    // section gap left a stray-looking second list.
+                    className={`scroll-mt-6 pb-16 md:pb-20 ${
+                        hasFaqs ? 'pt-8' : 'pt-12 md:pt-16'
+                    }`}
                 >
                     <div className='max-w-3xl'>
                         <div className='divide-y divide-holiday-grey/40 border-y border-holiday-grey/40'>
