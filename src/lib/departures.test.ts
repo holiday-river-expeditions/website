@@ -1,9 +1,14 @@
 import { describe, expect, test } from 'vitest';
 import type { ArcticDeparture } from '@/lib/arctic';
 import {
+    arcticSpecialtyEntries,
     buildCalloutMap,
     buildSpecialtyDateRows,
+    calloutFor,
     cleanTypeName,
+    familyForKeywords,
+    mergeSpecialtyEntries,
+    tripSpecialtyEntries,
     departureMonth,
     detectVariants,
     durationToDays,
@@ -415,6 +420,7 @@ describe('upcomingSpecialtyDates', () => {
                 phoneOnly: false,
                 priceText: null,
                 lengthText: null,
+                arcticDepartureId: null,
             },
         ]);
     });
@@ -736,5 +742,239 @@ describe('isPublicTripType', () => {
         expect(isPublicTripType(12, arctic, sanity)).toBe(false);
         expect(isPublicTripType(null, arctic, sanity)).toBe(false);
         expect(isPublicTripType(undefined, arctic, sanity)).toBe(false);
+    });
+});
+
+describe('specialty dates from Arctic keywords', () => {
+    const music = {
+        _id: 'music',
+        name: 'Canyon Concerts',
+        slug: { current: 'canyon-concerts' },
+        arcticKeywords: ['MT'],
+    };
+    const womens = {
+        _id: 'womens',
+        name: "Women's Trips",
+        slug: { current: 'womens' },
+        arcticKeywords: ['WT'],
+    };
+    const affinity = {
+        _id: 'affinity',
+        name: 'Affinity & Custom Groups',
+        slug: { current: 'affinity' },
+        arcticKeywords: ['AT', 'LGBTQ'],
+    };
+    const families = [music, womens, affinity];
+
+    describe('familyForKeywords', () => {
+        test('ignores case and spacing on both sides', () => {
+            expect(familyForKeywords([' mt '], families)).toBe(music);
+            expect(
+                familyForKeywords(
+                    ['WT'],
+                    [{ ...womens, arcticKeywords: ['wt '] }],
+                )?._id,
+            ).toBe('womens');
+        });
+
+        test('takes the first family in order when two match', () => {
+            expect(familyForKeywords(['AT', 'WT'], families)).toBe(womens);
+        });
+
+        test('returns null for no keywords or no match', () => {
+            expect(familyForKeywords(null, families)).toBeNull();
+            expect(familyForKeywords(['Special', 'DS'], families)).toBeNull();
+            expect(familyForKeywords(['MT'], [])).toBeNull();
+        });
+    });
+
+    describe('arcticSpecialtyEntries', () => {
+        const pompe = departure({
+            id: 1501,
+            triptypeid: 59,
+            name: 'Yampa River  Pompe & Honey Music Trip',
+            start: '2027-05-15',
+            keywords: ['Dinosaur', 'MT', 'Special', 'YM'],
+        });
+
+        test('makes an entry from a tagged departure of the trip', () => {
+            expect(
+                arcticSpecialtyEntries([pompe], families, new Set([59, 60])),
+            ).toEqual([
+                {
+                    _key: 'arctic-1501',
+                    startDate: '2027-05-15',
+                    label: 'Yampa River Pompe & Honey Music Trip',
+                    arcticDepartureId: 1501,
+                    specialtyType: music,
+                },
+            ]);
+        });
+
+        test('skips other trips, untagged, canceled and charter departures', () => {
+            const departures = [
+                { ...pompe, triptypeid: 41 },
+                { ...pompe, id: 2, keywords: ['Special'] },
+                { ...pompe, id: 3, keywords: null },
+                { ...pompe, id: 4, canceled: true },
+                { ...pompe, id: 5, keywords: ['Charter', 'MT'] },
+                { ...pompe, id: 6, name: '  ' },
+            ];
+            expect(
+                arcticSpecialtyEntries(departures, families, new Set([59])),
+            ).toEqual([]);
+        });
+
+        test('needs families with keywords and a trip with ids', () => {
+            expect(arcticSpecialtyEntries([pompe], [], new Set([59]))).toEqual(
+                [],
+            );
+            expect(
+                arcticSpecialtyEntries([pompe], families, new Set()),
+            ).toEqual([]);
+            expect(
+                arcticSpecialtyEntries(null, families, new Set([59])),
+            ).toEqual([]);
+        });
+    });
+
+    describe('mergeSpecialtyEntries', () => {
+        const arctic = arcticSpecialtyEntries(
+            [
+                departure({
+                    id: 1501,
+                    triptypeid: 59,
+                    name: 'Yampa River Pompe & Honey Music Trip',
+                    start: '2027-05-15',
+                    keywords: ['MT'],
+                }),
+                departure({
+                    id: 1502,
+                    triptypeid: 60,
+                    name: 'Yampa River Del Sol Quartet Music Trip',
+                    start: '2027-06-05',
+                    keywords: ['MT'],
+                }),
+            ],
+            families,
+            new Set([59, 60]),
+        );
+
+        test('a Sanity entry replaces the Arctic date on its day and takes its id', () => {
+            const merged = mergeSpecialtyEntries(
+                [
+                    {
+                        _key: 'a',
+                        startDate: '2027-05-15',
+                        label: 'Pompe & Honey',
+                    },
+                ],
+                arctic,
+            );
+            expect(merged).toEqual([
+                {
+                    _key: 'a',
+                    startDate: '2027-05-15',
+                    label: 'Pompe & Honey',
+                    arcticDepartureId: 1501,
+                },
+                arctic[1],
+            ]);
+        });
+
+        test('keeps Sanity dates Arctic does not tag', () => {
+            const merged = mergeSpecialtyEntries(
+                [{ startDate: '2027-09-01', label: 'Not in Arctic' }],
+                arctic,
+            );
+            expect(merged.map((e) => e.startDate)).toEqual([
+                '2027-09-01',
+                '2027-05-15',
+                '2027-06-05',
+            ]);
+        });
+
+        test('a phone-only entry claims its day but never takes the id', () => {
+            const [entry, ...rest] = mergeSpecialtyEntries(
+                [
+                    {
+                        startDate: '2027-05-15',
+                        label: 'By phone',
+                        phoneOnly: true,
+                    },
+                ],
+                arctic,
+            );
+            expect(entry.arcticDepartureId).toBeUndefined();
+            expect(rest).toEqual([arctic[1]]);
+        });
+
+        test('an entry without a label leaves the Arctic date in place', () => {
+            const merged = mergeSpecialtyEntries(
+                [{ startDate: '2027-05-15', label: ' ' }],
+                arctic,
+            );
+            expect(merged).toHaveLength(3);
+            expect(merged).toContain(arctic[0]);
+        });
+    });
+
+    test('badges only the tagged departure when another starts the same day', () => {
+        // Westwater, 2027-08-20: a regular 3 day and the LGBTQ+ trip.
+        const regular = departure({
+            id: 1293,
+            triptypeid: 56,
+            name: 'Westwater/Ruby Canyon 3 Day',
+            start: '2027-08-20',
+            keywords: ['RB', 'Westwater'],
+        });
+        const tagged = departure({
+            id: 1418,
+            triptypeid: 56,
+            name: 'Westwater/Ruby Canyon LGBTQ+ Affinity',
+            start: '2027-08-20',
+            keywords: ['AT', 'LGBTQ', 'Special'],
+        });
+        const callouts = buildCalloutMap(
+            tripSpecialtyEntries(null, '55,56', [regular, tagged], families),
+            'westwater-canyon',
+        );
+        expect(calloutFor(callouts, regular)).toBeUndefined();
+        expect(calloutFor(callouts, tagged)).toEqual({
+            label: 'Affinity & Custom Groups: Westwater/Ruby Canyon LGBTQ+ Affinity',
+            note: null,
+            href: '/specialty/westwater-ruby-canyon-lgbtq-affinity-westwater-canyon-2027-08-20',
+        });
+
+        const rows = buildSpecialtyDateRows(
+            [
+                {
+                    _id: 'westwater',
+                    name: 'Westwater Canyon',
+                    slug: { current: 'westwater-canyon' },
+                    arcticTripId: '55,56',
+                    entries: tripSpecialtyEntries(
+                        null,
+                        '55,56',
+                        [regular, tagged],
+                        families,
+                    ),
+                },
+            ],
+            [regular, tagged],
+            '2026-11-19',
+        );
+        expect(rows).toHaveLength(1);
+        expect(rows[0].departure?.id).toBe(1418);
+    });
+
+    test('a date-keyed Sanity callout still badges by day', () => {
+        const callouts = buildCalloutMap([
+            { startDate: '2027-07-01', label: 'Glen Canyon Institute' },
+        ]);
+        expect(
+            calloutFor(callouts, departure({ id: 7, start: '2027-07-01' }))
+                ?.label,
+        ).toBe('Glen Canyon Institute');
     });
 });

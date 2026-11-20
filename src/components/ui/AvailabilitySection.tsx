@@ -9,7 +9,9 @@ import {
     formatDateRange,
     nextAvailable,
     type SpecialtyDepartureEntry,
+    tripSpecialtyEntries,
 } from '@/lib/departures';
+import { getSpecialtyFamilies } from '@/lib/sanity';
 
 /**
  * "Dates & Availability" block on trip detail pages. Fetches live departures
@@ -40,7 +42,8 @@ interface AvailabilitySectionProps {
     arcticTripId: string | null;
     /** The trip's slug, so specialty badges link to each date's page. */
     tripSlug?: string | null;
-    /** trip.specialtyDepartures — badges the dates they name. */
+    /** trip.specialtyDepartures. Badges the dates they name, along with
+        the dates Arctic keywords tag. */
     specialtyDepartures?: readonly SpecialtyDepartureEntry[] | null;
 }
 
@@ -49,9 +52,10 @@ export async function AvailabilitySection({
     tripSlug,
     specialtyDepartures,
 }: AvailabilitySectionProps) {
-    const departures = arcticTripId
-        ? await getUpcomingDepartures(arcticTripId)
-        : null;
+    const [departures, families] = await Promise.all([
+        arcticTripId ? getUpcomingDepartures(arcticTripId) : null,
+        getSpecialtyFamilies(),
+    ]);
 
     // Trip types feed variant chip labels; only needed for multi-type trips.
     const multiType =
@@ -62,7 +66,15 @@ export async function AvailabilitySection({
         ? detectVariants(departures, tripTypes ?? undefined)
         : [];
     const next = departures ? nextAvailable(departures) : null;
-    const callouts = buildCalloutMap(specialtyDepartures, tripSlug);
+    const callouts = buildCalloutMap(
+        tripSpecialtyEntries(
+            specialtyDepartures,
+            arcticTripId,
+            departures,
+            families,
+        ),
+        tripSlug,
+    );
 
     return (
         <Section background='white' className='pb-20 pt-12 md:pb-24 md:pt-16'>

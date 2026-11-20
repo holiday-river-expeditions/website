@@ -1,3 +1,4 @@
+import { cache } from 'react';
 import { withArcticPrices } from '@/lib/arctic/prices';
 import { client } from './client';
 import {
@@ -13,6 +14,8 @@ import {
     siteSettingsQuery,
     sitemapQuery,
     specialtyDateIndexQuery,
+    specialtyDatedTripsQuery,
+    specialtyFamiliesQuery,
     tripBySlugQuery,
     tripFinderSpecQuery,
     tripFinderTripsQuery,
@@ -65,13 +68,7 @@ export async function getAllTripTypes() {
 }
 
 export async function getAllSpecialtyTypes() {
-    const types = await client.fetch(allSpecialtyTypesQuery);
-    return Promise.all(
-        types.map(async (type) => ({
-            ...type,
-            trips: await withArcticPrices(type.trips),
-        })),
-    );
+    return client.fetch(allSpecialtyTypesQuery);
 }
 
 export async function getAllFaqs() {
@@ -107,6 +104,20 @@ export async function getHomepage() {
 /** Trips with specialty dates, for resolving and listing their pages. */
 export async function getSpecialtyDateIndex() {
     return client.fetch(specialtyDateIndexQuery);
+}
+
+/**
+ * Families that Arctic keywords map to, in hub order. Cached per render:
+ * a trip page, /book and a specialty date page each read it once per
+ * departure list.
+ */
+export const getSpecialtyFamilies = cache(async () =>
+    client.fetch(specialtyFamiliesQuery),
+);
+
+/** Trips the /specialty hub can list dates for. */
+export async function getSpecialtyDatedTrips() {
+    return client.fetch(specialtyDatedTripsQuery);
 }
 
 /** Slugs and timestamps for sitemap.xml. Sanity only, never Arctic. */
